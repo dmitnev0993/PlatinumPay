@@ -1,0 +1,30 @@
+{
+  "files": {
+    "main.css": "/static/css/main.8b20d3d4.chunk.css",
+    "main.js": "/static/js/main.90ce6c5f.chunk.js",
+    "main.js.map": "/static/js/main.90ce6c5f.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.8971ffbd.js",
+    "runtime-main.js.map": "/static/js/runtime-main.8971ffbd.js.map",
+    "static/js/2.bab8eb22.chunk.js": "/static/js/2.bab8eb22.chunk.js",
+    "static/js/2.bab8eb22.chunk.js.map": "/static/js/2.bab8eb22.chunk.js.map",
+    "static/js/3.908b31bb.chunk.js": "/static/js/3.908b31bb.chunk.js",
+    "static/js/3.908b31bb.chunk.js.map": "/static/js/3.908b31bb.chunk.js.map",
+    "index.html": "/index.html",
+    "static/css/main.8b20d3d4.chunk.css.map": "/static/css/main.8b20d3d4.chunk.css.map",
+    "static/js/2.bab8eb22.chunk.js.LICENSE.txt": "/static/js/2.bab8eb22.chunk.js.LICENSE.txt",
+    "static/media/Aqua_Drib1.d1e51b84.mp3": "/static/media/Aqua_Drib1.d1e51b84.mp3",
+    "static/media/fonts.css": "/static/media/Roboto-Regular.03523cf5.ttf",
+    "static/media/logo-dark-header.ab8b863c.png": "/static/media/logo-dark-header.ab8b863c.png",
+    "static/media/logo-dark-short.3cb2822e.png": "/static/media/logo-dark-short.3cb2822e.png",
+    "static/media/logo-dark.0220fc66.png": "/static/media/logo-dark.0220fc66.png",
+    "static/media/logo-light-header.52812d6d.png": "/static/media/logo-light-header.52812d6d.png",
+    "static/media/logo-light-short.5e3961d9.png": "/static/media/logo-light-short.5e3961d9.png",
+    "static/media/logo-light.7d6b2f23.png": "/static/media/logo-light.7d6b2f23.png"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.8971ffbd.js",
+    "static/js/2.bab8eb22.chunk.js",
+    "static/css/main.8b20d3d4.chunk.css",
+    "static/js/main.90ce6c5f.chunk.js"
+  ]
+}
