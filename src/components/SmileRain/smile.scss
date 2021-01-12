@@ -12,12 +12,7 @@
   display: none;
 }
 
-.webkit {
-  -webkit-tap-highlight-color: transparent;
-}
-
 .smile {
-  bottom: -175px;
   animation-name: smile;
 
   animation-duration: var(--duration);
@@ -29,12 +24,9 @@
 
 @keyframes smile {
   0% {
-    bottom: -200px;
-  }
-  99% {
-    bottom: 109%;
+    transform: translateY(115vh)
   }
   100% {
-    bottom: 110%;
+    transform: translateY(-200px)
   }
 }

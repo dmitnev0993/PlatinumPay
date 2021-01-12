@@ -23,7 +23,6 @@
 }
 
 .smile {
-  bottom: -175px;
   -webkit-animation-name: smile;
           animation-name: smile;
   -webkit-animation-duration: var(--duration);
@@ -34,27 +33,5 @@
           animation-iteration-count: infinite;
 }
 
-@-webkit-keyframes smile {
-  0% {
-    bottom: -175px;
-  }
-  99% {
-    bottom: 845px;
-  }
-  100% {
-    bottom: 850px;
-  }
-}
 
-@keyframes smile {
-  0% {
-    bottom: -175px;
-  }
-  99% {
-    bottom: 845px;
-  }
-  100% {
-    bottom: 850px;
-  }
-}
 /*# sourceMappingURL=smile.css.map */

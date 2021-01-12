@@ -152,7 +152,7 @@ const MainHeader = ({ themeChanger, width }) => {
              color: currentTheme === "light" ? theme.dark : theme.light,
            }}
          >
-           <img className={classes.logo} src={currentTheme === 'dark' ? darkLogo : lightLogo}/>
+           <img alt='' className={classes.logo} src={currentTheme === 'dark' ? darkLogo : lightLogo}/>
            </NavLink>
              :
              null
@@ -165,7 +165,7 @@ const MainHeader = ({ themeChanger, width }) => {
               color: currentTheme === "light" ? theme.dark : theme.light,
             }}
           >
-            <img className={classes.logo} src={currentTheme === 'dark' ? darkLogo : lightLogo}/>
+            <img alt='' className={classes.logo} src={currentTheme === 'dark' ? darkLogo : lightLogo}/>
             </NavLink>
             }
           </div>
@@ -380,7 +380,7 @@ const MainHeader = ({ themeChanger, width }) => {
       borderRadius:'50%',
       height: width === 'xs' ? '50px' : '70px',
       }}>
-     <img style={{
+     <img alt='' style={{
        maxWidth:  width === 'xs' ? '50px' : '70px'
      }} src={tgLogo}/> 
      </a> */}

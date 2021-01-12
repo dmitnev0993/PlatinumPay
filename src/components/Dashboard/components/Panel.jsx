@@ -271,8 +271,8 @@ const Panel = ({ width }) => {
               }}
             >
              
-             {open ? <img className={classes.logo} src={currentTheme === 'dark' ? darkLogo : lightLogo}/>
-             : <img className={classes.logo} src={currentTheme === 'dark' ? darkShortLogo : lightShortLogo} style={{
+             {open ? <img alt='' className={classes.logo} src={currentTheme === 'dark' ? darkLogo : lightLogo}/>
+             : <img alt='' className={classes.logo} src={currentTheme === 'dark' ? darkShortLogo : lightShortLogo} style={{
                  maxWidth:'40px'
              }}/>
              }

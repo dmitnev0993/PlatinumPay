@@ -115,7 +115,7 @@ const Login = ({ width }) => {
       "username": name,
       "password": pass
     };
-    console.log(data)
+   // console.log(data)
     await fetch('https://secure.platinumpay.cc/dashboard/login', {
       method: 'POST',
       headers: {

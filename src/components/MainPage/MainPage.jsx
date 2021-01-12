@@ -34,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const MainPage = ({ themeChanger, width, sound }) => {
-
+ 
   //console.log(width);
   const classes = useStyles();
 
@@ -95,9 +95,10 @@ const MainPage = ({ themeChanger, width, sound }) => {
             left: 0,
             right: 0,
             bottom: 0,
-            maxWidth: "100%",
+            width: "100%",
             height: "100%",
-            overflow: 'hidden'
+            overflow: 'hidden',
+            contain:'content'
           }}
         >
           {starsJSX}
@@ -105,7 +106,7 @@ const MainPage = ({ themeChanger, width, sound }) => {
         <Box
           className='animate__animated animate__fadeIn'
           style={{ zIndex:'9999' }}>
-          <img style={{maxWidth: width === 'xs' ? '300px' : '450px'}} src={currentTheme === 'dark' ? darkLogo : lightLogo} />
+          <img alt='' style={{maxWidth: width === 'xs' ? '300px' : '450px'}} src={currentTheme === 'dark' ? darkLogo : lightLogo} />
           <Typography
             variant="h5"
             align="center"
