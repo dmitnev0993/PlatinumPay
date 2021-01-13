@@ -1,15 +1,12 @@
-import React, { useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import { makeStyles, withWidth } from "@material-ui/core";
-import { CSSTransition } from "react-transition-group";
-import "./smile.scss";
-
-
+import "./smile.css";
 
 export const Smile = ({ id, phrase, duration, sound, left, width }) => {
 
   const useStyles = makeStyles((theme) => ({
     smileObj: {
-      willChange:'transform, opacity',
+      willChange: 'transform, opacity, top',
       zIndex: 99,
       position: "absolute",
       fontFamily: "RobotoBold",
@@ -17,14 +14,14 @@ export const Smile = ({ id, phrase, duration, sound, left, width }) => {
       cursor: "pointer",
       display: "flex",
       alignItems: "flex-end",
-      '& img':{
+      '& img': {
         width: width === "xs"
-        ? 18
-        : width === "sm"
-        ? 21
-        : width === "md"
-        ? 22
-        : 23,
+          ? 18
+          : width === "sm"
+            ? 21
+            : width === "md"
+              ? 22
+              : 23,
       },
     },
   }));
@@ -32,72 +29,59 @@ export const Smile = ({ id, phrase, duration, sound, left, width }) => {
   const classes = useStyles();
   //Audio
   const [audioFlag, setAudioFlag] = useState(true);
-
-  //inProp CSSTransition
-  const [inProp, setInProp] = useState(false);
-
-  //Show Message
-  const [showMessage, setShowMessage] = useState(true);
   //Пробег по всем смайлам и назначение им скорости анимации
   useEffect(() => {
-    document
-      .querySelector(`.smile${id}`)
-      .style.setProperty("--duration", duration + "s");
+    // document
+    //   .querySelector(`.smile${id}`)
+    //   .style.setProperty("--duration", duration + "s");
+
+    const smileCont = document.querySelector(`.smile${id}`);
+    console.log(smileCont.style.top)
+
+
+    setInterval(() => {
+      let top = smileCont.style.top.split('%')[0];
+      smileCont.style.top = `${top - duration * 0.01}%`;
+      if (top < -25) {
+        setAudioFlag(true);
+        smileCont.style.opacity = '1';
+        smileCont.style.transform = 'scale(1)';
+        smileCont.style.top = '115%';
+      }
+    }, 5)
   }, [duration,id]);
 
-  // За 0.01 секунду до окончания анимации все
-  //флаги приходят в норму, чтобы снова адекватн опоказать фразу
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setShowMessage(true);
-      setAudioFlag(true);
-      setInProp(false);
-    }, duration * 1000 - 1);
-    return () => clearInterval(interval);
-  }, [duration]);
-
   //При клике на фразу происходит исчезновение и звук щелчка
-  const smileHandler = () => {
-    setInProp(true);
+  const smileHandler = (e) => {
     if (audioFlag) {
+      e.target.style.opacity = '0'
+      e.target.style.transform = 'scale(1.3)'
       sound.play();
       setAudioFlag(false);
     }
   };
 
-  const messOff = ()=>{
-    setShowMessage(false)
-  }
-
   return (
-    <CSSTransition
-      timeout={600}
-      appear={true}
-      classNames="alert"
-      in={inProp}
-      onEntered={messOff}
-    >
-      <div
-        onClick={smileHandler}
-        duration={duration}
-        className={`${classes.smileObj} smile smile${id} objAf`}
-        style={{
-          left: `${left}%`,
-          width: "min-content",
-          color: '#f9b942',
-          fontSize:
-            width === "xs"
-              ? 18
-              : width === "sm"
+    <div
+      onClick={smileHandler}
+      className={`${classes.smileObj} smile smile${id}`}
+      style={{
+        left: `${left}%`,
+        top: `110%`,
+        width: "min-content",
+        color: '#f9b942',
+        fontSize:
+          width === "xs"
+            ? 18
+            : width === "sm"
               ? 21
               : width === "md"
-              ? 22
-              : 23,
-        }}
-      >
-        {showMessage ? phrase : ""}
-      </div>
-    </CSSTransition>
+                ? 22
+                : 23,
+      }}
+    >
+      {phrase}
+    </div>
   );
 };
 
