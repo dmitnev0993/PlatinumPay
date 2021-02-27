@@ -136,15 +136,15 @@ const SmileRain = ({ width, sound }) => {
     5,
     4.5,
     7,
-    3,
+    5.5,
     4,
+    5.5,
+    4.5,
     6.5,
-    3.5,
-    7.5,
     2.5,
     8,
     9,
-    8.5,
+    7.5,
   ];
 
   const lefts = [
@@ -164,6 +164,23 @@ const SmileRain = ({ width, sound }) => {
     80,
   ];
 
+  const top2 = [
+    120,
+    180,
+    140,
+    170,
+    190,
+    110,
+    160,
+    140,
+    160,
+    150,
+    140,
+    150,
+    120,
+    140,
+  ];
+
   const renderPhrases = (phrases) => {
     const elements = [];
 
@@ -171,6 +188,7 @@ const SmileRain = ({ width, sound }) => {
       const phrase = phrases[Math.floor(Math.random() * phrases.length)].phrase;
       const left = lefts[i - 1];
       const duration = durations[i - 1];
+      const top = top2[i - 1];
       const id = uuidv4();
       const element = (
         <Smile
@@ -178,6 +196,7 @@ const SmileRain = ({ width, sound }) => {
           phrase={phrase}
           left={left}
           duration={duration}
+          top={top}
           sound={sound}
           key={i}
         />

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { makeStyles, withWidth } from "@material-ui/core";
 import "./smile.css";
 
-export const Smile = ({ id, phrase, duration, sound, left, width }) => {
+export const Smile = ({ id, phrase, duration, top, sound, left, width }) => {
 
   const useStyles = makeStyles((theme) => ({
     smileObj: {
@@ -68,7 +68,7 @@ export const Smile = ({ id, phrase, duration, sound, left, width }) => {
       className={`${classes.smileObj} smile smile${id}`}
       style={{
         left: `${left}%`,
-        top: `110%`,
+        top: `${top}%`,
         width: "min-content",
         color: '#f9b942',
         fontSize:
