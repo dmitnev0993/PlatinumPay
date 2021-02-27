@@ -6,10 +6,6 @@ import Cookies from 'js-cookie';
 import Panel from "./components/Panel";
 import StatisticsToday from "./components/StatisticsToday";
 import StatisticsMonthly from './components/StatisticsMonthly';
-import Referrals from "./components/Referrals";
-import Cards from "./components/Cards";
-import Accounts from "./components/Accounts";
-import Transactions from "./components/Transactions";
 import { Box } from "@material-ui/core";
 
 
@@ -39,15 +35,11 @@ const Dashboard = ({ width }) => {
           paddingLeft: width === 'xs' ? '15px' : '105px',
           backgroundColor: currentTheme === 'light' ? 'white' : 'rgb(20, 19, 34)',
           zIndex: '9',
-          textAlign: width === 'xs' ? 'center' : '',
+          textAlign: width === 'xs' ? 'center' : ''
         }}>
             
       <StatisticsToday />
       <StatisticsMonthly />
-      <Referrals />
-      <Cards />
-      <Accounts />
-      <Transactions />
       </Box>
     </>
   );

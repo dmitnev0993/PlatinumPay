@@ -1,7 +1,13 @@
 const initialState = {
     isLogin:false,
-    userData: {},
-    openPanel:false
+    userData: {
+
+    },
+    openPanel:false,
+    balance:{
+      money:0,
+      rates:0
+    }
   };
   
   const reduce = (state = initialState, action) => {
@@ -23,7 +29,17 @@ const initialState = {
       case "SET_DATA": {
         return {
           ...state,
-          userData: action.payload
+          userData: {
+            ...state.userData,
+            ...action.payload
+          }
+        };
+      }
+
+      case "REL_BALANCE": {
+        return {
+          ...state,
+          balance: action.payload
         };
       }
   

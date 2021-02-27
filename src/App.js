@@ -1,10 +1,11 @@
-import React, {  useReducer } from "react";
-import {  Route, Switch } from "react-router-dom";
-import Login from "./components/Auth/Login/Login.jsx";
-import  Register  from "./components/Auth/Register/Register.jsx";
-import Dashboard from "./components/Dashboard/Dashboard.jsx";
-import MainHeader from "./components/MainPage/header/MainHeader.jsx";
-import MainPage from "./components/MainPage/MainPage.jsx";
+import React, { useReducer, Suspense, lazy } from "react";
+import { Route, Switch } from "react-router-dom";
+
+// import Register from "./components/Auth/Register/Register.jsx";
+// import Dashboard from "./components/Dashboard/Dashboard.jsx";
+ import MainHeader from "./components/MainPage/header/MainHeader.jsx";
+// import MainPage from "./components/MainPage/MainPage.jsx";
+// import Profile from "./components/Dashboard/Pages/Profile/Profile";
 import { ThemeContext } from "./context/themeContext.js";
 import { useLocalStorageTheme } from "./hooks/useLocalStorageTheme.js";
 import { DARK, LIGHT, theme } from "./state/consts.js";
@@ -16,6 +17,12 @@ import { composeWithDevTools } from "redux-devtools-extension";
 import thunk from "redux-thunk";
 import reducer from "./config/reducer";
 
+const Login = lazy(()=> import("./components/Auth/Login/Login.jsx"))
+const Register = lazy(()=> import("./components/Auth/Register/Register.jsx"))
+const Dashboard = lazy(()=> import("./components/Dashboard/Dashboard.jsx"))
+const MainPage = lazy(()=> import("./components/MainPage/MainPage.jsx"))
+const Profile = lazy(()=> import("./components/Dashboard/Pages/Profile/Profile"))
+const Products = lazy(()=> import("./components/Dashboard/Pages/Products/Products"))
 
 function App({ sound, flag }) {
   const { currentTheme } = useLocalStorageTheme("theme");
@@ -42,27 +49,29 @@ function App({ sound, flag }) {
   return (
     <>
       <ThemeContext.Provider value={{ currentTheme }}>
-      <Provider store={store}>
-        <MainHeader themeChanger={themeChanger} />
-
+        <Provider store={store}>
+          <MainHeader themeChanger={themeChanger} />
+          <Suspense fallback={<div>...Loading</div>}>
           <Switch>
             <Route path="/" exact>
-              <MainPage themeChanger={themeChanger} sound={sound}/>
+              <MainPage themeChanger={themeChanger} sound={sound} />
             </Route>
-            <Route path="/login" exact>
-              <Login />
-            </Route>
-            <Route path="/register" exact>
-              <Register />
-            </Route>
-            <Route path="/dashboard" exact>
-              <Dashboard />
-            </Route>
+            <Route path="/login" exact component={Login}/>
+            
+            <Route path="/register" exact component={Register}/>
+
+            <Route path="/dashboard" exact component={Dashboard}/>
+
+            <Route path="/dashboard/profile" exact component={Profile}/>
+
+            <Route path="/dashboard/products" exact component={Products}/>
+
+
           </Switch>
-          
+          </Suspense>
         </Provider>
       </ThemeContext.Provider>
-      
+
     </>
   );
 }

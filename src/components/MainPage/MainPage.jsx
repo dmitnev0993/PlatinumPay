@@ -1,4 +1,6 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
+import { useHistory } from "react-router-dom";
+import { useDispatch, useSelector } from 'react-redux';
 import { NavLink } from "react-router-dom";
 import { makeStyles, Box, Typography } from "@material-ui/core";
 import withWidth from "@material-ui/core/withWidth";
@@ -34,7 +36,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const MainPage = ({ themeChanger, width, sound }) => {
- 
+  const isLogin = useSelector(state => state.isLogin);
+  const myHistory = useHistory();
   //console.log(width);
   const classes = useStyles();
 

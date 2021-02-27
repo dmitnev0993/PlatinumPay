@@ -52,10 +52,11 @@ export const Smile = ({ id, phrase, duration, sound, left, width }) => {
   }, [duration,id]);
 
   //При клике на фразу происходит исчезновение и звук щелчка
-  const smileHandler = (e) => {
+  const smileHandler = () => {
+    const sml = document.querySelector(`.smile${id}`);
     if (audioFlag) {
-      e.target.style.opacity = '0'
-      e.target.style.transform = 'scale(1.3)'
+      sml.style.opacity = '0'
+      sml.style.transform = 'scale(1.3)'
       sound.play();
       setAudioFlag(false);
     }

@@ -106,7 +106,7 @@ const Referrals = ({ width }) => {
                     <div className={classes.grid} style={{
                          height: 400, 
                          width: width === 'xs' ? 'calc(100vw - 60px)' : 'calc(100vw - 170px)',
-                         marginBottom:'25px'
+                         paddingBottom:'95px'
                          }}>
                         <DataGrid rows={rows} columns={columns} pageSize={5} />
                     </div>

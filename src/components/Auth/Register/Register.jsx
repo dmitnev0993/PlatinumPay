@@ -167,7 +167,7 @@ const Register = ({ width }) => {
       "password": pass
     };
     console.log(data)
-    await fetch('https://secure.platinumpay.cc/dashboard/register', {
+    await fetch('https://secure.platinumpay.cc/v1/client/auth/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -202,7 +202,6 @@ const Register = ({ width }) => {
   return (
     <>
       <Box
-        className='animate__animated animate__fadeInDown'
         style={{
           zIndex: '999',
           position: 'absolute',

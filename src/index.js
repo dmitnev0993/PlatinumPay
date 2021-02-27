@@ -7,10 +7,11 @@ import { Howl } from "howler";
 import "./resetCss/reset.css";
 import "./fonts/fonts.css";
 import "./index.css";
-import soundMP3 from './assets/sounds/Aqua_Drib1.mp3'
+import sound3 from './assets/sounds/sound3.mp3'
+
 
 const sound = new Howl({
-  src: [soundMP3],
+  src: [sound3],
   autoplay: false,
   preload: true,
   onplayerror: function () {

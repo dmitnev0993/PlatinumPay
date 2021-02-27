@@ -1,5 +1,6 @@
 import React, { useContext, useState } from "react";
 import { useDispatch } from "react-redux";
+import { useHistory } from "react-router-dom";
 import Button from "@material-ui/core/Button";
 import withWidth from "@material-ui/core/withWidth";
 import { TextField, makeStyles, Box, Typography, Paper, Icon, IconButton, withStyles } from "@material-ui/core";
@@ -82,7 +83,7 @@ const CssTextField2 = withStyles({
       '&:hover fieldset': {
         borderColor: '#78a3ff',
       },
-      '&.Mui-focused fieldset': {
+      '& .Mui-focused fieldset': {
         borderColor: '#78a3ff',
       },
     },
@@ -100,7 +101,7 @@ const useStyles = makeStyles(theme =>({
 const Login = ({ width }) => {
 
   const dispatch = useDispatch();
-  
+  const myHistory = useHistory();
 
 
   console.log(width)
@@ -116,7 +117,7 @@ const Login = ({ width }) => {
       "password": pass
     };
    // console.log(data)
-    await fetch('https://secure.platinumpay.cc/dashboard/login', {
+    await fetch('https://secure.platinumpay.cc/v1/client/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -137,7 +138,6 @@ const Login = ({ width }) => {
           }))
           dispatch(setLogin())
           showMess('Авторизация прошла успешно!');
-         // myHistory.push('/dashboard')
         }
         else {
           showMess('Что-то пошло не так, попробуйте еще раз.')
@@ -159,7 +159,6 @@ const Login = ({ width }) => {
   return (
     <>
       <Box
-        className='animate__animated animate__fadeInDown'
         style={{
           overflow:'hidden',
           position: 'absolute',

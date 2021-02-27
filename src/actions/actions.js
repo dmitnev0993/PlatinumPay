@@ -10,3 +10,11 @@ export const setData = data => ({
 export const setOpenPanel = () => ({
     type:'OPEN_PANEL'
 })
+
+export const setBalance = (money,rates) => ({
+    type:'REL_BALANCE',
+    payload:{
+        money:money,
+        rates:rates
+    }
+})

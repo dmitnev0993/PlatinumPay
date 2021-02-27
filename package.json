@@ -6,6 +6,7 @@
     "@material-ui/core": "^4.11.2",
     "@material-ui/data-grid": "^4.0.0-alpha.12",
     "@material-ui/icons": "^4.11.2",
+    "@material-ui/lab": "^4.0.0-alpha.57",
     "@testing-library/jest-dom": "^5.11.6",
     "@testing-library/react": "^11.2.2",
     "@testing-library/user-event": "^12.3.0",
@@ -24,11 +25,14 @@
     "node-snackbar": "^0.1.16",
     "normalize.css": "^8.0.1",
     "react": "^17.0.1",
+    "react-bones": "^1.0.3",
     "react-dom": "^17.0.1",
     "react-redux": "^7.2.2",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.1",
+    "react-select": "^4.1.0",
+    "react-spinners-kit": "^1.9.1",
     "react-spring": "^8.0.27",
     "react-transition-group": "^4.4.1",
     "recharts": "^1.8.5",
@@ -66,6 +70,7 @@
     ]
   },
   "devDependencies": {
-    "gh-pages": "^3.1.0"
+    "gh-pages": "^3.1.0",
+    "react-selectrix": "^1.0.17"
   }
 }

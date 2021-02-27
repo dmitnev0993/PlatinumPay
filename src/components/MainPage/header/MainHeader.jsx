@@ -1,51 +1,147 @@
-import React, { useContext } from "react";
-import {  useHistory } from "react-router-dom";
+import React, { useContext, useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
+import ReplayIcon from '@material-ui/icons/Replay';
 import { ThemeChanger } from "./ThemeChanger/ThemeChanger";
 import { amber } from "@material-ui/core/colors";
 import { ThemeContext } from "../../../context/themeContext";
 import { NavLink } from "react-router-dom";
-import { ClickAwayListener, Grow, MenuList, Paper, Popper, withWidth } from "@material-ui/core";
+import { ClickAwayListener, Grow, MenuList, Paper, Popper, Typography, withWidth } from "@material-ui/core";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import Fade from "@material-ui/core/Fade";
 import { theme } from "../../../state/consts";
 import Cookies from 'js-cookie';
-import { setData, setLogin } from "../../../actions/actions";
+import { setData, setLogin, setBalance } from "../../../actions/actions";
 import { AccountBox } from "@material-ui/icons";
-import lightLogo from '../../../assets/logo/logo-light-header.png'
-import darkLogo from '../../../assets/logo/logo-dark-header.png'
+import lightLogo from '../../../assets/logo/logo-light-short.png'
+import darkLogo from '../../../assets/logo/logo-dark-short.png'
+import { CircleSpinner } from "react-spinners-kit";
 
 const MainHeader = ({ themeChanger, width }) => {
 
   const dispatch = useDispatch();
   const isLogin = useSelector(state => state.isLogin);
+  const userData = useSelector(state => state.userData);
+  const balance = useSelector(state => state.balance);
+  const [loadingBalance, setLoadingBalance] = useState(false)
   const myHistory = useHistory();
 
-  if (Cookies.get('token')) {
-    if (!isLogin) {
-      dispatch(setLogin())
-      dispatch(setData({
-        token: Cookies.get('token'),
-        level: Cookies.get('level'),
-      }))
-      myHistory.push('/dashboard')
-    }
-    else myHistory.push('/dashboard')
+  const exit = () => {
+    Cookies.remove('token');
+    Cookies.remove('level');
+    dispatch(setLogin());
+    dispatch(setBalance(0, 0));
+    dispatch(setData({
+      token: undefined,
+      level: undefined,
+      trafficBack: undefined,
+      trafficBackUrl: undefined,
+      username: undefined
+    }))
   }
 
+  useEffect(() => {
+    if (Cookies.get('token')) {
+      console.log(myHistory.location.pathname)
+      if (!isLogin) {
+        dispatch(setLogin())
+        dispatch(setData({
+          token: Cookies.get('token'),
+          level: Cookies.get('level'),
+        }))
+        if (myHistory.location.pathname === '/' || myHistory.location.pathname === '/login' || myHistory.location.pathname === '/register') {
+          myHistory.push('/dashboard')
+        }
+      }
+      else {
+        if (myHistory.location.pathname === '/' || myHistory.location.pathname === '/login' || myHistory.location.pathname === '/register') {
+          myHistory.push('/dashboard')
+        }
+      }
+    }
+    else {
+      myHistory.push('/')
+    }
+  }, [isLogin])
+
+  useEffect(() => {
+    setInterval(() => {
+      
+        fetch(`https://secure.platinumpay.cc/v1/client/auth/token`, {
+          headers: {
+            Authorization: `Bearer ${Cookies.get('token')}`
+          }
+        })
+          .then((res) => {
+            return res.json()
+          })
+          .then(data => {
+            if (myHistory.location.pathname !== '/' && myHistory.location.pathname !== '/login' && myHistory.location.pathname !== '/register') {
+              if (!data.result) {
+                exit()
+              }
+              else {
+                dispatch(setData({
+                  token: Cookies.get('token'),
+                  level: data.response.level,
+                }))
+              }
+            }
+          })
+      
+    }, 5000);
+  }, [])
+
+  useEffect(() => {
+    console.log(loadingBalance)
+  }, [loadingBalance])
+
+  useEffect(() => {
+    if (isLogin) {
+      setLoadingBalance(true);
+      fetch('https://secure.platinumpay.cc/v1/client/profile/getBalance', {
+        headers: {
+          Authorization: `Bearer ${Cookies.get('token')}`
+        }
+      })
+        .then(res => {
+          return res.json()
+        })
+        .then(data => {
+          dispatch(setBalance(data.response.balance, data.response.rates.BTC))
+          setLoadingBalance(false)
+        })
+
+      fetch(`https://secure.platinumpay.cc/v1/client/profile/getProfile`, {
+        headers: {
+          Authorization: `Bearer ${Cookies.get('token')}`
+        }
+      })
+        .then(res => {
+          return res.json()
+        })
+        .then(data => {
+          dispatch(setData({
+            username: data.response.username,
+            trafficBack: data.response.trafficBack,
+            trafficBackUrl: data.response.trafficBackUrl,
+          }))
+        })
+    }
+  }, [isLogin])
 
   const { currentTheme } = useContext(ThemeContext);
 
 
   const useStyles = makeStyles((theme) => ({
-    logo:{
-      maxWidth:'150px'
+    logo: {
+      maxWidth: '40px'
     },
     root: {
       flexGrow: 1,
@@ -118,168 +214,80 @@ const MainHeader = ({ themeChanger, width }) => {
     setAnchorEl(null);
   };
 
+  const reloadBalance = () => {
+    setLoadingBalance(true);
+
+    fetch('https://secure.platinumpay.cc/v1/client/profile/getBalance', {
+      headers: {
+        Authorization: `Bearer ${userData.token}`
+      }
+    })
+      .then(res => {
+        return res.json()
+      })
+      .then(data => {
+        dispatch(setBalance(data.response.balance, data.response.rates.BTC))
+        setLoadingBalance(false);
+      })
+  }
+
+
+
   return (
     <>
-    <div
-      className={classes.root}
-    >
-      <AppBar position="fixed" style={{
-        boxShadow: currentTheme === 'dark' ? 'none' : "rgb(212 215 225 / 28%) 0px 1px 6px",
-        transition: "box-shadow 250ms",
-        zIndex: isLogin ? '2001' : '',
-        borderBottom: currentTheme === 'dark' ? '1px solid #232135' : 'none',
-      }}>
-        <Toolbar
-          style={{
-            minHeight: 63,
-            backgroundColor: !Cookies.get('token') ? currentTheme === 'dark' ? 'rgb(20, 19, 34)' : theme.light : currentTheme === 'dark' ? '#0c0c1b' : theme.light,
-            boxShadow: 'none'
-          }}
-        >
-          <div
-            className={classes.title}
+      <div
+        className={classes.root}
+      >
+        <AppBar position="fixed" style={{
+          boxShadow: currentTheme === 'dark' ? 'none' : "rgb(212 215 225 / 28%) 0px 1px 6px",
+          transition: "box-shadow 250ms",
+          zIndex: isLogin ? '2001' : '',
+          borderBottom: currentTheme === 'dark' ? '1px solid #232135' : 'none',
+        }}>
+          <Toolbar
             style={{
-              fontSize: width === "xs" && 30,
+              minHeight: 63,
+              backgroundColor: !Cookies.get('token') ? currentTheme === 'dark' ? 'rgb(20, 19, 34)' : theme.light : currentTheme === 'dark' ? '#0c0c1b' : theme.light,
+              boxShadow: 'none'
             }}
           >
-            {isLogin ? 
-             width === 'xs' ?
-             <NavLink
-           to="/dashboard"
-           exact
-           style={{
-             textDecoration: "none",
-             color: currentTheme === "light" ? theme.dark : theme.light,
-           }}
-         >
-           <img alt='' className={classes.logo} src={currentTheme === 'dark' ? darkLogo : lightLogo}/>
-           </NavLink>
-             :
-             null
-            : 
-            <NavLink
-            to="/"
-            exact
-            style={{
-              textDecoration: "none",
-              color: currentTheme === "light" ? theme.dark : theme.light,
-            }}
-          >
-            <img alt='' className={classes.logo} src={currentTheme === 'dark' ? darkLogo : lightLogo}/>
-            </NavLink>
-            }
-          </div>
-          {width !== "xs" ?
-            !isLogin ?
-              (
-                <div className={classes.authBlock}>
-                  <NavLink
-                    className={classes.loginNav}
-                    to="/login"
-                    exact
-                    activeClassName={classes.active}
-                    style={{
-                      textDecoration: "none",
-                    }}
-                  >
-                    Войти
-                </NavLink>
-                  <NavLink
-                    to="/register"
-                    className={classes.registerNav}
-                    activeClassName={classes.active}
-                    style={{ color: "white", textDecoration: "none" }}
-                  >
-                    Регистрация
-                </NavLink>
-
-                </div>
-              ) :
-              (
-                <>
-              <IconButton
-                edge="start"
-                className={classes.menuButton}
-                color="inherit"
-                aria-label="menu"
-                style={{ 
-                  borderRadius: 3, 
-                  color: currentTheme === 'light' ? 'black' : '',
-                  backgroundColor: currentTheme === 'dark' ? 'rgb(20, 19, 34)' : 'white', 
-                  width: '42px', 
-                  height: '42px', 
-                  alignItems: 'center', 
-                  padding: '0px' }}
-                onClick={handleClick}
-              >
-                <AccountBox />
-              </IconButton>
-              <Popper open={open} anchorEl={anchorEl} role={undefined} transition disablePortal>
-          {({ TransitionProps, placement }) => (
-            <Grow
-              {...TransitionProps}
-              style={{ 
-                transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom', 
-                backgroundColor: currentTheme === 'dark' ? 'rgb(20, 19, 34)' : ''
+            <div
+              className={classes.title}
+              style={{
+                fontSize: width === "xs" && 30,
               }}
             >
-              <Paper>
-                <ClickAwayListener onClickAway={handleClose}>
-                  <MenuList autoFocusItem={open} id="menu-list-grow" >
-                    <MenuItem onClick={handleClose}>
-                    <NavLink
-                  className={classes.loginNav}
-                  onClick={() => {
-                    Cookies.remove('token');
-                    Cookies.remove('level');
-                    dispatch(setLogin());
-                    dispatch(setData({}))
-                  }}
-                  to="/login"
+              {isLogin ?
+                width === 'xs' ?
+                  <NavLink
+                    to="/dashboard"
+                    exact
+                    style={{
+                      textDecoration: "none",
+                      color: currentTheme === "light" ? theme.dark : theme.light,
+                    }}
+                  >
+                    <img alt='' className={classes.logo} src={currentTheme === 'dark' ? darkLogo : lightLogo} />
+                  </NavLink>
+                  :
+                  null
+                :
+                <NavLink
+                  to="/"
                   exact
-                  activeClassName={classes.active}
                   style={{
-                    
                     textDecoration: "none",
+                    color: currentTheme === "light" ? theme.dark : theme.light,
                   }}
                 >
-                  Выйти
+                  <img alt='' className={classes.logo} src={currentTheme === 'dark' ? darkLogo : lightLogo} />
                 </NavLink>
-                    </MenuItem>
-                    {/* <MenuItem onClick={handleClose}>My account</MenuItem>
-                    <MenuItem onClick={handleClose}>Logout</MenuItem> */}
-                  </MenuList>
-                </ClickAwayListener>
-              </Paper>
-            </Grow>
-          )}
-        </Popper>
-            </>
-                
-              )
-            : !isLogin ? ( 
-              <>
-                <IconButton
-                  edge="start"
-                  className={classes.menuButton}
-                  color="inherit"
-                  aria-label="menu"
-                  style={{ borderRadius: 5, backgroundColor: amber[600], width: '42px', height: '42px', alignItems: 'center', padding: '0px' }}
-                  onClick={handleClick}
-                >
-                  <MenuIcon />
-                </IconButton>
-                <Menu
-                  className={classes.menu}
-                  id="fade-menu"
-                  anchorEl={anchorEl}
-                  keepMounted
-                  open={open}
-                  onClose={handleClose}
-                  TransitionComponent={Fade}
-
-                >
-                  <MenuItem onClick={handleClose} className={classes.menuItem}>
+              }
+            </div>
+            {width !== "xs" ?
+              !isLogin ?
+                (
+                  <div className={classes.authBlock}>
                     <NavLink
                       className={classes.loginNav}
                       to="/login"
@@ -290,87 +298,280 @@ const MainHeader = ({ themeChanger, width }) => {
                       }}
                     >
                       Войти
-                    </NavLink>
-                  </MenuItem>
-                  <MenuItem onClick={handleClose}>
+                </NavLink>
                     <NavLink
-                      className={classes.registerNav}
                       to="/register"
+                      className={classes.registerNav}
                       activeClassName={classes.active}
-                      style={{ color: "white", textDecoration: "none", }}
+                      style={{ color: "white", textDecoration: "none" }}
                     >
                       Регистрация
-                    </NavLink>
-                  </MenuItem>
-                </Menu>
-              </>
-            ) :
-            (<>
-              <IconButton
-                edge="start"
-                className={classes.menuButton}
-                color="inherit"
-                aria-label="menu"
-                style={{ 
-                  borderRadius: 3, 
-                  color: currentTheme === 'light' ? 'black' : '',
-                  backgroundColor: currentTheme === 'dark' ? 'rgb(20, 19, 34)' : 'white', 
-                  width: '42px', 
-                  height: '42px', 
-                  alignItems: 'center', 
-                  padding: '0px' }}
-                onClick={handleClick}
-              >
-                <AccountBox />
-              </IconButton>
-              <Popper open={open} anchorEl={anchorEl} role={undefined} transition disablePortal>
-          {({ TransitionProps, placement }) => (
-            <Grow
-              {...TransitionProps}
-              style={{ 
-                transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom', 
-                backgroundColor: currentTheme === 'dark' ? 'rgb(20, 19, 34)' : ''
-              }}
-            >
-              <Paper>
-                <ClickAwayListener onClickAway={handleClose}>
-                  <MenuList autoFocusItem={open} id="menu-list-grow" >
-                  <MenuItem onClick={handleClose}>
-                    <NavLink
-                  className={classes.loginNav}
-                  onClick={() => {
-                    Cookies.remove('token');
-                    Cookies.remove('level');
-                    dispatch(setLogin());
-                    dispatch(setData({}));
-                  }}
-                  to="/login"
-                  exact
-                  activeClassName={classes.active}
-                  style={{
-                    textDecoration: "none",
-                  }}
-                >
-                  Выйти
                 </NavLink>
-                    </MenuItem>
-                    {/* <MenuItem onClick={handleClose}>My account</MenuItem>
+
+                  </div>
+                ) :
+                (
+                  <>
+                    {loadingBalance ?
+                      <div
+                        style={{
+                          marginRight: '35px'
+                        }}>
+                        <CircleSpinner
+                          size={12}
+                          color={currentTheme === 'dark' ? 'white' : 'black'}
+                          loading={loadingBalance}
+                        >
+                        </CircleSpinner>
+                      </div>
+                      :
+                      <Typography
+                        style={{
+                          marginRight: '25px',
+                          color: currentTheme === 'dark' ? 'white' : 'black',
+                          fontSize: '16px'
+                        }}>
+                        {`${balance.money} ₽ | ${balance.rates} ₿`}
+                        <IconButton
+                          onClick={reloadBalance}
+                          style={{
+                            color: currentTheme === 'dark' ? 'white' : 'black',
+                            padding: '5px'
+                          }}>
+                          <ReplayIcon style={{
+                            height: '19px'
+                          }}></ReplayIcon>
+                        </IconButton>
+                      </Typography>
+                    }
+                    <IconButton
+                      edge="start"
+                      className={classes.menuButton}
+                      color="inherit"
+                      aria-label="menu"
+                      style={{
+                        borderRadius: 3,
+                        color: currentTheme === 'light' ? 'black' : '',
+                        backgroundColor: currentTheme === 'dark' ? 'rgb(20, 19, 34)' : 'white',
+                        width: '42px',
+                        height: '42px',
+                        alignItems: 'center',
+                        padding: '0px'
+                      }}
+                      onClick={handleClick}
+                    >
+                      <AccountBox />
+                    </IconButton>
+                    <Popper open={open} anchorEl={anchorEl} role={undefined} transition disablePortal>
+                      {({ TransitionProps, placement }) => (
+                        <Grow
+                          {...TransitionProps}
+                          style={{
+                            transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom',
+                            backgroundColor: currentTheme === 'dark' ? 'rgb(20, 19, 34)' : ''
+                          }}
+                        >
+                          <Paper>
+                            <ClickAwayListener onClickAway={handleClose}>
+                              <MenuList autoFocusItem={open} id="menu-list-grow" >
+                                <MenuItem onClick={handleClose}>
+                                  <NavLink
+                                    className={classes.loginNav}
+                                    to="/dashboard/profile"
+                                    exact
+                                    activeClassName={classes.active}
+                                    style={{
+                                      textDecoration: "none",
+                                    }}
+                                  >
+                                    Профиль
+                </NavLink>
+                                </MenuItem>
+                                <MenuItem onClick={handleClose}>
+                                  <NavLink
+                                    className={classes.loginNav}
+                                    onClick={exit}
+                                    to="/login"
+                                    exact
+                                    activeClassName={classes.active}
+                                    style={{
+
+                                      textDecoration: "none",
+                                    }}
+                                  >
+                                    Выйти
+                </NavLink>
+                                </MenuItem>
+                                {/* <MenuItem onClick={handleClose}>My account</MenuItem>
                     <MenuItem onClick={handleClose}>Logout</MenuItem> */}
-                  </MenuList>
-                </ClickAwayListener>
-              </Paper>
-            </Grow>
-          )}
-        </Popper>
-            </>
-            )
+                              </MenuList>
+                            </ClickAwayListener>
+                          </Paper>
+                        </Grow>
+                      )}
+                    </Popper>
+                  </>
+
+                )
+              : !isLogin ? (
+                <>
+                  <IconButton
+                    edge="start"
+                    className={classes.menuButton}
+                    color="inherit"
+                    aria-label="menu"
+                    style={{ borderRadius: 5, backgroundColor: amber[600], width: '42px', height: '42px', alignItems: 'center', padding: '0px' }}
+                    onClick={handleClick}
+                  >
+                    <MenuIcon />
+                  </IconButton>
+                  <Menu
+                    className={classes.menu}
+                    id="fade-menu"
+                    anchorEl={anchorEl}
+                    keepMounted
+                    open={open}
+                    onClose={handleClose}
+                    TransitionComponent={Fade}
+
+                  >
+                    <MenuItem onClick={handleClose} className={classes.menuItem}>
+                      <NavLink
+                        className={classes.loginNav}
+                        to="/login"
+                        exact
+                        activeClassName={classes.active}
+                        style={{
+                          textDecoration: "none",
+                        }}
+                      >
+                        Войти
+                    </NavLink>
+                    </MenuItem>
+                    <MenuItem onClick={handleClose}>
+                      <NavLink
+                        className={classes.registerNav}
+                        to="/register"
+                        activeClassName={classes.active}
+                        style={{ color: "white", textDecoration: "none", }}
+                      >
+                        Регистрация
+                    </NavLink>
+                    </MenuItem>
+                  </Menu>
+                </>
+              ) :
+                (<>
+                  {loadingBalance ?
+                    <div
+                      style={{
+                        marginRight: '20px'
+                      }}
+                    >
+                      <CircleSpinner
+                        size={12}
+                        color={currentTheme === 'dark' ? 'white' : 'black'}
+                        loading={loadingBalance}
+                      >
+                      </CircleSpinner>
+                    </div>
+                    :
+                    <Typography
+                      style={{
+                        marginRight: '10px',
+                        color: currentTheme === 'dark' ? 'white' : 'black',
+                        fontSize: '16px'
+                      }}>
+                      {`${balance.money} ₽ | ${balance.rates} ₿`}
+                      <IconButton
+                        onClick={reloadBalance}
+                        style={{
+                          color: currentTheme === 'dark' ? 'white' : 'black',
+                          padding: '5px'
+                        }}>
+                        <ReplayIcon style={{
+                          height: '19px'
+                        }}></ReplayIcon>
+                      </IconButton>
+                    </Typography>
+                  }
+                  <IconButton
+                    edge="start"
+                    className={classes.menuButton}
+                    color="inherit"
+                    aria-label="menu"
+                    style={{
+                      borderRadius: 3,
+                      color: currentTheme === 'light' ? 'black' : '',
+                      backgroundColor: currentTheme === 'dark' ? 'rgb(20, 19, 34)' : 'white',
+                      width: '42px',
+                      height: '42px',
+                      alignItems: 'center',
+                      padding: '0px'
+                    }}
+                    onClick={handleClick}
+                  >
+                    <AccountBox />
+                  </IconButton>
+                  <Popper open={open} anchorEl={anchorEl} role={undefined} transition disablePortal>
+                    {({ TransitionProps, placement }) => (
+                      <Grow
+                        {...TransitionProps}
+                        style={{
+                          transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom',
+                          backgroundColor: currentTheme === 'dark' ? 'rgb(20, 19, 34)' : ''
+                        }}
+                      >
+                        <Paper>
+                          <ClickAwayListener onClickAway={handleClose}>
+                            <MenuList autoFocusItem={open} id="menu-list-grow" >
+
+                              <MenuItem onClick={handleClose}>
+                                <NavLink
+                                  className={classes.loginNav}
+                                  to="/dashboard/profile"
+                                  exact
+                                  activeClassName={classes.active}
+                                  style={{
+                                    textDecoration: "none",
+                                  }}
+                                >
+                                  Профиль
+                </NavLink>
+                              </MenuItem>
+
+                              <MenuItem onClick={handleClose}>
+                                <NavLink
+                                  className={classes.loginNav}
+                                  onClick={exit}
+                                  to="/login"
+                                  exact
+                                  activeClassName={classes.active}
+                                  style={{
+                                    textDecoration: "none",
+                                  }}
+                                >
+                                  Выйти
+                </NavLink>
+                              </MenuItem>
+
+                              {/* <MenuItem onClick={handleClose}>My account</MenuItem>
+                    <MenuItem onClick={handleClose}>Logout</MenuItem> */}
+                            </MenuList>
+                          </ClickAwayListener>
+                        </Paper>
+                      </Grow>
+                    )}
+                  </Popper>
+                </>
+                )
             }
 
-          <ThemeChanger themeChanger={themeChanger} />
-        </Toolbar>
-      </AppBar>
-    </div >
-    {/* <a href="tg://resolve?domain=telegram" class="telegramim_button telegramim_shadow telegramim_pulse" style={{
+            <ThemeChanger themeChanger={themeChanger} />
+          </Toolbar>
+        </AppBar>
+      </div >
+      {/* <a href="tg://resolve?domain=telegram" class="telegramim_button telegramim_shadow telegramim_pulse" style={{
       width:  width === 'xs' ? '50px' : '70px',
       position: 'fixed',
       bottom: width === 'xs' ? '10px' : '32px',
@@ -384,7 +585,7 @@ const MainHeader = ({ themeChanger, width }) => {
        maxWidth:  width === 'xs' ? '50px' : '70px'
      }} src={tgLogo}/> 
      </a> */}
-     </>
+    </>
   );
 };
 

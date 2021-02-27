@@ -1,20 +1,20 @@
 import React, { useContext } from "react";
+import { useSelector } from 'react-redux';
+import { useHistory } from "react-router-dom";
 import { NavLink } from "react-router-dom";
 import withWidth from "@material-ui/core/withWidth";
 import { useTheme } from '@material-ui/core/styles';
-import { makeStyles, Typography, IconButton, Drawer, List, ListItem, ListItemIcon, Divider, Icon, Hidden, Accordion, AccordionSummary, AccordionDetails, Box } from "@material-ui/core";
-import {  ChevronRight, ChevronLeft } from '@material-ui/icons';
+import { makeStyles, Typography, IconButton, Drawer, List, ListItem, ListItemIcon, Divider, Icon, Hidden, Box } from "@material-ui/core";
+import { ChevronRight, ChevronLeft } from '@material-ui/icons';
 import HomeIconOutlined from '@material-ui/icons/HomeOutlined';
 import AppsIconOutlined from '@material-ui/icons/AppsOutlined';
 import StorageIconOutlined from '@material-ui/icons/StorageOutlined';
 import ShoppingCartIconOutlined from '@material-ui/icons/ShoppingCartOutlined';
-import PhotoOutlinedIcon from '@material-ui/icons/PhotoOutlined';
-import CreditCardOutlinedIcon from '@material-ui/icons/CreditCardOutlined';
-import PieChartOutlinedIcon from '@material-ui/icons/PieChartOutlined';
+import PeopleAltOutlinedIcon from '@material-ui/icons/PeopleAltOutlined';
+import EqualizerOutlinedIcon from '@material-ui/icons/EqualizerOutlined';
 import clsx from 'clsx';
 import { ThemeContext } from "../../../context/themeContext";
 import MenuIcon from "@material-ui/icons/Menu";
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import lightLogo from '../../../assets/logo/logo-light-header.png'
 import darkLogo from '../../../assets/logo/logo-dark-header.png'
 import lightShortLogo from '../../../assets/logo/logo-light-short.png'
@@ -25,18 +25,18 @@ const Panel = ({ width }) => {
     const [open, setOpen] = React.useState(false);
     const theme = useTheme();
     const drawerWidth = width === 'xs' ? '' : '280px';
-
+    const userData = useSelector(state => state.userData);
     const useStyles = makeStyles((theme) => ({
-        logo:{
-            maxWidth:'150px',
+        logo: {
+            maxWidth: '150px',
             margin: width === 'xs' ? '0px 0px 10px 16px' : '1px 0px 10px 24px'
         },
         hide: {
             display: 'none',
         },
         drawer: {
-            '& .MuiDrawer-paperAnchorDockedLeft':{
-                borderRight:'none'
+            '& .MuiDrawer-paperAnchorDockedLeft': {
+                borderRight: 'none'
             },
             flexShrink: 0,
 
@@ -46,7 +46,7 @@ const Panel = ({ width }) => {
                 bottom: '40px',
                 right: width === 'xs' ? '0px' : 'auto',
                 boxShadow: currentTheme === 'dark' ? 'none' : "rgb(212 215 225 / 28%) 0px 1px 6px",
-                zIndex:'2002',
+                zIndex: '2002',
                 '&::-webkit-scrollbar': {
                     width: '5px',
                     backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : '',
@@ -59,7 +59,7 @@ const Panel = ({ width }) => {
 
         },
         drawerOpen: {
-            overflow:'scroll',
+            overflow: 'auto',
             backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : '',
             color: currentTheme === 'dark' ? '#7575a3' : '',
             width: drawerWidth,
@@ -69,7 +69,7 @@ const Panel = ({ width }) => {
             }),
         },
         drawerClose: {
-            overflow:'visible',
+            overflow: 'visible',
             display: width === 'xs' ? 'none' : 'visible',
             backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : '',
             color: currentTheme === 'dark' ? 'rgb(117, 117, 163)' : '#595c97',
@@ -93,36 +93,7 @@ const Panel = ({ width }) => {
             }),
             width: drawerWidth
         },
-        secret: {
-            display: 'none',
-            top: '0px',
-            left: '64px',
-            minWidth: '120px',
-            zIndex: '9999',
-            position: 'absolute',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            textDecoration: 'none',
-            color: currentTheme === 'dark' ? '#aeaee0' : '#595c97',
-            backgroundColor: currentTheme === 'dark' ? '#232135' : 'white',
-            boxShadow: currentTheme === 'dark' ? 'none' : '0px 0px 20px -11px rgba(0,0,0,0.8)',
-            '& ul': {
-                listStyle: 'none',
-                padding: '0px',
-                width: '100%',
-                '& li': {
-                    margin: '20px',
-                    fontSize: '0.95rem',
-                    width: '100%',
-                    textAlign: 'left',
-                    '&:hover': {
-                        color: '#4b7cf3'
-                    }
-                }
-            }
-
-        },
+        
         root: {
             '& .MuiIcon-root': {
                 position: 'relative',
@@ -203,11 +174,18 @@ const Panel = ({ width }) => {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            width: '100%',
             fontSize: '0.95rem',
             '& svg': {
                 fontSize: '1.13rem!important',
-            }
+            },
+            color:currentTheme === 'dark' ? 'rgb(117, 117, 163)' : '#595c97',
+            padding:'0px 16px',
+            cursor:'pointer',
+            minHeight:'48px',
+            '&:hover': {
+                backgroundColor: currentTheme === 'dark' ? '#232135' : '#e4e9f0',
+                color: '#4b7cf3',
+            },
         },
 
     }));
@@ -217,7 +195,13 @@ const Panel = ({ width }) => {
     };
 
     const classes = useStyles();
-
+    const myHistory = useHistory();
+    const routeProducts = ()=>{
+        myHistory.push('/dashboard/products')
+    }
+    const routeHome = ()=>{
+        myHistory.push('/dashboard')
+    }
     return (
         <>
 
@@ -261,23 +245,23 @@ const Panel = ({ width }) => {
 
                 <List>
 
-                <NavLink
-              to="/dashboard"
-              exact
-              style={{
-                textDecoration: "none",
-                color: currentTheme === "light" ? theme.dark : theme.light,
+                    <NavLink
+                        to="/dashboard"
+                        exact
+                        style={{
+                            textDecoration: "none",
+                            color: currentTheme === "light" ? theme.dark : theme.light,
 
-              }}
-            >
-             
-             {open ? <img alt='' className={classes.logo} src={currentTheme === 'dark' ? darkLogo : lightLogo}/>
-             : <img alt='' className={classes.logo} src={currentTheme === 'dark' ? darkShortLogo : lightShortLogo} style={{
-                 maxWidth:'40px'
-             }}/>
-             }
-             
-            </NavLink>
+                        }}
+                    >
+
+                        {open ? <img alt='' className={classes.logo} src={currentTheme === 'dark' ? darkLogo : lightLogo} />
+                            : <img alt='' className={classes.logo} src={currentTheme === 'dark' ? darkShortLogo : lightShortLogo} style={{
+                                maxWidth: '40px'
+                            }} />
+                        }
+
+                    </NavLink>
 
                     <div className={classes.root}>
                         {open ?
@@ -285,7 +269,7 @@ const Panel = ({ width }) => {
                                 color: currentTheme === 'dark' ? '#232135' : '#c8c4db',
                                 margin: '5px 0px 5px 15px'
 
-                            }}>Номе</Typography>
+                            }}>Главная</Typography>
                             :
                             <Divider style={{
                                 width: '70%',
@@ -296,47 +280,23 @@ const Panel = ({ width }) => {
                             </Divider>
                         }
                         {open ?
-                            <>
-                                <Accordion>
-                                    <AccordionSummary
-                                        // expandIcon={open ? <><ExpandMoreIcon /><People /></> : ''}
-                                        aria-controls="panel1a-content"
-                                        id="panel1a-header"
-                                    // onClick={open ? null : handleDrawer}
-                                    >
-                                        <Box className={classes.heading}>Home <div><ExpandMoreIcon /><HomeIconOutlined /></div> </Box>
-                                    </AccordionSummary>
-                                    <AccordionDetails>
-
-                                        <ul className={classes.ulAcc}>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                        </ul>
-
-                                    </AccordionDetails>
-                                </Accordion>
-                            </>
+                        <NavLink to='/dashboard' exact>
+                            <Box className={classes.heading}>Главная <HomeIconOutlined /> </Box>
+                            </NavLink>
                             :
-                            <Icon className='iconSec'>
-                                <HomeIconOutlined
-                                    className={classes.icons}
-                                    style={{
-                                        height: '30px',
-                                        margin: '5px 0px'
-                                    }}></HomeIconOutlined>
-                                <div
-                                    className={`${classes.secret} blocSec`}
-                                >
-                                    <ul>
-                                        <li>Profile</li>
-                                        <li>Calendar</li>
-                                        <li>Gallery</li>
-                                        <li>Mail</li>
-                                    </ul>
-                                </div>
+                            <Icon 
+                            onClick={routeHome}
+                            >
+                                
+                                    <HomeIconOutlined
+                                        className={classes.icons}
+                                        style={{
+                                            height: '30px',
+                                            margin: '5px 0px',
+                                        }}>
+                                    </HomeIconOutlined>
+                                
+                                
                             </Icon>
                         }
 
@@ -348,7 +308,7 @@ const Panel = ({ width }) => {
                                     color: currentTheme === 'dark' ? '#232135' : '#c8c4db',
                                     margin: '5px 0px 5px 15px'
 
-                                }}>APPS n PAGES</Typography>
+                                }}>Каталоги</Typography>
                             :
                             <Divider style={{
                                 width: '70%',
@@ -360,290 +320,103 @@ const Panel = ({ width }) => {
                         }
 
                         {open ?
-                            <>
-                                <Accordion>
-                                    <AccordionSummary
-                                        // expandIcon={open ? <><ExpandMoreIcon /><ExpandMoreIcon /></> : ''}
-                                        aria-controls="panel1a-content"
-                                        id="panel1a-header"
-                                    // onClick={open ? null : handleDrawer}
-                                    >
-                                        <Box className={classes.heading}>Apps <div><ExpandMoreIcon /><AppsIconOutlined /></div></Box>
-                                    </AccordionSummary>
-                                    <AccordionDetails>
-
-                                        <ul className={classes.ulAcc}>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                        </ul>
-
-                                    </AccordionDetails>
-                                </Accordion>
-
-                            </>
+                            <NavLink to='/dashboard/products' exact>
+                            <Box className={classes.heading}>Продукты <AppsIconOutlined /></Box>
+                            </NavLink>
                             :
-                            <Icon className='iconSec'>
+                            
+                            <Icon 
+                            onClick={routeProducts}
+                            >
+                                
                                 <AppsIconOutlined
                                     className={classes.icons}
                                     style={{
                                         height: '30px',
-                                        margin: '5px 0px'
+                                        margin: '5px 0px',
                                     }}></AppsIconOutlined >
-                                <div
-                                    className={`${classes.secret} blocSec`}
-                                >
-                                    <ul>
-                                        <li>Profile</li>
-                                        <li>Calendar</li>
-                                        <li>Gallery</li>
-                                        <li>Mail</li>
-                                    </ul>
-                                </div>
-
+                               
+                               
                             </Icon>
+                            
                         }
                         {open ?
-                            <>
-                                <Accordion>
-                                    <AccordionSummary
-                                        // expandIcon={open ? <><ExpandMoreIcon /><ExpandMoreIcon /></> : ''}
-                                        aria-controls="panel1a-content"
-                                        id="panel1a-header"
-                                    // onClick={open ? null : handleDrawer}
-                                    >
-                                        <Box className={classes.heading}>Extra apps <div><ExpandMoreIcon /><StorageIconOutlined /></div> </Box>
-                                    </AccordionSummary>
-                                    <AccordionDetails>
 
-                                        <ul className={classes.ulAcc}>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                        </ul>
+                            <Box className={classes.heading}>UTM-метки <StorageIconOutlined /> </Box>
 
-                                    </AccordionDetails>
-                                </Accordion>
-
-                            </>
                             :
-                            <Icon className='iconSec'>
+                            <Icon >
                                 <StorageIconOutlined
                                     className={classes.icons}
                                     style={{
                                         height: '30px',
                                         margin: '5px 0px'
                                     }}></StorageIconOutlined >
-                                <div
-                                    className={`${classes.secret} blocSec`}
-                                >
-                                    <ul>
-                                        <li>Profile</li>
-                                        <li>Calendar</li>
-                                        <li>Gallery</li>
-                                        <li>Mail</li>
-                                    </ul>
-                                </div>
+                               
                             </Icon>
                         }
                         {open ?
-                            <>
-                                <Accordion>
-                                    <AccordionSummary
-                                        // expandIcon={open ? <><ExpandMoreIcon /><ExpandMoreIcon /></> : ''}
-                                        aria-controls="panel1a-content"
-                                        id="panel1a-header"
-                                    // onClick={open ? null : handleDrawer}
-                                    >
-                                        <Box className={classes.heading}>Ecommerce <div><ExpandMoreIcon /><ShoppingCartIconOutlined /></div></Box>
-                                    </AccordionSummary>
-                                    <AccordionDetails>
 
-                                        <ul className={classes.ulAcc}>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                        </ul>
+                            <Box className={classes.heading}>Заказы <ShoppingCartIconOutlined /></Box>
 
-                                    </AccordionDetails>
-                                </Accordion>
-
-                            </>
                             :
-                            <Icon className='iconSec'>
+                            <Icon >
                                 <ShoppingCartIconOutlined
                                     className={classes.icons}
                                     style={{
                                         height: '30px',
                                         margin: '5px 0px'
                                     }}></ShoppingCartIconOutlined >
-                                <div
-                                    className={`${classes.secret} blocSec`}
-                                >
-                                    <ul>
-                                        <li>Profile</li>
-                                        <li>Calendar</li>
-                                        <li>Gallery</li>
-                                        <li>Mail</li>
-                                    </ul>
-                                </div>
+                                
                             </Icon>
                         }
                         {open ?
-                            <>
-                                <Accordion>
-                                    <AccordionSummary
-                                        // expandIcon={open ? <><ExpandMoreIcon /><ExpandMoreIcon /></> : ''}
-                                        aria-controls="panel1a-content"
-                                        id="panel1a-header"
-                                    // onClick={open ? null : handleDrawer}
-                                    >
-                                        <Box className={classes.heading}>Gallery <div><ExpandMoreIcon /><PhotoOutlinedIcon /></div></Box>
-                                    </AccordionSummary>
-                                    <AccordionDetails>
 
-                                        <ul className={classes.ulAcc}>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                        </ul>
+                            <Box className={classes.heading}>Статистика <EqualizerOutlinedIcon /></Box>
 
-                                    </AccordionDetails>
-                                </Accordion>
-
-                            </>
                             :
-                            <Icon className='iconSec'>
-                                <PhotoOutlinedIcon
+                            <Icon >
+                                <EqualizerOutlinedIcon
                                     className={classes.icons}
                                     style={{
                                         height: '30px',
                                         margin: '5px 0px'
-                                    }}></PhotoOutlinedIcon >
-                                <div
-                                    className={`${classes.secret} blocSec`}
-                                >
-                                    <ul>
-                                        <li>Profile</li>
-                                        <li>Calendar</li>
-                                        <li>Gallery</li>
-                                        <li>Mail</li>
-                                    </ul>
-                                </div>
+                                    }}></EqualizerOutlinedIcon >
+                                
                             </Icon>
                         }
-                        {open ?
-                            <Typography variant='h7' style={{
-                                color: currentTheme === 'dark' ? '#232135' : '#c8c4db',
-                                margin: '5px 0px 5px 15px'
+                        {userData.level === 2 ? 
+                        open ?
+                        <Typography variant='h7' style={{
+                            color: currentTheme === 'dark' ? '#232135' : '#c8c4db',
+                            margin: '5px 0px 5px 15px'
 
-                            }}>COMPONENTS</Typography>
-                            :
-                            <Divider style={{
-                                width: '70%',
-                                backgroundColor: currentTheme === 'dark' ? '#232135' : '#c8c4db',
-                                margin: '10px 0px'
-                            }}>
+                        }}>Для администраторов</Typography>
+                        :
+                        <Divider style={{
+                            width: '70%',
+                            backgroundColor: currentTheme === 'dark' ? '#232135' : '#c8c4db',
+                            margin: '10px 0px'
+                        }}>
 
-                            </Divider>
+                        </Divider> 
+                        : null
                         }
-                        {open ?
-                            <>
-                                <Accordion>
-                                    <AccordionSummary
-                                        // expandIcon={open ? <><ExpandMoreIcon /><ExpandMoreIcon /></> : ''}
-                                        aria-controls="panel1a-content"
-                                        id="panel1a-header"
-                                    // onClick={open ? null : handleDrawer}
-                                    >
-                                        <Box className={classes.heading}>Cards <div><ExpandMoreIcon /><CreditCardOutlinedIcon /></div></Box>
-                                    </AccordionSummary>
-                                    <AccordionDetails>
+                        {userData.leve === 2 ?
+                        open ?
 
-                                        <ul className={classes.ulAcc}>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                        </ul>
+                        <Box className={classes.heading}>Пользователи <PeopleAltOutlinedIcon /></Box>
 
-                                    </AccordionDetails>
-                                </Accordion>
-
-                            </>
-                            :
-                            <Icon className='iconSec'>
-                                <CreditCardOutlinedIcon
-                                    className={classes.icons}
-                                    style={{
-                                        height: '30px',
-                                        margin: '5px 0px'
-                                    }}></CreditCardOutlinedIcon >
-                                <div
-                                    className={`${classes.secret} blocSec`}
-                                >
-                                    <ul>
-                                        <li>Profile</li>
-                                        <li>Calendar</li>
-                                        <li>Gallery</li>
-                                        <li>Mail</li>
-                                    </ul>
-                                </div>
-                            </Icon>
-                        }
-                        {open ?
-                            <>
-                                <Accordion>
-                                    <AccordionSummary
-                                        // expandIcon={open ? <><ExpandMoreIcon /><ExpandMoreIcon /></> : ''}
-                                        aria-controls="panel1a-content"
-                                        id="panel1a-header"
-                                    // onClick={open ? null : handleDrawer}
-                                    >
-                                        <Box className={classes.heading}>Charts <div><ExpandMoreIcon /><PieChartOutlinedIcon /></div></Box>
-                                    </AccordionSummary>
-                                    <AccordionDetails>
-
-                                        <ul className={classes.ulAcc}>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                            <li className={classes.liAcc}>Profile</li>
-                                        </ul>
-
-                                    </AccordionDetails>
-                                </Accordion>
-
-                            </>
-                            :
-                            <Icon className='iconSec'>
-                                <PieChartOutlinedIcon ple='true'
-                                    className={classes.icons}
-                                    style={{
-                                        height: '30px',
-                                        margin: '5px 0px'
-                                    }}></PieChartOutlinedIcon >
-                                <div
-                                    className={`${classes.secret} blocSec`}
-                                >
-                                    <ul>
-                                        <li>Profile</li>
-                                        <li>Calendar</li>
-                                        <li>Gallery</li>
-                                        <li>Mail</li>
-                                    </ul>
-                                </div>
-                            </Icon>
+                        :
+                        <Icon >
+                            <PeopleAltOutlinedIcon
+                                className={classes.icons}
+                                style={{
+                                    height: '30px',
+                                    margin: '5px 0px'
+                                }}></PeopleAltOutlinedIcon >
+                        </Icon>
+                        : null
                         }
 
 
