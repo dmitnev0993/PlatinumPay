@@ -16,6 +16,7 @@ import { createStore, applyMiddleware } from "redux";
 import { composeWithDevTools } from "redux-devtools-extension";
 import thunk from "redux-thunk";
 import reducer from "./config/reducer";
+import { CircleSpinner } from "react-spinners-kit";
 
 const Login = lazy(()=> import("./components/Auth/Login/Login.jsx"))
 const Register = lazy(()=> import("./components/Auth/Register/Register.jsx"))
@@ -60,10 +61,17 @@ function App({ sound, flag }) {
             bottom:'0px',
             right:'0px',
             left:'0px',
-            zIndex:'9999'
+            zIndex:'9999',
+            display:'flex',
+            justifyContent:'center',
+            alignItems:'center'
           }}
           >
-            ...Loading
+            <CircleSpinner
+            size={30}
+            color={currentTheme === 'dark' ? 'white' : 'black'}
+            loading={true}
+            />
             </div>
           }>
           <Switch>
