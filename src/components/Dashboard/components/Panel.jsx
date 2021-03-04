@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import { useSelector } from 'react-redux';
 import { useHistory } from "react-router-dom";
+import Snackbar from 'node-snackbar';
 import { NavLink } from "react-router-dom";
 import withWidth from "@material-ui/core/withWidth";
 import { useTheme } from '@material-ui/core/styles';
@@ -20,12 +21,29 @@ import darkLogo from '../../../assets/logo/logo-dark-header.png'
 import lightShortLogo from '../../../assets/logo/logo-light-short.png'
 import darkShortLogo from '../../../assets/logo/logo-dark-short.png'
 
+const showMess = (message) => {
+    Snackbar.show({
+        actionTextColor: '#7575a3',
+        text: message,
+        actionText: 'ОК',
+        pos: 'bottom-right'
+    });
+}
+
 const Panel = ({ width }) => {
     const { currentTheme } = useContext(ThemeContext);
+
     const [open, setOpen] = React.useState(false);
+
     const theme = useTheme();
+
     const drawerWidth = width === 'xs' ? '' : '280px';
+
     const userData = useSelector(state => state.userData);
+    const level = useSelector(state => state.userData.level);
+
+
+
     const useStyles = makeStyles((theme) => ({
         logo: {
             maxWidth: '150px',
@@ -93,7 +111,7 @@ const Panel = ({ width }) => {
             }),
             width: drawerWidth
         },
-        
+
         root: {
             '& .MuiIcon-root': {
                 position: 'relative',
@@ -178,10 +196,10 @@ const Panel = ({ width }) => {
             '& svg': {
                 fontSize: '1.13rem!important',
             },
-            color:currentTheme === 'dark' ? 'rgb(117, 117, 163)' : '#595c97',
-            padding:'0px 16px',
-            cursor:'pointer',
-            minHeight:'48px',
+            color: currentTheme === 'dark' ? 'rgb(117, 117, 163)' : '#595c97',
+            padding: '0px 16px',
+            cursor: 'pointer',
+            minHeight: '48px',
             '&:hover': {
                 backgroundColor: currentTheme === 'dark' ? '#232135' : '#e4e9f0',
                 color: '#4b7cf3',
@@ -196,11 +214,15 @@ const Panel = ({ width }) => {
 
     const classes = useStyles();
     const myHistory = useHistory();
-    const routeProducts = ()=>{
+    const routeProducts = () => {
         myHistory.push('/dashboard/products')
     }
-    const routeHome = ()=>{
+    const routeHome = () => {
         myHistory.push('/dashboard')
+    }
+
+    const notActivated = () => {
+        showMess('Ваш аккаунт не активирован');
     }
     return (
         <>
@@ -280,23 +302,28 @@ const Panel = ({ width }) => {
                             </Divider>
                         }
                         {open ?
-                        <NavLink to='/dashboard' exact>
-                            <Box className={classes.heading}>Главная <HomeIconOutlined /> </Box>
-                            </NavLink>
-                            :
-                            <Icon 
-                            onClick={routeHome}
+
+                            <Box
+                                className={classes.heading}
+                                onClick={routeHome}
                             >
-                                
-                                    <HomeIconOutlined
-                                        className={classes.icons}
-                                        style={{
-                                            height: '30px',
-                                            margin: '5px 0px',
-                                        }}>
-                                    </HomeIconOutlined>
-                                
-                                
+                                Главная <HomeIconOutlined />
+                            </Box>
+
+                            :
+                            <Icon
+                                onClick={routeHome}
+                            >
+
+                                <HomeIconOutlined
+                                    className={classes.icons}
+                                    style={{
+                                        height: '30px',
+                                        margin: '5px 0px',
+                                    }}>
+                                </HomeIconOutlined>
+
+
                             </Icon>
                         }
 
@@ -320,25 +347,30 @@ const Panel = ({ width }) => {
                         }
 
                         {open ?
-                            <NavLink to='/dashboard/products' exact>
-                            <Box className={classes.heading}>Продукты <AppsIconOutlined /></Box>
-                            </NavLink>
-                            :
-                            
-                            <Icon 
-                            onClick={routeProducts}
+
+                            <Box
+                                onClick={level === 0 ? notActivated : routeProducts}
+                                className={classes.heading}
                             >
-                                
+                                Продукты <AppsIconOutlined />
+                            </Box>
+
+                            :
+
+                            <Icon
+                                onClick={level === 0 ? notActivated : routeProducts}
+                            >
+
                                 <AppsIconOutlined
                                     className={classes.icons}
                                     style={{
                                         height: '30px',
                                         margin: '5px 0px',
                                     }}></AppsIconOutlined >
-                               
-                               
+
+
                             </Icon>
-                            
+
                         }
                         {open ?
 
@@ -352,7 +384,7 @@ const Panel = ({ width }) => {
                                         height: '30px',
                                         margin: '5px 0px'
                                     }}></StorageIconOutlined >
-                               
+
                             </Icon>
                         }
                         {open ?
@@ -367,7 +399,7 @@ const Panel = ({ width }) => {
                                         height: '30px',
                                         margin: '5px 0px'
                                     }}></ShoppingCartIconOutlined >
-                                
+
                             </Icon>
                         }
                         {open ?
@@ -382,41 +414,41 @@ const Panel = ({ width }) => {
                                         height: '30px',
                                         margin: '5px 0px'
                                     }}></EqualizerOutlinedIcon >
-                                
+
                             </Icon>
                         }
-                        {userData.level === 2 ? 
-                        open ?
-                        <Typography variant='h7' style={{
-                            color: currentTheme === 'dark' ? '#232135' : '#c8c4db',
-                            margin: '5px 0px 5px 15px'
+                        {userData.level === 2 ?
+                            open ?
+                                <Typography variant='h7' style={{
+                                    color: currentTheme === 'dark' ? '#232135' : '#c8c4db',
+                                    margin: '5px 0px 5px 15px'
 
-                        }}>Для администраторов</Typography>
-                        :
-                        <Divider style={{
-                            width: '70%',
-                            backgroundColor: currentTheme === 'dark' ? '#232135' : '#c8c4db',
-                            margin: '10px 0px'
-                        }}>
+                                }}>Для администраторов</Typography>
+                                :
+                                <Divider style={{
+                                    width: '70%',
+                                    backgroundColor: currentTheme === 'dark' ? '#232135' : '#c8c4db',
+                                    margin: '10px 0px'
+                                }}>
 
-                        </Divider> 
-                        : null
+                                </Divider>
+                            : null
                         }
                         {userData.leve === 2 ?
-                        open ?
+                            open ?
 
-                        <Box className={classes.heading}>Пользователи <PeopleAltOutlinedIcon /></Box>
+                                <Box className={classes.heading}>Пользователи <PeopleAltOutlinedIcon /></Box>
 
-                        :
-                        <Icon >
-                            <PeopleAltOutlinedIcon
-                                className={classes.icons}
-                                style={{
-                                    height: '30px',
-                                    margin: '5px 0px'
-                                }}></PeopleAltOutlinedIcon >
-                        </Icon>
-                        : null
+                                :
+                                <Icon >
+                                    <PeopleAltOutlinedIcon
+                                        className={classes.icons}
+                                        style={{
+                                            height: '30px',
+                                            margin: '5px 0px'
+                                        }}></PeopleAltOutlinedIcon >
+                                </Icon>
+                            : null
                         }
 
 

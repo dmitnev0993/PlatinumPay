@@ -131,7 +131,6 @@ const Login = ({ width }) => {
         console.log(userData)
         if (userData.result) {
           Cookies.set('token',userData.response.access_token,{path:'/',sameSite: 'strict',expires:360000});
-          Cookies.set('level',userData.response.level,{path:'/',sameSite: 'strict',expires:360000});
           dispatch(setData({
             token:userData.response.access_token,
             level:userData.response.level

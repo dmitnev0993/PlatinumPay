@@ -1,11 +1,16 @@
 import React, { useContext, useState } from "react";
 import Button from "@material-ui/core/Button";
+import { useDispatch } from "react-redux";
+import { useHistory } from "react-router-dom";
 import withWidth from "@material-ui/core/withWidth";
 import { TextField, makeStyles, Box, Typography, Paper, IconButton, Icon, withStyles } from "@material-ui/core";
 import { Visibility, VisibilityOff, People, Close } from '@material-ui/icons';
 import { NavLink } from "react-router-dom";
 import Snackbar from 'node-snackbar';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { ThemeContext } from "../../../context/themeContext";
+import Cookies from 'js-cookie';
+import { setData, setLogin } from "../../../actions/actions";
 
 
 const CssTextField = withStyles({
@@ -102,12 +107,16 @@ const CssTextField2 = withStyles({
 const Register = ({ width }) => {
   const { currentTheme } = useContext(ThemeContext);
   const [vis, setVis] = useState(false);
+  const [vis2, setVis2] = useState(false);
+  const [capchaToken, setCapchaToken] = useState('');
   const [err, setErr] = useState({
     name: '',
-    pass: ''
+    pass: '',
+    pass2: ''
 
   });
-
+  const dispatch = useDispatch();
+  const myHistory = useHistory();
 
   const useStyles = makeStyles(theme =>({
     regButt:{
@@ -140,12 +149,16 @@ const Register = ({ width }) => {
   const checkErrorPass = (e) => {
     setErr({ ...err, pass: '' })
     let value = e.target.value;
-
+    const pass = document.querySelector('#pass').value;
+    const pass2 = document.querySelector('#pass2').value;
     const notContainsLetters = /^.*[а-яА-Я]+.*$/
 
     if(!value) {
       setErr({ ...err, pass: 'Введите ваш пароль' })
     return
+    }
+    if(pass !== pass2 && pass !== '' || pass2 !== ''){
+      setErr({...err,pass2:'Пароли не совпадают!'})
     }
     if (
       notContainsLetters.test(value)
@@ -156,15 +169,42 @@ const Register = ({ width }) => {
     }
   }
 
+  const checkErrorPass2 = (e) => {
+    setErr({ ...err, pass2: '' })
+    let value = e.target.value;
+    const pass = document.querySelector('#pass').value;
+    const pass2 = document.querySelector('#pass2').value;
+    const notContainsLetters = /^.*[а-яА-Я]+.*$/
+
+    if(!value) {
+      setErr({ ...err, pass2: 'Введите ваш пароль' })
+    return
+    }
+    if(pass !== pass2 && pass !== '' || pass2 !== ''){
+      console.log('not')
+      setErr({ ...err, pass2: 'Пароли не совпадают!' })
+    }
+    if (
+      notContainsLetters.test(value)
+    ) {
+      setErr({ ...err, pass2: 'Русская раскладка запрещена!' })
+    } else {
+      setErr({ ...err, pass2: '' })
+    }
+  }
+
 
 
   const registration = async (e) => {
     e.preventDefault();
     const name = document.querySelector('#name').value;
     const pass = document.querySelector('#pass').value;
+    const pass2 = document.querySelector('#pass2').value;
     const data = {
       "username": name,
-      "password": pass
+      "password": pass,
+      "repeatPassword": pass2,
+      "token" : capchaToken,
     };
     console.log(data)
     await fetch('https://secure.platinumpay.cc/v1/client/auth/register', {
@@ -180,7 +220,13 @@ const Register = ({ width }) => {
       .then(userData => {
         console.log(userData)
         if (userData.result) {
-          showMess('Вы успешно зарегистрировались!')
+          Cookies.set('token',userData.response.access_token,{path:'/',sameSite: 'strict',expires:360000});
+          dispatch(setData({
+            token:userData.response.access_token,
+            level:userData.response.level
+          }))
+          dispatch(setLogin())
+          showMess('Вы успешно зарегистрировались!');
         }
         else {
           showMess('Что-то пошло не так, попробуйте еще раз.')
@@ -389,6 +435,87 @@ const Register = ({ width }) => {
                 }}></VisibilityOff>
               </IconButton>
             }
+          </Box>
+          <Box style={{
+            position: 'relative',
+            width: '100%'
+          }}>
+            {currentTheme === 'dark' ?
+              <CssTextField
+                InputProps={{ className: classes.root }}
+                id="pass2"
+                placeholder="Повторите пароль"
+                onChange={checkErrorPass2}
+                required
+                error={Boolean(err.pass2)}
+                helperText={err.pass2}
+                style={{
+                  margin: '10px 0px',
+                  backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
+                  color: currentTheme === 'dark' ? '#aeaee0' : '',
+                  width: '100%'
+                }}
+                type={!vis2 ? 'password' : ''}
+              />
+              :
+              <CssTextField2
+                InputProps={{ className: classes.root }}
+                id="pass2"
+                placeholder="Повторите пароль"
+                onChange={checkErrorPass2}
+                required
+                error={Boolean(err.pass2)}
+                helperText={err.pass2}
+                style={{
+                  margin: '10px 0px',
+                  backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
+                  color: currentTheme === 'dark' ? '#aeaee0' : '',
+                  width: '100%',
+                  border: '1px solid #e4e9f0'
+                }}
+                type={!vis2 ? 'password' : ''}
+              />}
+            {!vis2 ?
+              <IconButton style={{
+                position: 'absolute',
+                right: "-2px",
+                top: '9px',
+              }}
+                onClick={() => { setVis2(!vis2) }}
+              >
+                <Visibility style={{
+                  color: currentTheme === 'dark' ? '#aeaee0' : ''
+                }}></Visibility>
+              </IconButton>
+              :
+              <IconButton style={{
+                position: 'absolute',
+                right: "-2px",
+                top: '9px'
+              }}
+                onClick={() => { setVis2(!vis2) }}
+              >
+                <VisibilityOff style={{
+                  color: currentTheme === 'dark' ? '#aeaee0' : ''
+                }}></VisibilityOff>
+              </IconButton>
+            }
+            <Box
+            style={{
+              width:'100%',
+              display:'flex',
+              justifyContent:'flex-start',
+              marginTop:'10px'
+            }}
+            >
+            <HCaptcha
+            sitekey="ff2a1ddd-ba55-400e-9537-1c8a8d24a365"
+            theme={currentTheme}
+            languageOverride='ru'
+            onError={(err) => console.log(err)}
+            onVerify={(token) => setCapchaToken(token)}
+            />
+            </Box>
           </Box>
           <Button
             type='submit'

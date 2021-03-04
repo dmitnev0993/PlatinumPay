@@ -23,6 +23,7 @@ const Dashboard = lazy(()=> import("./components/Dashboard/Dashboard.jsx"))
 const MainPage = lazy(()=> import("./components/MainPage/MainPage.jsx"))
 const Profile = lazy(()=> import("./components/Dashboard/Pages/Profile/Profile"))
 const Products = lazy(()=> import("./components/Dashboard/Pages/Products/Products"))
+const CreateProduct = lazy(()=> import("./components/Dashboard/Pages/Products/CreateProduct"))
 
 function App({ sound, flag }) {
   const { currentTheme } = useLocalStorageTheme("theme");
@@ -51,7 +52,20 @@ function App({ sound, flag }) {
       <ThemeContext.Provider value={{ currentTheme }}>
         <Provider store={store}>
           <MainHeader themeChanger={themeChanger} />
-          <Suspense fallback={<div>...Loading</div>}>
+          <Suspense fallback={
+          <div
+          style={{
+            position:'fixed',
+            top:'0px',
+            bottom:'0px',
+            right:'0px',
+            left:'0px',
+            zIndex:'9999'
+          }}
+          >
+            ...Loading
+            </div>
+          }>
           <Switch>
             <Route path="/" exact>
               <MainPage themeChanger={themeChanger} sound={sound} />
@@ -65,6 +79,9 @@ function App({ sound, flag }) {
             <Route path="/dashboard/profile" exact component={Profile}/>
 
             <Route path="/dashboard/products" exact component={Products}/>
+
+            <Route path="/dashboard/products/create" exact component={CreateProduct}/>
+
 
 
           </Switch>

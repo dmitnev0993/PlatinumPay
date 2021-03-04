@@ -3,7 +3,7 @@ import Selectrix from 'react-selectrix';
 import ReactSelect, { Props } from "react-select";
 import { useDispatch, useSelector } from 'react-redux';
 import withWidth from "@material-ui/core/withWidth";
-import { useHistory } from "react-router-dom";
+import { NavLink, useHistory } from "react-router-dom";
 import { ThemeContext } from "../../../../context/themeContext";
 import Cookies from 'js-cookie';
 import Panel from "../../components/Panel";
@@ -19,6 +19,7 @@ const Products = ({ width }) => {
     console.log(width)
     const dispatch = useDispatch();
     const userData = useSelector(state => state.userData);
+    const level = useSelector(state => state.userData.level);
     const { currentTheme } = useContext(ThemeContext);
 
     const useStyles = makeStyles(theme => ({
@@ -88,7 +89,8 @@ const Products = ({ width }) => {
     const [dataProducts,setDataProducts] = useState({});
 
     useEffect(()=>{
-        var urlencoded = new URLSearchParams();
+        if(level !== 0){
+            var urlencoded = new URLSearchParams();
 
         urlencoded.append('subscription', false);
         urlencoded.append('manage', false);
@@ -107,6 +109,7 @@ const Products = ({ width }) => {
                 console.log(data)
                 setDataProducts(data.response)
             })
+        }
     
 
     },[])
@@ -146,6 +149,10 @@ const Products = ({ width }) => {
             })
     }
 
+    const toCreate = () => {
+        myHistory.push('/dashboard/products/create')
+    }
+
 
     return (
         <>
@@ -174,15 +181,16 @@ const Products = ({ width }) => {
                         flexDirection: width === 'xs' ? 'column' : 'row'
                     }}
                 >
+                    
                     <Button
                         className={classes.butt}
-
+                        onClick={toCreate}
                         variant="contained"
                         style={{
                             color: 'white',
                             backgroundColor: 'rgb(75, 124, 243)',
                             borderRadius: '2px',
-                            fontSize: '15px',
+                            fontSize: '14px',
                             height: '45px',
                             width: width === 'xs' ? '100%' : '45%',
                             maxWidth: '250px',
@@ -191,8 +199,9 @@ const Products = ({ width }) => {
                         }}
 
                     >
-                        Создать
+                        Создать продукт
             </Button>
+                   
 
                     <FormControl
                         className={classes.input}

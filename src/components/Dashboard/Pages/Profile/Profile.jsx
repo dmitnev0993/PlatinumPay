@@ -1,11 +1,13 @@
 import React, { useContext, useState, useMemo, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import withWidth from "@material-ui/core/withWidth";
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import Snackbar from 'node-snackbar';
 import { useHistory } from "react-router-dom";
 import { ThemeContext } from "../../../../context/themeContext";
 import Cookies from 'js-cookie';
 import Panel from "../../components/Panel";
-import { AppBar, Box, Button, makeStyles, Switch, Tab, Tabs, TextField, Typography, withStyles } from "@material-ui/core";
+import { AppBar, Box, Button, Icon, IconButton, makeStyles, Switch, Tab, Tabs, TextField, Typography, withStyles } from "@material-ui/core";
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
@@ -113,6 +115,15 @@ function TabPanel(props) {
       )}
     </div>
   );
+}
+
+const showMess = (message) => {
+  Snackbar.show({
+      actionTextColor: '#7575a3',
+      text: message,
+      actionText: 'ОК',
+      pos: 'bottom-right'
+  });
 }
 
 const Profile = ({ width }) => {
@@ -252,9 +263,13 @@ const Profile = ({ width }) => {
     const pass = document.querySelector('#pass').value;
     const pass2 = document.querySelector('#pass2').value;
     console.log(pass, pass2)
-    if (pass !== pass2) return
+    if (pass !== pass2) {
+      showMess('Пароли не совпадают!');
+      return
+    }
     var urlencoded = new URLSearchParams();
     urlencoded.append("password", pass);
+    urlencoded.append("repeatPassword", pass2);
     fetch('https://secure.platinumpay.cc/v1/client/profile/setPassword', {
       method: 'POST', headers: {
         Authorization: `Bearer ${Cookies.get('token')}`,
@@ -266,34 +281,61 @@ const Profile = ({ width }) => {
       })
       .then(data => {
         console.log(data)
-        Cookies.set('token', data.response.access_token)
+        if(!data.errorMsg){
+          Cookies.set('token', data.response.access_token)
         dispatch(setData({
           token: data.response.access_token
         }))
+        }
+        else{
+          showMess('Ошибка!')
+        }
       })
 
   }
 
+  const resetApi = ()=>{
+    fetch('https://secure.platinumpay.cc/v1/client/profile/resetApi',{
+      method: 'GET', headers: {
+        Authorization: `Bearer ${Cookies.get('token')}`
+      }
+      })
+      .then(res=>{
+        return res.json();
+      })
+      .then(data=>{
+        if(!data.errorMsg){
+          dispatch(setData({
+            api:data.response.api
+          }))
+        }
+      })
+  }
+
+  const copyApi = () => {
+    navigator.clipboard.writeText(userData.api);
+    showMess('Ключ API скопирован')
+  }
 
 
   return (
     <>
       <Panel></Panel>
-      <Box 
-      className='animate__animated animate__fadeIn'
-      style={{
-        position: 'absolute',
-        top: '0px',
-        left: '0px',
-        right: '0xp',
-        bottom: '0px',
-        width: width === 'xs' ? 'calc(100vw - 35px)' : 'calc(100vw - 145px)',
-        paddingTop: '90px',
-        paddingLeft: width === 'xs' ? '15px' : '105px',
-        backgroundColor: currentTheme === 'light' ? 'white' : 'rgb(20, 19, 34)',
-        zIndex: '9',
-        textAlign: width === 'xs' ? 'center' : '',
-      }}>
+      <Box
+        className='animate__animated animate__fadeIn'
+        style={{
+          position: 'absolute',
+          top: '0px',
+          left: '0px',
+          right: '0xp',
+          bottom: '0px',
+          width: width === 'xs' ? 'calc(100vw - 35px)' : 'calc(100vw - 145px)',
+          paddingTop: '90px',
+          paddingLeft: width === 'xs' ? '15px' : '105px',
+          backgroundColor: currentTheme === 'light' ? 'white' : 'rgb(20, 19, 34)',
+          zIndex: '9',
+          textAlign: width === 'xs' ? 'center' : '',
+        }}>
         <AppBar position="static" className={classes.bar}>
           <Tabs
             orientation={width === 'xs' ? "vertical" : "horizontal"}
@@ -315,109 +357,114 @@ const Profile = ({ width }) => {
 
 
         <TabPanel value={value} index={0} width={width}>
+          {userData.username ?
+        <>
+        <Box style={{
+          width: '100%',
+          maxWidth: '1000px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap'
+        }}>
           <Box style={{
-            width: '100%',
-            maxWidth: '1000px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap'
+            textAlign: 'start',
+            width: width === 'xs' ? '100%' : '49%',
           }}>
-            <Box style={{
-              textAlign: 'start',
-              width: width === 'xs' ? '100%' : '49%',
-            }}>
-              <Typography className={classes.label}>
-                Имя пользователя
-      </Typography>
-              {currentTheme === 'dark' ?
-                <CssTextField
-                  value={userData.username ? userData.username : undefined}
-                  id="name"
-                  placeholder="Имя пользователя"
-                  required
-                  style={{
-                    margin: '10px 0px 10px 0px',
-                    backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
-                    width: '100%'
-                  }}
-                />
-                :
-                <CssTextField2
-                  value={userData.username ? userData.username : undefined}
-                  id="name"
-                  placeholder="Имя пользователя"
-                  required
-                  style={{
-                    margin: '10px 0px 10px 0px',
-                    backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
-                    width: '100%',
-                    border: '1px solid #e4e9f0'
-                  }}
-                />}
-            </Box>
-            <Box style={{
-              textAlign: 'start',
-              width: width === 'xs' ? '100%' : '49%'
-            }}>
-              <Typography className={classes.label}>
-                Telegram
-      </Typography>
-              {currentTheme === 'dark' ?
-                <CssTextField
-                  value={userData.telegram ? userData.telegram : undefined}
-                  id="telegram"
-                  placeholder="@"
-                  required
-                  style={{
-                    margin: '10px 0px 10px 0px',
-                    backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
-                    width: '100%'
-                  }}
-                />
-                :
-                <CssTextField2
-                  value={userData.telegram ? userData.telegram : undefined}
-                  id="telegram"
-                  placeholder="@"
-                  required
-                  style={{
-                    margin: '10px 0px 10px 0px',
-                    backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
-                    width: '100%',
-                    border: '1px solid #e4e9f0'
-                  }}
-                />}
-            </Box>
-
-
+            <Typography className={classes.label}>
+              Имя пользователя
+    </Typography>
+            {currentTheme === 'dark' ?
+              <CssTextField
+                defaultValue={userData.username ? userData.username : undefined}
+                id="name"
+                placeholder="Имя пользователя"
+                required
+                style={{
+                  margin: '10px 0px 10px 0px',
+                  backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
+                  width: '100%'
+                }}
+              />
+              :
+              <CssTextField2
+              defaultValue={userData.username ? userData.username : undefined}
+                id="name"
+                placeholder="Имя пользователя"
+                required
+                style={{
+                  margin: '10px 0px 10px 0px',
+                  backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
+                  width: '100%',
+                  border: '1px solid #e4e9f0'
+                }}
+              />}
           </Box>
           <Box style={{
-            width: '100%',
-            maxWidth: '1000px',
-            display: 'flex',
-            justifyContent: 'flex-start'
+            textAlign: 'start',
+            width: width === 'xs' ? '100%' : '49%'
           }}>
-            <Button
-              className={classes.butt}
-              variant="contained"
-              onClick={handleProfile}
-              style={{
-                color: 'white',
-                backgroundColor: 'rgb(75, 124, 243)',
-                marginTop: '10px',
-                borderRadius: '2px',
-                fontSize: '15px',
-                height: '45px',
-                width: '50%',
-                maxWidth: '250px',
-                border: '0px',
-                alignSelf: 'left'
-              }}
-
-            >
-              Подтвердить
-            </Button>
+            <Typography className={classes.label}>
+              Telegram
+    </Typography>
+            {currentTheme === 'dark' ?
+              <CssTextField
+              defaultValue={userData.telegram ? userData.telegram : undefined}
+                id="telegram"
+                placeholder="@"
+                required
+                style={{
+                  margin: '10px 0px 10px 0px',
+                  backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
+                  width: '100%'
+                }}
+              />
+              :
+              <CssTextField2
+              defaultValue={userData.telegram ? userData.telegram : undefined}
+                id="telegram"
+                placeholder="@"
+                required
+                style={{
+                  margin: '10px 0px 10px 0px',
+                  backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
+                  width: '100%',
+                  border: '1px solid #e4e9f0'
+                }}
+              />}
           </Box>
+
+
+        </Box>
+        <Box style={{
+          width: '100%',
+          maxWidth: '1000px',
+          display: 'flex',
+          justifyContent: 'flex-start'
+        }}>
+          <Button
+            className={classes.butt}
+            variant="contained"
+            onClick={handleProfile}
+            style={{
+              color: 'white',
+              backgroundColor: 'rgb(75, 124, 243)',
+              marginTop: '10px',
+              borderRadius: '2px',
+              fontSize: '15px',
+              height: '45px',
+              width: '50%',
+              maxWidth: '250px',
+              border: '0px',
+              alignSelf: 'left'
+            }}
+
+          >
+            Подтвердить
+          </Button>
+        </Box>
+        </>
+        : null  
+        }
         </TabPanel>
 
 
@@ -548,7 +595,7 @@ const Profile = ({ width }) => {
              </Typography>
               {currentTheme === 'dark' ?
                 <CssTextField
-                  value={userData.trafficBackUrl ? userData.trafficBackUrl : undefined}
+                defaultValue={userData.trafficBackUrl ? userData.trafficBackUrl : undefined}
                   id="linkTrBack"
                   placeholder="Ссылка"
                   required
@@ -560,7 +607,7 @@ const Profile = ({ width }) => {
                 />
                 :
                 <CssTextField2
-                  value={userData.trafficBackUrl ? userData.trafficBackUrl : undefined}
+                defaultValue={userData.trafficBackUrl ? userData.trafficBackUrl : undefined}
                   id="linkTrBack"
                   placeholder="Ссылка"
                   required
@@ -632,8 +679,99 @@ const Profile = ({ width }) => {
 
 
         <TabPanel value={value} index={3} width={width}>
-          Item Four
-</TabPanel>
+          <Box
+          style={{
+            width: '100%',
+            maxWidth: '1000px',
+            flexWrap: 'wrap',
+            textAlign: 'start',
+            display: 'flex',
+            justifyContent: 'flex-start',
+            flexDirection:'column'
+          }}
+          >
+            <Typography className={classes.label}>
+            Ключ API
+             </Typography>
+          <Box
+          style={{
+            width: width === 'xs' ? '100%' : '49%',
+              marginRight: width === 'xs' ? '0px' : '40px',
+              maxWidth: '1000px',
+              position:'relative'
+          }}
+          >
+          
+          {useMemo(()=>(
+            currentTheme === 'dark' ?
+            <CssTextField
+             // value={userData.trafficBackUrl ? userData.trafficBackUrl : undefined}
+              id="linkTrBack"
+              placeholder="Ключ API"
+              value={userData.api ? userData.api : undefined}
+              disabled
+              required
+              style={{
+                margin: '10px 0px 10px 0px',
+                backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
+                width: '100%'
+              }}
+            />
+            :
+            <CssTextField2
+             // value={userData.trafficBackUrl ? userData.trafficBackUrl : undefined}
+              id="linkTrBack"
+              placeholder="Ключ API"
+              value={userData.api ? userData.api : undefined}
+              disabled
+              required
+              style={{
+                margin: '10px 0px 10px 0px',
+                backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
+                width: '100%',
+                border: '1px solid #e4e9f0'
+              }}
+            />
+            
+          ),[userData,userData.api])}
+          <IconButton 
+          onClick={copyApi}
+          style={{
+              position: 'absolute',
+              right: "-1px",
+              top: '8.5px',
+              color: currentTheme === 'dark' ? '#aeaee0!important' : '',
+              cursor:'pointer'
+            }}
+            >
+              <FileCopyIcon
+                style={{
+                  color: currentTheme === 'dark' ? '#aeaee0' : ''
+                }}></FileCopyIcon>
+            </IconButton>
+          </Box>
+
+          <Button
+            className={classes.butt}
+            variant="contained"
+            style={{
+              color: 'white',
+              backgroundColor: 'rgb(75, 124, 243)',
+              marginTop: '10px',
+              borderRadius: '2px',
+              fontSize: '15px',
+              height: '45px',
+              width: '50%',
+              maxWidth: '250px',
+              border: '0px',
+              alignSelf: 'left'
+            }}
+            onClick={resetApi}
+          >
+            Сбросить ключ
+            </Button>
+          </Box>
+        </TabPanel>
 
 
 

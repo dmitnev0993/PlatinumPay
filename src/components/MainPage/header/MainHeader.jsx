@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
+import Snackbar from 'node-snackbar';
 import { makeStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -23,18 +24,29 @@ import lightLogo from '../../../assets/logo/logo-light-short.png'
 import darkLogo from '../../../assets/logo/logo-dark-short.png'
 import { CircleSpinner } from "react-spinners-kit";
 
+const showMess = (message) => {
+  Snackbar.show({
+      actionTextColor: '#7575a3',
+      text: message,
+      actionText: 'ОК',
+      pos: 'bottom-right'
+  });
+}
+
+let int;
+
 const MainHeader = ({ themeChanger, width }) => {
 
   const dispatch = useDispatch();
   const isLogin = useSelector(state => state.isLogin);
   const userData = useSelector(state => state.userData);
+  const level = useSelector(state => state.userData.level);
   const balance = useSelector(state => state.balance);
   const [loadingBalance, setLoadingBalance] = useState(false)
   const myHistory = useHistory();
 
   const exit = () => {
     Cookies.remove('token');
-    Cookies.remove('level');
     dispatch(setLogin());
     dispatch(setBalance(0, 0));
     dispatch(setData({
@@ -53,7 +65,6 @@ const MainHeader = ({ themeChanger, width }) => {
         dispatch(setLogin())
         dispatch(setData({
           token: Cookies.get('token'),
-          level: Cookies.get('level'),
         }))
         if (myHistory.location.pathname === '/' || myHistory.location.pathname === '/login' || myHistory.location.pathname === '/register') {
           myHistory.push('/dashboard')
@@ -65,15 +76,28 @@ const MainHeader = ({ themeChanger, width }) => {
         }
       }
     }
-    else {
-      myHistory.push('/')
+    else{
+      if(myHistory.location.pathname !== '/' && myHistory.location.pathname !== '/login' && myHistory.location.pathname !== '/register'){
+        myHistory.push('/login')
+      }
     }
   }, [isLogin])
 
+  useEffect(()=>{
+    if(level === 0 && myHistory.location.pathname !== '/dashboard' && myHistory.location.pathname !== '/dashboard/profile'){
+      myHistory.push('/dashboard')
+      notActivated();
+    }
+  },[level])
+
   useEffect(() => {
-    setInterval(() => {
-      
-        fetch(`https://secure.platinumpay.cc/v1/client/auth/token`, {
+    
+    if(!isLogin){ clearInterval(int) }
+    else{
+      int = setInterval(() => {
+      //  console.log('token')
+        if(isLogin){
+          fetch(`https://secure.platinumpay.cc/v1/client/auth/token`, {
           headers: {
             Authorization: `Bearer ${Cookies.get('token')}`
           }
@@ -94,17 +118,37 @@ const MainHeader = ({ themeChanger, width }) => {
               }
             }
           })
-      
-    }, 5000);
-  }, [])
-
-  useEffect(() => {
-    console.log(loadingBalance)
-  }, [loadingBalance])
+        }
+  
+      }, 5000);
+    }
+  }, [isLogin])
 
   useEffect(() => {
     if (isLogin) {
       setLoadingBalance(true);
+
+      fetch(`https://secure.platinumpay.cc/v1/client/auth/token`, {
+        headers: {
+          Authorization: `Bearer ${Cookies.get('token')}`
+        }
+      })
+        .then((res) => {
+          return res.json()
+        })
+        .then(data => {
+          if (myHistory.location.pathname !== '/' && myHistory.location.pathname !== '/login' && myHistory.location.pathname !== '/register') {
+            if (!data.result) {
+              exit()
+            }
+            else {
+              dispatch(setData({
+                level: data.response.level,
+              }))
+            }
+          }
+        })
+
       fetch('https://secure.platinumpay.cc/v1/client/profile/getBalance', {
         headers: {
           Authorization: `Bearer ${Cookies.get('token')}`
@@ -131,6 +175,8 @@ const MainHeader = ({ themeChanger, width }) => {
             username: data.response.username,
             trafficBack: data.response.trafficBack,
             trafficBackUrl: data.response.trafficBackUrl,
+            telegram: data.response.telegram,
+            api: data.response.api
           }))
         })
     }
@@ -231,6 +277,9 @@ const MainHeader = ({ themeChanger, width }) => {
       })
   }
 
+  const notActivated = () => {
+    showMess('Ваш аккаунт не активирован');
+}
 
 
   return (
@@ -315,34 +364,84 @@ const MainHeader = ({ themeChanger, width }) => {
                     {loadingBalance ?
                       <div
                         style={{
-                          marginRight: '35px'
+                          marginRight: '32px',
+                          display:'flex',
+                        alignItems:'flex-end',
+                        height:'33px'
                         }}>
                         <CircleSpinner
-                          size={12}
+                          size={11}
                           color={currentTheme === 'dark' ? 'white' : 'black'}
                           loading={loadingBalance}
                         >
                         </CircleSpinner>
                       </div>
                       :
-                      <Typography
+                      <div
                         style={{
-                          marginRight: '25px',
-                          color: currentTheme === 'dark' ? 'white' : 'black',
-                          fontSize: '16px'
-                        }}>
-                        {`${balance.money} ₽ | ${balance.rates} ₿`}
+                          display: 'flex',
+                          color: '#808080',
+                          marginRight:'25px',
+                          alignItems:'flex-end'
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column'
+                          }}
+                        >
+                          <Typography variant='h7'
+                            style={{
+                              fontSize: '15px'
+                            }}
+                          >
+                            RUB
+                        </Typography>
+                          <Typography
+                            style={{
+                              marginRight: '18px',
+                              color: currentTheme === 'dark' ? 'white' : 'black',
+                              fontSize: '16px'
+                            }}>
+                            {`${balance.money} ₽`}
+
+                          </Typography>
+                        </div>
+                        <div
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column'
+                          }}
+                        >
+                          <Typography variant='h7'
+                            style={{
+                              fontSize: '15px'
+                            }}
+                          >
+                            BTC
+                        </Typography>
+                          <Typography
+                            style={{
+                              color: currentTheme === 'dark' ? 'white' : 'black',
+                              fontSize: '16px'
+                            }}>
+                            {`${balance.rates} ₿`}
+
+                          </Typography>
+                        </div>
                         <IconButton
                           onClick={reloadBalance}
                           style={{
                             color: currentTheme === 'dark' ? 'white' : 'black',
-                            padding: '5px'
+                            padding: '2px 2px 3px 2px',
+                            marginLeft:'4px'
                           }}>
                           <ReplayIcon style={{
-                            height: '19px'
+                            height: '18px'
                           }}></ReplayIcon>
                         </IconButton>
-                      </Typography>
+                      </div>
                     }
                     <IconButton
                       edge="start"
@@ -352,11 +451,12 @@ const MainHeader = ({ themeChanger, width }) => {
                       style={{
                         borderRadius: 3,
                         color: currentTheme === 'light' ? 'black' : '',
-                        backgroundColor: currentTheme === 'dark' ? 'rgb(20, 19, 34)' : 'white',
+                        backgroundColor: currentTheme === 'dark' ? 'rgb(26, 32, 44)' : 'rgb(245, 245, 245)',
                         width: '42px',
                         height: '42px',
                         alignItems: 'center',
-                        padding: '0px'
+                        padding: '0px',
+                        borderRadius:'8px'
                       }}
                       onClick={handleClick}
                     >
@@ -465,35 +565,85 @@ const MainHeader = ({ themeChanger, width }) => {
                   {loadingBalance ?
                     <div
                       style={{
-                        marginRight: '20px'
+                        marginRight: '25px',
+                        display:'flex',
+                        alignItems:'flex-end',
+                        height:'33px'
                       }}
                     >
                       <CircleSpinner
-                        size={12}
+                        size={11}
                         color={currentTheme === 'dark' ? 'white' : 'black'}
                         loading={loadingBalance}
                       >
                       </CircleSpinner>
                     </div>
                     :
-                    <Typography
-                      style={{
-                        marginRight: '10px',
-                        color: currentTheme === 'dark' ? 'white' : 'black',
-                        fontSize: '16px'
-                      }}>
-                      {`${balance.money} ₽ | ${balance.rates} ₿`}
-                      <IconButton
-                        onClick={reloadBalance}
+                    <div
                         style={{
-                          color: currentTheme === 'dark' ? 'white' : 'black',
-                          padding: '5px'
-                        }}>
-                        <ReplayIcon style={{
-                          height: '19px'
-                        }}></ReplayIcon>
-                      </IconButton>
-                    </Typography>
+                          display: 'flex',
+                          color: '#808080',
+                          marginRight:'18px',
+                          alignItems:'flex-end'
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column'
+                          }}
+                        >
+                          <Typography variant='h7'
+                            style={{
+                              fontSize: '15px'
+                            }}
+                          >
+                            RUB
+                        </Typography>
+                          <Typography
+                            style={{
+                              marginRight: '14px',
+                              color: currentTheme === 'dark' ? 'white' : 'black',
+                              fontSize: '16px'
+                            }}>
+                            {`${balance.money} ₽`}
+
+                          </Typography>
+                        </div>
+                        <div
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column'
+                          }}
+                        >
+                          <Typography variant='h7'
+                            style={{
+                              fontSize: '15px'
+                            }}
+                          >
+                            BTC
+                        </Typography>
+                          <Typography
+                            style={{
+                              color: currentTheme === 'dark' ? 'white' : 'black',
+                              fontSize: '16px'
+                            }}>
+                            {`${balance.rates} ₿`}
+
+                          </Typography>
+                        </div>
+                        <IconButton
+                          onClick={reloadBalance}
+                          style={{
+                            color: currentTheme === 'dark' ? 'white' : 'black',
+                            padding: '2px 2px 3px 2px',
+                            marginLeft:'3px'
+                          }}>
+                          <ReplayIcon style={{
+                            height: '18px'
+                          }}></ReplayIcon>
+                        </IconButton>
+                      </div>
                   }
                   <IconButton
                     edge="start"
@@ -503,11 +653,12 @@ const MainHeader = ({ themeChanger, width }) => {
                     style={{
                       borderRadius: 3,
                       color: currentTheme === 'light' ? 'black' : '',
-                      backgroundColor: currentTheme === 'dark' ? 'rgb(20, 19, 34)' : 'white',
+                      backgroundColor: currentTheme === 'dark' ? 'rgb(26, 32, 44)' : 'rgb(245, 245, 245)',
                       width: '42px',
                       height: '42px',
                       alignItems: 'center',
-                      padding: '0px'
+                      padding: '0px',
+                      borderRadius:'8px'
                     }}
                     onClick={handleClick}
                   >
