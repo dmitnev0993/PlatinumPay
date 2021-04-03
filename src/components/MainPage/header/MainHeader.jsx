@@ -26,10 +26,10 @@ import { CircleSpinner } from "react-spinners-kit";
 
 const showMess = (message) => {
   Snackbar.show({
-      actionTextColor: '#7575a3',
-      text: message,
-      actionText: 'ОК',
-      pos: 'bottom-right'
+    actionTextColor: '#7575a3',
+    text: message,
+    actionText: 'ОК',
+    pos: 'bottom-right'
   });
 }
 
@@ -76,50 +76,50 @@ const MainHeader = ({ themeChanger, width }) => {
         }
       }
     }
-    else{
-      if(myHistory.location.pathname !== '/' && myHistory.location.pathname !== '/login' && myHistory.location.pathname !== '/register'){
+    else {
+      if (myHistory.location.pathname !== '/' && myHistory.location.pathname !== '/login' && myHistory.location.pathname !== '/register') {
         myHistory.push('/login')
       }
     }
   }, [isLogin])
 
-  useEffect(()=>{
-    if(level === 0 && myHistory.location.pathname !== '/dashboard' && myHistory.location.pathname !== '/dashboard/profile'){
+  useEffect(() => {
+    if (level === 0 && myHistory.location.pathname !== '/dashboard' && myHistory.location.pathname !== '/dashboard/profile') {
       myHistory.push('/dashboard')
       notActivated();
     }
-  },[level])
+  }, [level])
 
   useEffect(() => {
-    
-    if(!isLogin){ clearInterval(int) }
-    else{
+
+    if (!isLogin) { clearInterval(int) }
+    else {
       int = setInterval(() => {
-      //  console.log('token')
-        if(isLogin){
+        //  console.log('token')
+        if (isLogin) {
           fetch(`https://secure.platinumpay.cc/v1/client/auth/token`, {
-          headers: {
-            Authorization: `Bearer ${Cookies.get('token')}`
-          }
-        })
-          .then((res) => {
-            return res.json()
-          })
-          .then(data => {
-            if (myHistory.location.pathname !== '/' && myHistory.location.pathname !== '/login' && myHistory.location.pathname !== '/register') {
-              if (!data.result) {
-                exit()
-              }
-              else {
-                dispatch(setData({
-                  token: Cookies.get('token'),
-                  level: data.response.level,
-                }))
-              }
+            headers: {
+              Authorization: `Bearer ${Cookies.get('token')}`
             }
           })
+            .then((res) => {
+              return res.json()
+            })
+            .then(data => {
+              if (myHistory.location.pathname !== '/' && myHistory.location.pathname !== '/login' && myHistory.location.pathname !== '/register') {
+                if (!data.result) {
+                  exit()
+                }
+                else {
+                  dispatch(setData({
+                    token: Cookies.get('token'),
+                    level: data.response.level,
+                  }))
+                }
+              }
+            })
         }
-  
+
       }, 5000);
     }
   }, [isLogin])
@@ -161,7 +161,6 @@ const MainHeader = ({ themeChanger, width }) => {
           dispatch(setBalance(data.response.balance, data.response.rates.BTC))
           setLoadingBalance(false)
         })
-
       fetch(`https://secure.platinumpay.cc/v1/client/profile/getProfile`, {
         headers: {
           Authorization: `Bearer ${Cookies.get('token')}`
@@ -279,7 +278,7 @@ const MainHeader = ({ themeChanger, width }) => {
 
   const notActivated = () => {
     showMess('Ваш аккаунт не активирован');
-}
+  }
 
 
   return (
@@ -290,7 +289,7 @@ const MainHeader = ({ themeChanger, width }) => {
         <AppBar position="fixed" style={{
           boxShadow: currentTheme === 'dark' ? 'none' : "rgb(212 215 225 / 28%) 0px 1px 6px",
           transition: "box-shadow 250ms",
-          zIndex: isLogin ? '2001' : '',
+          zIndex: isLogin ? '1058' : '',
           borderBottom: currentTheme === 'dark' ? '1px solid #232135' : 'none',
         }}>
           <Toolbar
@@ -365,9 +364,9 @@ const MainHeader = ({ themeChanger, width }) => {
                       <div
                         style={{
                           marginRight: '32px',
-                          display:'flex',
-                        alignItems:'flex-end',
-                        height:'33px'
+                          display: 'flex',
+                          alignItems: 'flex-end',
+                          height: '33px'
                         }}>
                         <CircleSpinner
                           size={11}
@@ -381,8 +380,8 @@ const MainHeader = ({ themeChanger, width }) => {
                         style={{
                           display: 'flex',
                           color: '#808080',
-                          marginRight:'25px',
-                          alignItems:'flex-end'
+                          marginRight: '25px',
+                          alignItems: 'flex-end'
                         }}
                       >
                         <div
@@ -435,7 +434,7 @@ const MainHeader = ({ themeChanger, width }) => {
                           style={{
                             color: currentTheme === 'dark' ? 'white' : 'black',
                             padding: '2px 2px 3px 2px',
-                            marginLeft:'4px'
+                            marginLeft: '4px'
                           }}>
                           <ReplayIcon style={{
                             height: '18px'
@@ -456,7 +455,7 @@ const MainHeader = ({ themeChanger, width }) => {
                         height: '42px',
                         alignItems: 'center',
                         padding: '0px',
-                        borderRadius:'8px'
+                        borderRadius: '8px'
                       }}
                       onClick={handleClick}
                     >
@@ -485,7 +484,7 @@ const MainHeader = ({ themeChanger, width }) => {
                                     }}
                                   >
                                     Профиль
-                </NavLink>
+                                   </NavLink>
                                 </MenuItem>
                                 <MenuItem onClick={handleClose}>
                                   <NavLink
@@ -566,9 +565,9 @@ const MainHeader = ({ themeChanger, width }) => {
                     <div
                       style={{
                         marginRight: '25px',
-                        display:'flex',
-                        alignItems:'flex-end',
-                        height:'33px'
+                        display: 'flex',
+                        alignItems: 'flex-end',
+                        height: '33px'
                       }}
                     >
                       <CircleSpinner
@@ -580,70 +579,70 @@ const MainHeader = ({ themeChanger, width }) => {
                     </div>
                     :
                     <div
+                      style={{
+                        display: 'flex',
+                        color: '#808080',
+                        marginRight: '18px',
+                        alignItems: 'flex-end'
+                      }}
+                    >
+                      <div
                         style={{
                           display: 'flex',
-                          color: '#808080',
-                          marginRight:'18px',
-                          alignItems:'flex-end'
+                          flexDirection: 'column'
                         }}
                       >
-                        <div
+                        <Typography variant='h7'
                           style={{
-                            display: 'flex',
-                            flexDirection: 'column'
+                            fontSize: '15px'
                           }}
                         >
-                          <Typography variant='h7'
-                            style={{
-                              fontSize: '15px'
-                            }}
-                          >
-                            RUB
+                          RUB
                         </Typography>
-                          <Typography
-                            style={{
-                              marginRight: '14px',
-                              color: currentTheme === 'dark' ? 'white' : 'black',
-                              fontSize: '16px'
-                            }}>
-                            {`${balance.money} ₽`}
-
-                          </Typography>
-                        </div>
-                        <div
+                        <Typography
                           style={{
-                            display: 'flex',
-                            flexDirection: 'column'
+                            marginRight: '14px',
+                            color: currentTheme === 'dark' ? 'white' : 'black',
+                            fontSize: '16px'
+                          }}>
+                          {`${balance.money} ₽`}
+
+                        </Typography>
+                      </div>
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column'
+                        }}
+                      >
+                        <Typography variant='h7'
+                          style={{
+                            fontSize: '15px'
                           }}
                         >
-                          <Typography variant='h7'
-                            style={{
-                              fontSize: '15px'
-                            }}
-                          >
-                            BTC
+                          BTC
                         </Typography>
-                          <Typography
-                            style={{
-                              color: currentTheme === 'dark' ? 'white' : 'black',
-                              fontSize: '16px'
-                            }}>
-                            {`${balance.rates} ₿`}
-
-                          </Typography>
-                        </div>
-                        <IconButton
-                          onClick={reloadBalance}
+                        <Typography
                           style={{
                             color: currentTheme === 'dark' ? 'white' : 'black',
-                            padding: '2px 2px 3px 2px',
-                            marginLeft:'3px'
+                            fontSize: '16px'
                           }}>
-                          <ReplayIcon style={{
-                            height: '18px'
-                          }}></ReplayIcon>
-                        </IconButton>
+                          {`${balance.rates} ₿`}
+
+                        </Typography>
                       </div>
+                      <IconButton
+                        onClick={reloadBalance}
+                        style={{
+                          color: currentTheme === 'dark' ? 'white' : 'black',
+                          padding: '2px 2px 3px 2px',
+                          marginLeft: '3px'
+                        }}>
+                        <ReplayIcon style={{
+                          height: '18px'
+                        }}></ReplayIcon>
+                      </IconButton>
+                    </div>
                   }
                   <IconButton
                     edge="start"
@@ -658,7 +657,7 @@ const MainHeader = ({ themeChanger, width }) => {
                       height: '42px',
                       alignItems: 'center',
                       padding: '0px',
-                      borderRadius:'8px'
+                      borderRadius: '8px'
                     }}
                     onClick={handleClick}
                   >
@@ -688,7 +687,7 @@ const MainHeader = ({ themeChanger, width }) => {
                                   }}
                                 >
                                   Профиль
-                </NavLink>
+                                  </NavLink>
                               </MenuItem>
 
                               <MenuItem onClick={handleClose}>
@@ -703,11 +702,11 @@ const MainHeader = ({ themeChanger, width }) => {
                                   }}
                                 >
                                   Выйти
-                </NavLink>
+                                  </NavLink>
                               </MenuItem>
 
                               {/* <MenuItem onClick={handleClose}>My account</MenuItem>
-                    <MenuItem onClick={handleClose}>Logout</MenuItem> */}
+                                <MenuItem onClick={handleClose}>Logout</MenuItem> */}
                             </MenuList>
                           </ClickAwayListener>
                         </Paper>

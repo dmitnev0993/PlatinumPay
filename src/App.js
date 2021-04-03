@@ -1,4 +1,4 @@
-import React, { useReducer, Suspense, lazy } from "react";
+import React, { useReducer, Suspense, lazy, useState,useEffect,useRef } from "react";
 import { Route, Switch } from "react-router-dom";
 
 // import Register from "./components/Auth/Register/Register.jsx";
@@ -16,19 +16,22 @@ import { createStore, applyMiddleware } from "redux";
 import { composeWithDevTools } from "redux-devtools-extension";
 import thunk from "redux-thunk";
 import reducer from "./config/reducer";
-import { CircleSpinner } from "react-spinners-kit";
+import LoadingBar from 'react-top-loading-bar'
 
-const Login = lazy(()=> import("./components/Auth/Login/Login.jsx"))
-const Register = lazy(()=> import("./components/Auth/Register/Register.jsx"))
-const Dashboard = lazy(()=> import("./components/Dashboard/Dashboard.jsx"))
-const MainPage = lazy(()=> import("./components/MainPage/MainPage.jsx"))
-const Profile = lazy(()=> import("./components/Dashboard/Pages/Profile/Profile"))
-const Products = lazy(()=> import("./components/Dashboard/Pages/Products/Products"))
-const CreateProduct = lazy(()=> import("./components/Dashboard/Pages/Products/CreateProduct"))
+const Login = lazy(()=> import("./components/Auth/Login/Login.jsx"));
+const Register = lazy(()=> import("./components/Auth/Register/Register.jsx"));
+const Dashboard = lazy(()=> import("./components/Dashboard/Dashboard.jsx"));
+const MainPage = lazy(()=> import("./components/MainPage/MainPage.jsx"));
+const Profile = lazy(()=> import("./components/Dashboard/Pages/Profile/Profile"));
+const Products = lazy(()=> import("./components/Dashboard/Pages/Products/Products"));
+const Subscriptions = lazy(()=> import("./components/Dashboard/Pages/Subscriptions/Subscriptions"));
+const Users = lazy(()=> import("./components/Dashboard/Pages/Users/Users"));
+const CreateProduct = lazy(()=> import("./components/Dashboard/Pages/Products/CreateProduct"));
+const CreateURL = lazy(()=> import("./components/Dashboard/Pages/Products/CreateURL"));
 
 function App({ sound, flag }) {
   const { currentTheme } = useLocalStorageTheme("theme");
-
+  const [progress, setProgress] = useState(0);
   const initialState = {
     theme: currentTheme === "light" ? theme.light : theme.dark,
   };
@@ -47,33 +50,26 @@ function App({ sound, flag }) {
     reducer,
     composeWithDevTools(applyMiddleware(thunk))
   );
+  const ref = useRef(null)
 
+  const LazyLoad = () => {
+    useEffect(() => {
+      ref.current.continuousStart()
+        return () => {
+          ref.current.complete()
+        };
+    });
+
+    return '';
+};
   return (
     <>
       <ThemeContext.Provider value={{ currentTheme }}>
         <Provider store={store}>
-          <MainHeader themeChanger={themeChanger} />
-          <Suspense fallback={
-          <div
-          style={{
-            position:'fixed',
-            top:'0px',
-            bottom:'0px',
-            right:'0px',
-            left:'0px',
-            zIndex:'9999',
-            display:'flex',
-            justifyContent:'center',
-            alignItems:'center'
-          }}
+        <LoadingBar color="rgb(249, 185, 66)" ref={ref}  height={3} loaderSpeed={1000} waitingTime={400}   onLoaderFinished={() => setProgress(0)}/>
+          <MainHeader themeChanger={themeChanger}/>
+          <Suspense fallback={<LazyLoad/>}
           >
-            <CircleSpinner
-            size={30}
-            color={currentTheme === 'dark' ? 'white' : 'black'}
-            loading={true}
-            />
-            </div>
-          }>
           <Switch>
             <Route path="/" exact>
               <MainPage themeChanger={themeChanger} sound={sound} />
@@ -88,7 +84,13 @@ function App({ sound, flag }) {
 
             <Route path="/dashboard/products" exact component={Products}/>
 
+            <Route path="/dashboard/users" exact component={Users}/>
+
             <Route path="/dashboard/products/create" exact component={CreateProduct}/>
+
+            <Route path="/dashboard/products/url" exact component={CreateURL}/>
+
+            <Route path="/dashboard/products/subscriptions" exact component={Subscriptions}/>
 
 
 

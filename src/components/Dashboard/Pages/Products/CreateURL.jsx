@@ -209,7 +209,7 @@ const showMess = (message) => {
     });
 }
 
-const CreateProduct = ({ width }) => {
+const CreateURL = ({ width }) => {
     console.log(width)
     const dispatch = useDispatch();
     const [loading, setLoading] = useState(false);
@@ -967,4 +967,4 @@ const CreateProduct = ({ width }) => {
     );
 };
 
-export default withWidth()(CreateProduct);
+export default withWidth()(CreateURL);

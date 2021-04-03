@@ -25,16 +25,20 @@
     "node-sass": "^4.14.1",
     "node-snackbar": "^0.1.16",
     "normalize.css": "^8.0.1",
+    "nprogress": "^0.2.0",
     "react": "^17.0.1",
+    "react-avatar-edit": "^1.0.0",
     "react-bones": "^1.0.3",
     "react-dom": "^17.0.1",
     "react-redux": "^7.2.2",
+    "react-redux-loading-bar": "^5.0.0",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.1",
     "react-select": "^4.1.0",
     "react-spinners-kit": "^1.9.1",
     "react-spring": "^8.0.27",
+    "react-top-loading-bar": "^2.0.1",
     "react-transition-group": "^4.4.1",
     "recharts": "^1.8.5",
     "redux": "^4.0.5",
@@ -50,7 +54,8 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "fire": "npm run build && firebase deploy"
   },
   "eslintConfig": {
     "extends": [

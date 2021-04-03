@@ -12,6 +12,7 @@ import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import { setData } from "../../../../actions/actions";
+import { CircleSpinner } from "react-spinners-kit";
 
 const CssTextField = withStyles({
   root: {
@@ -119,10 +120,10 @@ function TabPanel(props) {
 
 const showMess = (message) => {
   Snackbar.show({
-      actionTextColor: '#7575a3',
-      text: message,
-      actionText: 'ОК',
-      pos: 'bottom-right'
+    actionTextColor: '#7575a3',
+    text: message,
+    actionText: 'ОК',
+    pos: 'bottom-right'
   });
 }
 
@@ -229,6 +230,9 @@ const Profile = ({ width }) => {
       })
       .then(data => {
         console.log(data)
+        dispatch(setData({
+          trafficBackUrl: data.response.trafficBackUrl,
+        }))
       })
   }
 
@@ -250,6 +254,10 @@ const Profile = ({ width }) => {
       })
       .then(data => {
         console.log(data)
+        dispatch(setData({
+          username: data.response.username,
+          telegram: data.response.telegram
+        }))
       })
   }
   useEffect(() => {
@@ -281,32 +289,32 @@ const Profile = ({ width }) => {
       })
       .then(data => {
         console.log(data)
-        if(!data.errorMsg){
+        if (!data.errorMsg) {
           Cookies.set('token', data.response.access_token)
-        dispatch(setData({
-          token: data.response.access_token
-        }))
+          dispatch(setData({
+            token: data.response.access_token
+          }))
         }
-        else{
+        else {
           showMess('Ошибка!')
         }
       })
 
   }
 
-  const resetApi = ()=>{
-    fetch('https://secure.platinumpay.cc/v1/client/profile/resetApi',{
+  const resetApi = () => {
+    fetch('https://secure.platinumpay.cc/v1/client/profile/resetApi', {
       method: 'GET', headers: {
         Authorization: `Bearer ${Cookies.get('token')}`
       }
-      })
-      .then(res=>{
+    })
+      .then(res => {
         return res.json();
       })
-      .then(data=>{
-        if(!data.errorMsg){
+      .then(data => {
+        if (!data.errorMsg) {
           dispatch(setData({
-            api:data.response.api
+            api: data.response.api
           }))
         }
       })
@@ -358,113 +366,131 @@ const Profile = ({ width }) => {
 
         <TabPanel value={value} index={0} width={width}>
           {userData.username ?
-        <>
-        <Box style={{
-          width: '100%',
-          maxWidth: '1000px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap'
-        }}>
-          <Box style={{
-            textAlign: 'start',
-            width: width === 'xs' ? '100%' : '49%',
-          }}>
-            <Typography className={classes.label}>
-              Имя пользователя
+            <>
+              <Box style={{
+                width: '100%',
+                maxWidth: '1000px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap'
+              }}>
+                <Box style={{
+                  textAlign: 'start',
+                  width: width === 'xs' ? '100%' : '49%',
+                }}>
+                  <Typography className={classes.label}>
+                    Имя пользователя
     </Typography>
-            {currentTheme === 'dark' ?
-              <CssTextField
-                defaultValue={userData.username ? userData.username : undefined}
-                id="name"
-                placeholder="Имя пользователя"
-                required
-                style={{
-                  margin: '10px 0px 10px 0px',
-                  backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
-                  width: '100%'
-                }}
-              />
-              :
-              <CssTextField2
-              defaultValue={userData.username ? userData.username : undefined}
-                id="name"
-                placeholder="Имя пользователя"
-                required
-                style={{
-                  margin: '10px 0px 10px 0px',
-                  backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
-                  width: '100%',
-                  border: '1px solid #e4e9f0'
-                }}
-              />}
-          </Box>
-          <Box style={{
-            textAlign: 'start',
-            width: width === 'xs' ? '100%' : '49%'
-          }}>
-            <Typography className={classes.label}>
-              Telegram
+                  {currentTheme === 'dark' ?
+                    <CssTextField
+                      defaultValue={userData.username ? userData.username : undefined}
+                      id="name"
+                      placeholder="Имя пользователя"
+                      required
+                      style={{
+                        margin: '10px 0px 10px 0px',
+                        backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
+                        width: '100%'
+                      }}
+                    />
+                    :
+                    <CssTextField2
+                      defaultValue={userData.username ? userData.username : undefined}
+                      id="name"
+                      placeholder="Имя пользователя"
+                      required
+                      style={{
+                        margin: '10px 0px 10px 0px',
+                        backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
+                        width: '100%',
+                        border: '1px solid #e4e9f0'
+                      }}
+                    />}
+                </Box>
+                <Box style={{
+                  textAlign: 'start',
+                  width: width === 'xs' ? '100%' : '49%'
+                }}>
+                  <Typography className={classes.label}>
+                    Telegram
     </Typography>
-            {currentTheme === 'dark' ?
-              <CssTextField
-              defaultValue={userData.telegram ? userData.telegram : undefined}
-                id="telegram"
-                placeholder="@"
-                required
-                style={{
-                  margin: '10px 0px 10px 0px',
-                  backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
-                  width: '100%'
-                }}
-              />
-              :
-              <CssTextField2
-              defaultValue={userData.telegram ? userData.telegram : undefined}
-                id="telegram"
-                placeholder="@"
-                required
-                style={{
-                  margin: '10px 0px 10px 0px',
-                  backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
-                  width: '100%',
-                  border: '1px solid #e4e9f0'
-                }}
-              />}
-          </Box>
+                  {currentTheme === 'dark' ?
+                    <CssTextField
+                      defaultValue={userData.telegram ? userData.telegram : undefined}
+                      id="telegram"
+                      placeholder="@"
+                      required
+                      style={{
+                        margin: '10px 0px 10px 0px',
+                        backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
+                        width: '100%'
+                      }}
+                    />
+                    :
+                    <CssTextField2
+                      defaultValue={userData.telegram ? userData.telegram : undefined}
+                      id="telegram"
+                      placeholder="@"
+                      required
+                      style={{
+                        margin: '10px 0px 10px 0px',
+                        backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
+                        width: '100%',
+                        border: '1px solid #e4e9f0'
+                      }}
+                    />}
+                </Box>
 
 
-        </Box>
-        <Box style={{
-          width: '100%',
-          maxWidth: '1000px',
-          display: 'flex',
-          justifyContent: 'flex-start'
-        }}>
-          <Button
-            className={classes.butt}
-            variant="contained"
-            onClick={handleProfile}
-            style={{
-              color: 'white',
-              backgroundColor: 'rgb(75, 124, 243)',
-              marginTop: '10px',
-              borderRadius: '2px',
-              fontSize: '15px',
-              height: '45px',
-              width: '50%',
-              maxWidth: '250px',
-              border: '0px',
-              alignSelf: 'left'
-            }}
+              </Box>
+              <Box style={{
+                width: '100%',
+                maxWidth: '1000px',
+                display: 'flex',
+                justifyContent: 'flex-start'
+              }}>
+                <Button
+                  className={classes.butt}
+                  variant="contained"
+                  onClick={handleProfile}
+                  style={{
+                    color: 'white',
+                    backgroundColor: 'rgb(75, 124, 243)',
+                    marginTop: '10px',
+                    borderRadius: '2px',
+                    fontSize: '15px',
+                    height: '45px',
+                    width: '50%',
+                    maxWidth: '250px',
+                    border: '0px',
+                    alignSelf: 'left'
+                  }}
 
-          >
-            Подтвердить
+                >
+                  Подтвердить
           </Button>
-        </Box>
-        </>
-        : null  
-        }
+              </Box>
+            </>
+            :
+            <Box
+              style={{
+                position: 'fixed',
+                top: '0px',
+                bottom: '0px',
+                left: '0px',
+                right: '0px',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}
+            >
+              <CircleSpinner
+                size={25}
+                color={currentTheme === 'dark' ? 'white' : 'black'}
+                loading={true}
+              />
+            </Box>
+          }
         </TabPanel>
 
 
@@ -595,7 +621,7 @@ const Profile = ({ width }) => {
              </Typography>
               {currentTheme === 'dark' ?
                 <CssTextField
-                defaultValue={userData.trafficBackUrl ? userData.trafficBackUrl : undefined}
+                  defaultValue={userData.trafficBackUrl ? userData.trafficBackUrl : undefined}
                   id="linkTrBack"
                   placeholder="Ссылка"
                   required
@@ -607,7 +633,7 @@ const Profile = ({ width }) => {
                 />
                 :
                 <CssTextField2
-                defaultValue={userData.trafficBackUrl ? userData.trafficBackUrl : undefined}
+                  defaultValue={userData.trafficBackUrl ? userData.trafficBackUrl : undefined}
                   id="linkTrBack"
                   placeholder="Ссылка"
                   required
@@ -680,95 +706,95 @@ const Profile = ({ width }) => {
 
         <TabPanel value={value} index={3} width={width}>
           <Box
-          style={{
-            width: '100%',
-            maxWidth: '1000px',
-            flexWrap: 'wrap',
-            textAlign: 'start',
-            display: 'flex',
-            justifyContent: 'flex-start',
-            flexDirection:'column'
-          }}
+            style={{
+              width: '100%',
+              maxWidth: '1000px',
+              flexWrap: 'wrap',
+              textAlign: 'start',
+              display: 'flex',
+              justifyContent: 'flex-start',
+              flexDirection: 'column'
+            }}
           >
             <Typography className={classes.label}>
-            Ключ API
+              Ключ API
              </Typography>
-          <Box
-          style={{
-            width: width === 'xs' ? '100%' : '49%',
-              marginRight: width === 'xs' ? '0px' : '40px',
-              maxWidth: '1000px',
-              position:'relative'
-          }}
-          >
-          
-          {useMemo(()=>(
-            currentTheme === 'dark' ?
-            <CssTextField
-             // value={userData.trafficBackUrl ? userData.trafficBackUrl : undefined}
-              id="linkTrBack"
-              placeholder="Ключ API"
-              value={userData.api ? userData.api : undefined}
-              disabled
-              required
+            <Box
               style={{
-                margin: '10px 0px 10px 0px',
-                backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
-                width: '100%'
+                width: width === 'xs' ? '100%' : '49%',
+                marginRight: width === 'xs' ? '0px' : '40px',
+                maxWidth: '1000px',
+                position: 'relative'
               }}
-            />
-            :
-            <CssTextField2
-             // value={userData.trafficBackUrl ? userData.trafficBackUrl : undefined}
-              id="linkTrBack"
-              placeholder="Ключ API"
-              value={userData.api ? userData.api : undefined}
-              disabled
-              required
-              style={{
-                margin: '10px 0px 10px 0px',
-                backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
-                width: '100%',
-                border: '1px solid #e4e9f0'
-              }}
-            />
-            
-          ),[userData,userData.api])}
-          <IconButton 
-          onClick={copyApi}
-          style={{
-              position: 'absolute',
-              right: "-1px",
-              top: '8.5px',
-              color: currentTheme === 'dark' ? '#aeaee0!important' : '',
-              cursor:'pointer'
-            }}
             >
-              <FileCopyIcon
-                style={{
-                  color: currentTheme === 'dark' ? '#aeaee0' : ''
-                }}></FileCopyIcon>
-            </IconButton>
-          </Box>
 
-          <Button
-            className={classes.butt}
-            variant="contained"
-            style={{
-              color: 'white',
-              backgroundColor: 'rgb(75, 124, 243)',
-              marginTop: '10px',
-              borderRadius: '2px',
-              fontSize: '15px',
-              height: '45px',
-              width: '50%',
-              maxWidth: '250px',
-              border: '0px',
-              alignSelf: 'left'
-            }}
-            onClick={resetApi}
-          >
-            Сбросить ключ
+              {
+                currentTheme === 'dark' ?
+                  <CssTextField
+                    // value={userData.trafficBackUrl ? userData.trafficBackUrl : undefined}
+                    id="linkTrBack"
+                    placeholder="Ключ API"
+                    value={userData.api ? userData.api : undefined}
+                    disabled
+                    required
+                    style={{
+                      margin: '10px 0px 10px 0px',
+                      backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
+                      width: '100%'
+                    }}
+                  />
+                  :
+                  <CssTextField2
+                    // value={userData.trafficBackUrl ? userData.trafficBackUrl : undefined}
+                    id="linkTrBack"
+                    placeholder="Ключ API"
+                    value={userData.api ? userData.api : undefined}
+                    disabled
+                    required
+                    style={{
+                      margin: '10px 0px 10px 0px',
+                      backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
+                      width: '100%',
+                      border: '1px solid #e4e9f0'
+                    }}
+                  />
+
+              }
+              <IconButton
+                onClick={copyApi}
+                style={{
+                  position: 'absolute',
+                  right: "-1px",
+                  top: '8.5px',
+                  color: currentTheme === 'dark' ? '#aeaee0!important' : '',
+                  cursor: 'pointer'
+                }}
+              >
+                <FileCopyIcon
+                  style={{
+                    color: currentTheme === 'dark' ? '#aeaee0' : ''
+                  }}></FileCopyIcon>
+              </IconButton>
+            </Box>
+
+            <Button
+              className={classes.butt}
+              variant="contained"
+              style={{
+                color: 'white',
+                backgroundColor: 'rgb(75, 124, 243)',
+                marginTop: '10px',
+                borderRadius: '2px',
+                fontSize: '15px',
+                height: '45px',
+                width: '50%',
+                maxWidth: '250px',
+                border: '0px',
+                alignSelf: 'left'
+              }}
+              onClick={resetApi}
+            >
+              Сбросить ключ
             </Button>
           </Box>
         </TabPanel>

@@ -64,7 +64,7 @@ const Panel = ({ width }) => {
                 bottom: '40px',
                 right: width === 'xs' ? '0px' : 'auto',
                 boxShadow: currentTheme === 'dark' ? 'none' : "rgb(212 215 225 / 28%) 0px 1px 6px",
-                zIndex: '2002',
+                zIndex: '1059',
                 '&::-webkit-scrollbar': {
                     width: '5px',
                     backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : '',
@@ -215,14 +215,18 @@ const Panel = ({ width }) => {
     const classes = useStyles();
     const myHistory = useHistory();
     const routeProducts = () => {
-        myHistory.push('/dashboard/products')
+        myHistory.push('/dashboard/products');
     }
     const routeHome = () => {
-        myHistory.push('/dashboard')
+        myHistory.push('/dashboard');
     }
 
     const notActivated = () => {
         showMess('Ваш аккаунт не активирован');
+    }
+
+    const routeUsers = () => {
+        myHistory.push('/dashboard/users');
     }
     return (
         <>
@@ -374,21 +378,6 @@ const Panel = ({ width }) => {
                         }
                         {open ?
 
-                            <Box className={classes.heading}>UTM-метки <StorageIconOutlined /> </Box>
-
-                            :
-                            <Icon >
-                                <StorageIconOutlined
-                                    className={classes.icons}
-                                    style={{
-                                        height: '30px',
-                                        margin: '5px 0px'
-                                    }}></StorageIconOutlined >
-
-                            </Icon>
-                        }
-                        {open ?
-
                             <Box className={classes.heading}>Заказы <ShoppingCartIconOutlined /></Box>
 
                             :
@@ -434,13 +423,21 @@ const Panel = ({ width }) => {
                                 </Divider>
                             : null
                         }
-                        {userData.leve === 2 ?
+                        {userData.level === 2 ?
                             open ?
 
-                                <Box className={classes.heading}>Пользователи <PeopleAltOutlinedIcon /></Box>
+                                <Box 
+                                className={classes.heading}
+                                onClick={routeUsers}
+                                >
+                                    Пользователи 
+                                    <PeopleAltOutlinedIcon />
+                                    </Box>
 
                                 :
-                                <Icon >
+                                <Icon 
+                                onClick={routeUsers}
+                                >
                                     <PeopleAltOutlinedIcon
                                         className={classes.icons}
                                         style={{
