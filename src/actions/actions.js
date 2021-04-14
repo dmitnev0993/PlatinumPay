@@ -33,6 +33,11 @@ export const setIdForRef = id => ({
     payload:id
 });
 
+export const setIdForUrl = id => ({
+    type:'SET_ID_FOR_URL',
+    payload:id
+});
+
 export const setPageForRef = page => ({
     type:'SET_PAGE_FOR_REF',
     payload:page
@@ -51,4 +56,14 @@ export const isBackToPr = () => ({
 export const setBackLabel = label => ({
     type:'SET_LABEL',
     payload: label
+});
+
+export const setProduct = data => ({
+    type:'SET_PRODUCT',
+    payload: data
+});
+
+export const setIndex = data => ({
+    type:'SET_INDEX',
+    payload: data
 });

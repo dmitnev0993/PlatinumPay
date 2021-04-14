@@ -8,13 +8,14 @@ import { useHistory } from "react-router-dom";
 import { ThemeContext } from "../../../../context/themeContext";
 import Cookies from 'js-cookie';
 import Panel from "../../components/Panel";
-import { AppBar, Box, Button, Icon, InputBase, InputLabel, makeStyles, NativeSelect, Switch, Tab, Tabs, TextField, Typography, withStyles } from "@material-ui/core";
+import { AppBar, Box, Button, Icon, InputBase, InputLabel, makeStyles, NativeSelect, Switch, Tab, Tabs, TextField, Typography, withStyles, IconButton } from "@material-ui/core";
 import Pagination from '@material-ui/lab/Pagination';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import { isCreated } from "../../../../actions/actions";
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
@@ -345,6 +346,7 @@ const CreateProduct = ({ width }) => {
             .catch(err => {
                 console.log(err);
                 setLoading(false);
+                showMess('Ошибка!');
             })
 
     }
@@ -423,6 +425,7 @@ const CreateProduct = ({ width }) => {
             .catch(err => {
                 console.log(err);
                 setLoadingImg(false);
+                showMess('Ошибка!');
             });
 
 
@@ -450,6 +453,40 @@ const CreateProduct = ({ width }) => {
     return (
         <>
             <Panel></Panel>
+
+            {width === 'xs' ?
+
+                <IconButton
+                    onClick={redirectPr}
+                    style={{
+                        position: 'fixed',
+                        top: '85px',
+                        right: '15px',
+                        zIndex: '100'
+                    }}
+                >
+                    <ArrowBackIcon
+                        style={{
+                            color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
+                        }}
+                    >
+
+                    </ArrowBackIcon>
+                </IconButton>
+                :
+                <Button
+                    onClick={redirectPr}
+                    style={{
+                        position: 'fixed',
+                        top: '90px',
+                        right: '15px',
+                        color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
+                        zIndex: '100'
+                    }}
+                >
+                    Вернуться назад
+            </Button>}
+
             {loading ?
                 <Box
                     style={{
@@ -503,7 +540,7 @@ const CreateProduct = ({ width }) => {
                             }}
                         >
                             Создать продукт
-                </Typography>
+                        </Typography>
                         <Typography
                             style={{
                                 color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
@@ -511,7 +548,7 @@ const CreateProduct = ({ width }) => {
                             }}
                         >
                             Название
-                </Typography>
+                         </Typography>
                         {currentTheme === 'dark' ?
                             <CssTextField
                                 id="name"
@@ -914,6 +951,7 @@ const CreateProduct = ({ width }) => {
                                 display: 'flex',
                                 justifyContent: 'flex-start',
                                 flexDirection: width === 'xs' ? 'column' : 'row',
+                                paddingBottom: '20px'
                             }}
                         >
                             <Button
@@ -937,7 +975,7 @@ const CreateProduct = ({ width }) => {
                             >
                                 Подтвердить
           </Button>
-                            <Button
+                            {/* <Button
                                 className={classes.butt}
                                 variant="contained"
                                 onClick={redirectPr}
@@ -957,7 +995,7 @@ const CreateProduct = ({ width }) => {
 
                             >
                                 Отменить
-          </Button>
+          </Button> */}
                         </Box>
                     </Box>
                 </Box>

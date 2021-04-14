@@ -7,12 +7,13 @@ import { NavLink, useHistory } from "react-router-dom";
 import { ThemeContext } from "../../../../context/themeContext";
 import Cookies from 'js-cookie';
 import Panel from "../../components/Panel";
-import { Accordion, AccordionDetails, AccordionSummary, AppBar, Box, Button, ClickAwayListener, Grow, Icon, InputBase, InputLabel, makeStyles, MenuItem, MenuList, NativeSelect, Paper, Popper, Switch, Tab, Tabs, TextField, Typography, withStyles } from "@material-ui/core";
+import { Accordion, AccordionDetails, AccordionSummary, AppBar, Box, Button, ClickAwayListener, Grow, Icon, IconButton, InputBase, InputLabel, makeStyles, MenuItem, MenuList, NativeSelect, Paper, Popper, Switch, Tab, Tabs, TextField, Typography, withStyles } from "@material-ui/core";
 import Pagination from '@material-ui/lab/Pagination';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { setData } from "../../../../actions/actions";
 import { CircleSpinner } from "react-spinners-kit";
 import lightLogo from '../../../../assets/logo/logo-light.png';
@@ -201,6 +202,7 @@ const Subscriptions = ({ width }) => {
                 .catch(err => {
                     console.log(err);
                     setLoading(false);
+                    showMess('Ошибка!')
                 })
         }
     }, [])
@@ -227,9 +229,14 @@ const Subscriptions = ({ width }) => {
                     pages: data.response.pages
                 });
             })
-            .catch(err => {
-                console.log(err)
+            .catch(err=>{
+                console.log(err);
+                showMess('Ошибка!');
             })
+    }
+
+    const redirectPr = () => {
+        myHistory.push('/dashboard/products')
     }
 
 
@@ -238,6 +245,38 @@ const Subscriptions = ({ width }) => {
             <Panel>
 
             </Panel>
+            {width === 'xs' ? 
+            
+            <IconButton
+            onClick={redirectPr}
+            style={{
+                position:'fixed',
+                top:'92px',
+                right:'15px',
+                zIndex:'100'
+            }}
+            >
+                <ArrowBackIcon
+                style={{
+                    color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
+                }}
+                >
+
+                </ArrowBackIcon>
+            </IconButton>
+            :
+            <Button
+            onClick={redirectPr}
+            style={{
+                position:'fixed',
+                top:'97px',
+                right:'15px',
+                color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
+                zIndex:'100'
+            }}
+            >
+                Вернуться назад
+            </Button>}
             <Box
                 className='animate__animated animate__fadeIn'
                 style={{
@@ -295,7 +334,7 @@ const Subscriptions = ({ width }) => {
                     null}
                 </Box>
 
-                <Button
+                {/* <Button
                     className={classes.butt}
                     variant="contained"
                     onClick={() => {
@@ -317,7 +356,7 @@ const Subscriptions = ({ width }) => {
 
                 >
                     Отменить
-          </Button>
+          </Button> */}
 
 
                 <Box

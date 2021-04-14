@@ -8,19 +8,19 @@ import { useHistory } from "react-router-dom";
 import { ThemeContext } from "../../../../context/themeContext";
 import Cookies from 'js-cookie';
 import Panel from "../../components/Panel";
-import { AppBar, Box, Button, Icon, InputBase, InputLabel, makeStyles, NativeSelect, Switch, Tab, Tabs, TextField, Typography, withStyles, IconButton, FormLabel, RadioGroup, Radio } from "@material-ui/core";
+import { AppBar, Box, Button, Icon, IconButton, InputBase, InputLabel, makeStyles, NativeSelect, Switch, Tab, Tabs, TextField, Typography, withStyles } from "@material-ui/core";
 import Pagination from '@material-ui/lab/Pagination';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
-import { isCreated, setIdForUrl } from "../../../../actions/actions";
+import { isCreated, setProduct } from "../../../../actions/actions";
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Img from '../../../../assets/logo/logo-dark.png';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { CircleSpinner } from "react-spinners-kit";
 import Avatar from 'react-avatar-edit'
 
@@ -210,26 +210,25 @@ const showMess = (message) => {
     });
 }
 
-const CreateURL = ({ width }) => {
+const EditProducts = ({ width }) => {
     console.log(width)
     const dispatch = useDispatch();
-    const idUrl = useSelector(state=>state.idForUrl);
-    const [idUrlSt, setIdUrlSt] = useState(idUrl);
     const [loading, setLoading] = useState(false);
     const [loadingImg, setLoadingImg] = useState(false);
-    const [state, setState] = useState({
-        img: null,
-        imgId: null
-    })
-    const [value,setValue] = useState('');
-    const [myVal,setMyVal] = useState('');
+    
+    
     const [fields, setFields] = useState([{
         price: '',
         url: ''
-    }]);
-    const [switchSt,setSwitchSt] = useState(false);
+    }])
     const { currentTheme } = useContext(ThemeContext);
     const fileInput = useRef(null);
+    const product = useSelector(state=>state.product);
+    const [productState,setProductState] = useState(product);
+    const [state, setState] = useState({
+        img: product.image ? product.image : null,
+        imgId: product.imageId ? product.imageId : null
+    })
     const useStyles = makeStyles(theme => ({
         paginationRoot: {
             "& .MuiPaginationItem-root": {
@@ -286,85 +285,61 @@ const CreateURL = ({ width }) => {
                 alignItems: 'center',
                 fontSize: '30px'
             }
-        },
-        select: {
-            marginTop: '20px',
-            "&.react-selectrix.rs-base-materialize .rs-toggle": {
-                paddingLeft: '7px',
-                paddingTop: '14px',
-                textAlign: 'start',
-                backgroundColor: currentTheme === 'dark' ? 'rgb(20, 19, 34)' : 'white',
-                borderRadius: '0px',
-                height: '100%'
-            },
-            "&.react-selectrix.rs-base-materialize .rs-header": {
-                borderBottom: currentTheme === 'dark' ? '1px solid rgb(75, 124, 243)' : '',
-                height: '45px'
-            },
-            "&.react-selectrix .rs-body": {
-                backgroundColor: currentTheme === 'dark' ? 'rgb(20, 19, 34)' : 'white',
-            },
-            "&.react-selectrix .rs-option:not(.disabled).focused,&.react-selectrix .rs-option:not(.disabled).selected": {
-                backgroundColor: currentTheme === 'dark' ? '#232135' : 'white',
-            },
-            "&.react-selectrix": {
-                height: '45px'
-            },
-            "&.rs-wrapper": {
-                height: '45px'
-            }
-        },
-        source: {
-            marginTop: '10px',
-            color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
-            "& .MuiRadio-root": {
-                color: currentTheme === 'dark' ? '#4e4d5d' : 'rgba(0, 0, 0, 0.54)',
-            },
-            "& .MuiRadio-colorPrimary.Mui-checked": {
-                color: '#3f51b5',
-            },
-            "& .MuiFormControlLabel-root": {
-                width: width === 'xs' ? '100%' : ''
-            }
         }
     }));
     const classes = useStyles();
 
     const myHistory = useHistory();
 
+    const add = () => {
+        setFields([...fields, {
+            price: '',
+            url: ''
+        }]);
+    }
+
+    const del = (i) => {
+        const copyArr = [...fields];
+        copyArr.splice(i, 1);
+        console.log(i, copyArr)
+        setFields(copyArr);
+    }
+
     const redirectPr = () => {
         myHistory.push('/dashboard/products')
     }
 
-    useEffect(() => {
-        if (!idUrlSt) {
-            myHistory.push('/dashboard/products')
+
+    useEffect(()=>{
+        if(product.title){
+            console.log(productState)
+        return;
         }
-    }, [])
+        else{
+            console.log(productState,'BB')
+            myHistory.push('/dashboard/products');
+        }
+    },[])
 
-    const createShortener = (e) => {
+
+    const updateProduct = () => {
         setLoading(true);
-
-        const name = document.getElementById('name').value;
-        const idn = document.getElementById('idn').value;
-        const keyP = document.getElementById('keyP').value;
-        const subId = document.getElementById('subId').value;
-        const url = document.getElementById('url').value;
+        const name = document.querySelector('#name').value;
+        const description = document.querySelector('#description').value;
+        const deductions = document.querySelector('#deductions').value;
+        const url = document.querySelector('#url').value;
 
         var urlencoded = new URLSearchParams();
-        urlencoded.append('productId', idUrlSt);
-        urlencoded.append('campaignSource', value);
-        urlencoded.append('campaignName', name);
-        urlencoded.append('pixelIdentifier', idn);
-        urlencoded.append('pixelValue', keyP);
-        urlencoded.append('subId', subId);
-        urlencoded.append('trafficBackUrl', url);
-        urlencoded.append('trafficBackValue', switchSt ? 1 : 0);
-        
-        fetch('https://secure.platinumpay.cc/v1/client/products/shorteners/createShortener', {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${Cookies.get('token')}`
+        urlencoded.append("productId", productState.productId);
+        urlencoded.append("title", name);
+        urlencoded.append("description", description);
+        urlencoded.append("deductions", deductions);
+        urlencoded.append("imageId", state.imgId);
+        urlencoded.append("url", url);
+
+        fetch('https://secure.platinumpay.cc/v1/client/products/editProduct', {
+            method: 'POST', headers: {
+                Authorization: `Bearer ${Cookies.get('token')}`,
             },
             body: urlencoded
         })
@@ -372,15 +347,107 @@ const CreateURL = ({ width }) => {
                 return res.json()
             })
             .then(data => {
-                console.log(data);
-                setLoading(false);
-                showMess('Ссылка создана!');
-                dispatch(setIdForUrl(idUrlSt));
-                myHistory.push('/dashboard/products/shorteners/manage');
+                if (!data.errorMsg) {
+                    dispatch(isCreated());
+                    dispatch(setProduct({
+                        ...product,
+                        title:name,
+                        description:description,
+                        deductions:deductions,
+                        imageId:state.imgId,
+                        image:state.img,
+                        url:url
+                    }))
+                    showMess('Продукт успешно изменен!');
+                    myHistory.push('/dashboard/products');
+                }
+                else {
+                    showMess('Ошибка!');
+                    myHistory.push('/dashboard/products');
+                }
             })
             .catch(err => {
                 console.log(err);
                 setLoading(false);
+                showMess('Ошибка!');
+            })
+
+    }
+
+    const setPrice = (e, i) => {
+        let copyArr = [...fields];
+        console.log(e.target.value, i, copyArr)
+        copyArr[i].price = e.target.value;
+        setFields(copyArr)
+    }
+    const setUrl = (e, i) => {
+        let copyArr = [...fields];
+        console.log(e.target.value, i, copyArr)
+        copyArr[i].url = e.target.value;
+        setFields(copyArr)
+    }
+
+    const minmax = (e) => {
+        if (+e.target.value > 100) {
+            e.target.value = 100;
+        }
+        if (+e.target.value < 0) {
+            e.target.value = 0;
+        }
+    }
+
+    useEffect(() => {
+        console.log(state)
+    }, [state])
+
+    const fileUp = async (e) => {
+        if (!e.target.files[0]) {
+            return;
+        }
+        if (e.target.files[0].size > 5000000) {
+            showMess('Файл слишком большой');
+            return;
+        }
+        setLoadingImg(true);
+
+        var file = e.target.files[0];
+
+        // var reader = new FileReader();
+        // reader.onloadend = async function () {
+        //    await setState({
+        //         ...state,
+        //         img: e.target.files[0],
+        //         src: reader.result
+        //     });
+        //     var img = await new Image();
+        //     img.src = await reader.result;
+        //    await setImgSt(img);
+        // }
+        // reader.readAsDataURL(file);
+        var formData = new FormData();
+        formData.append("image", file);
+        fetch('https://secure.platinumpay.cc/v1/client/products/uploadImage', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${Cookies.get('token')}`
+            },
+            body: formData
+        })
+            .then(res => {
+                return res.json()
+            })
+            .then(data => {
+                console.log(data);
+                setState({
+                    ...state,
+                    img: data.response.image,
+                    imgId: data.response.imageId,
+                });
+                setLoadingImg(false);
+            })
+            .catch(err => {
+                console.log(err);
+                setLoadingImg(false);
                 showMess('Ошибка!');
             });
 
@@ -406,51 +473,40 @@ const CreateURL = ({ width }) => {
     //     }
     // }, [imgSt])
 
-    const editVal = (e)=>{
-       // console.log(e.target.value);
-        setValue(e.target.value);
-        setMyVal('');
-    }
-
-
-    const handleSwitch = () => {
-        setSwitchSt(!switchSt);
-    }
-
     return (
         <>
             <Panel></Panel>
-            {width === 'xs' ?
-
-                <IconButton
-                    onClick={redirectPr}
-                    style={{
-                        position: 'fixed',
-                        top: '85px',
-                        right: '15px',
-                        zIndex: '100'
-                    }}
+            {width === 'xs' ? 
+            
+            <IconButton
+            onClick={redirectPr}
+            style={{
+                position:'fixed',
+                top:'85px',
+                right:'15px',
+                zIndex:'100'
+            }}
+            >
+                <ArrowBackIcon
+                style={{
+                    color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
+                }}
                 >
-                    <ArrowBackIcon
-                        style={{
-                            color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
-                        }}
-                    >
 
-                    </ArrowBackIcon>
-                </IconButton>
-                :
-                <Button
-                    onClick={redirectPr}
-                    style={{
-                        position: 'fixed',
-                        top: '90px',
-                        right: '15px',
-                        color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
-                        zIndex: '100'
-                    }}
-                >
-                    Вернуться назад
+                </ArrowBackIcon>
+            </IconButton>
+            :
+            <Button
+            onClick={redirectPr}
+            style={{
+                position:'fixed',
+                top:'90px',
+                right:'15px',
+                color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
+                zIndex:'100'
+            }}
+            >
+                Вернуться назад
             </Button>}
             {loading ?
                 <Box
@@ -504,119 +560,24 @@ const CreateURL = ({ width }) => {
                                 margin: '0px'
                             }}
                         >
-                            Создать ссылку
+                            Редактировать продукт
                 </Typography>
-                        <FormControl component="fieldset"
-                            className={classes.source}
-                        >
-                            <RadioGroup aria-label="source1" name="source1" row value={value}>
-                                <FormControlLabel value="" onChange={(e)=>editVal(e)} control={<Radio color="primary" />} label="Свои значения" />
-                                <FormControlLabel value="google" onChange={(e)=>editVal(e)} control={<Radio color="primary" />} label="Google Adwords" />
-                                <FormControlLabel value="yandex" onChange={(e)=>editVal(e)} control={<Radio color="primary" />} label="Яндекс.Директ" />
-                                <FormControlLabel value="vk" onChange={(e)=>editVal(e)} control={<Radio color="primary" />} label="Вконтакте" />
-                                <FormControlLabel value="facebook" onChange={(e)=>editVal(e)} control={<Radio color="primary" />} label="Facebook" />
-                                <FormControlLabel value="instagram" onChange={(e)=>editVal(e)} control={<Radio color="primary" />} label="Instagram" />
-                                <FormControlLabel value="youtube" onChange={(e)=>editVal(e)} control={<Radio color="primary" />} label="YouTube" />
-                                <FormControlLabel value="mycom" onChange={(e)=>editVal(e)} control={<Radio color="primary" />} label="Target My.com" />
-                            </RadioGroup>
-                        </FormControl>
-
-                        {/* <FormControl
-                            className={classes.input}
-                            style={{
-                                display: 'flex',
-                                justifyContent: 'center',
-                                // width: width === 'xs' ? '100%' : '45%',
-                                maxWidth: '250px',
-                                width: '100%',
-                                height: '45px'
-                            }}
-                        >
-                            <Selectrix
-                                //  onChange={productsHandle}
-                                materialize={true}
-                                searchable={false}
-                                className={classes.select}
-                                placeholder={'Свои значения'}
-                                options={
-                                    [
-                                        { key: 'Свои значения', label: 'Свои значения' },
-                                        { key: 'Google Adwords', label: 'Google Adwords' },
-                                        { key: 'Яндекс.Директ', label: 'Яндекс.Директ' },
-                                        { key: 'Вконтакте', label: 'Вконтакте' },
-                                        { key: 'Facebook', label: 'Facebook' },
-                                        { key: 'Target My.com', label: 'Target My.com' }
-                                    ]
-                                }
-                            >
-
-                            </Selectrix>
-                        </FormControl> */}
-
-                        <Typography
-                            variant='h5'
-                            style={{
-                                color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
-                                margin: '25px 0px 20px 0px'
-                            }}
-                        >
-                            Настройка кампании
-                         </Typography>
-
-
                         <Typography
                             style={{
                                 color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
-                                margin: '0px 0px 0px 0px'
+                                margin: '15px 0px 5px 0px'
                             }}
-                            variant='h7'
                         >
-                            Источник кампании
-                         </Typography>
-                        {currentTheme === 'dark' ?
-                            <CssTextField
-                                id="source"
-                                placeholder="google, yandex, vk, facebook"
-                                required
-                                onChange={value ? null : (e)=>setMyVal(e.target.value)}
-                                value={value ? value : myVal}
-                                style={{
-                                    margin: '6px 0px 25px 0px',
-                                    backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
-                                    width: '100%'
-                                }}
-                            />
-                            :
-                            <CssTextField2
-                                id="source"
-                                placeholder="google, yandex, vk, facebook"
-                                required
-                                onChange={value ? null : (e)=>setMyVal(e.target.value)}
-                                value={value ? value : myVal}
-                                style={{
-                                    margin: '6px 0px 25px 0px',
-                                    backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
-                                    width: '100%',
-                                    border: '1px solid #e4e9f0'
-                                }}
-                            />}
-
-                        <Typography
-                            style={{
-                                color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
-                                margin: '0px 0px 0px 0px'
-                            }}
-                            variant='h7'
-                        >
-                            Название кампании
-                         </Typography>
+                            Название
+                </Typography>
                         {currentTheme === 'dark' ?
                             <CssTextField
                                 id="name"
-                                placeholder="promo, discount, sale"
+                                placeholder="Название"
+                                defaultValue={productState.title ? productState.title : undefined}
                                 required
                                 style={{
-                                    margin: '6px 0px 25px 0px',
+                                    margin: '0px 0px 25px 0px',
                                     backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
                                     width: '100%'
                                 }}
@@ -624,86 +585,89 @@ const CreateURL = ({ width }) => {
                             :
                             <CssTextField2
                                 id="name"
-                                placeholder="promo, discount, sale"
+                                placeholder="Название"
+                                defaultValue={productState.title ? productState.title : undefined}
                                 required
                                 style={{
-                                    margin: '6px 0px 25px 0px',
+                                    margin: '0px 0px 25px 0px',
                                     backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
                                     width: '100%',
                                     border: '1px solid #e4e9f0'
                                 }}
                             />}
 
-                        <Typography
-                            variant='h5'
-                            style={{
-                                color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
-                                margin: '5px 0px 20px 0px'
-                            }}
-                        >
-                            Настройка пикселя
-                         </Typography>
 
 
                         <Typography
                             style={{
                                 color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
-                                margin: '0px 0px 0px 0px'
+                                margin: '0px 0px 5px 0px'
                             }}
-                            variant='h7'
                         >
-                            Идентификатор параметра
-                         </Typography>
+                            Описание
+                </Typography>
                         {currentTheme === 'dark' ?
-                            <CssTextField
-                                id="idn"
-                                placeholder="fbpix"
+                            <CssTextArea
+                                id="description"
+                                placeholder="Описание"
+                                multiline
+                                rows={4}
+                                defaultValue={productState.description ? productState.description : undefined}
                                 required
                                 style={{
-                                    margin: '6px 0px 25px 0px',
+                                    margin: '0px 0px 25px 0px',
+                                    backgroundColor: currentTheme === 'dark' ? '#232135' : 'white',
+                                    width: '100%',
+                                }}
+                            />
+                            :
+                            <CssTextArea2
+                                id="description"
+                                placeholder="Описание"
+                                multiline
+                                rows={4}
+                                defaultValue={productState.description ? productState.description : undefined}
+                                required
+                                style={{
+                                    margin: '0px 0px 25px 0px',
+                                    backgroundColor: currentTheme === 'dark' ? '#232135' : 'white',
+                                    width: '100%',
+                                    border: '1px solid #e4e9f0'
+                                }}
+                            />}
+
+                        <Typography
+                            style={{
+                                color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
+                                margin: '0px 0px 5px 0px'
+                            }}
+                        >
+                            Отчисления партнерам
+                </Typography>
+                        {currentTheme === 'dark' ?
+                            <CssTextField
+                                id="deductions"
+                                placeholder="Отчисления партнерам"
+                                type='number'
+                                onChange={minmax}
+                                defaultValue={productState.deductions ? productState.deductions : undefined}
+                                required
+                                style={{
+                                    margin: '0px 0px 25px 0px',
                                     backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
                                     width: '100%'
                                 }}
                             />
                             :
                             <CssTextField2
-                                id="idn"
-                                placeholder="fbpix"
+                                id="deductions"
+                                placeholder="Отчисления партнерам"
+                                type='number'
+                                onChange={minmax}
+                                defaultValue={productState.deductions ? productState.deductions : undefined}
                                 required
                                 style={{
-                                    margin: '6px 0px 25px 0px',
-                                    backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
-                                    width: '100%',
-                                    border: '1px solid #e4e9f0'
-                                }}
-                            />}
-                        <Typography
-                            style={{
-                                color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
-                                margin: '0px 0px 0px 0px'
-                            }}
-                            variant='h7'
-                        >
-                            Значение параметра
-                         </Typography>
-                        {currentTheme === 'dark' ?
-                            <CssTextField
-                                id="keyP"
-                                placeholder=""
-                                required
-                                style={{
-                                    margin: '6px 0px 25px 0px',
-                                    backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
-                                    width: '100%'
-                                }}
-                            />
-                            :
-                            <CssTextField2
-                                id="keyP"
-                                placeholder=""
-                                required
-                                style={{
-                                    margin: '6px 0px 25px 0px',
+                                    margin: '0px 0px 25px 0px',
                                     backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
                                     width: '100%',
                                     border: '1px solid #e4e9f0'
@@ -712,76 +676,22 @@ const CreateURL = ({ width }) => {
 
 
                         <Typography
-                            variant='h5'
                             style={{
                                 color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
-                                margin: '5px 0px 25px 0px'
+                                margin: '0px 0px 5px 0px'
                             }}
-                        >
-                            Настройка суб-аккаунта
-                         </Typography>
-
-
-                        <Typography
-                            style={{
-                                color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
-                                margin: '0px 0px 0px 0px'
-                            }}
-                            variant='h7'
-                        >
-                            Значение параметра
-                         </Typography>
-                        {currentTheme === 'dark' ?
-                            <CssTextField
-                                id="subId"
-                                placeholder=""
-                                required
-                                style={{
-                                    margin: '6px 0px 25px 0px',
-                                    backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
-                                    width: '100%'
-                                }}
-                            />
-                            :
-                            <CssTextField2
-                                id="subId"
-                                placeholder=""
-                                required
-                                style={{
-                                    margin: '6px 0px 25px 0px',
-                                    backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
-                                    width: '100%',
-                                    border: '1px solid #e4e9f0'
-                                }}
-                            />}
-
-                        <Typography
-                            variant='h5'
-                            style={{
-                                color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
-                                margin: '5px 0px 25px 0px'
-                            }}
-                        >
-                            Настройка трафик-бэк
-                         </Typography>
-
-
-                        <Typography
-                            style={{
-                                color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
-                                margin: '0px 0px 0px 0px'
-                            }}
-                            variant='h7'
                         >
                             URL
-                         </Typography>
+                </Typography>
                         {currentTheme === 'dark' ?
                             <CssTextField
                                 id="url"
                                 placeholder="URL"
+                                type='text'
+                                defaultValue={productState.url ? productState.url : 'aaaaaaaa'}
                                 required
                                 style={{
-                                    margin: '6px 0px 15px 0px',
+                                    margin: '0px 0px 25px 0px',
                                     backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
                                     width: '100%'
                                 }}
@@ -790,42 +700,137 @@ const CreateURL = ({ width }) => {
                             <CssTextField2
                                 id="url"
                                 placeholder="URL"
+                                type='text'
+                                defaultValue={productState.url ? productState.url : 'aaaaaaaa'}
                                 required
                                 style={{
-                                    margin: '6px 0px 15px 0px',
+                                    margin: '0px 0px 25px 0px',
                                     backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
                                     width: '100%',
                                     border: '1px solid #e4e9f0'
                                 }}
                             />}
-                            <FormControl component="fieldset"
-                                        className={classes.fcont}
+
+
+                        {/* <Typography
+                        style={{
+                            color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
+                            margin: '0px 0px 5px 0px'
+                        }}
+                    >
+                        URL
+                </Typography>
+
+
+                    {currentTheme === 'dark' ?
+                        <CssTextField
+                            id="url"
+                            placeholder="URL"
+                            required
+                            style={{
+                                margin: '0px',
+                                backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
+                                width: '100%'
+                            }}
+                        />
+                        :
+                        <CssTextField2
+                            id="url"
+                            placeholder="URL"
+                            required
+                            style={{
+                                margin: '0px',
+                                backgroundColor: currentTheme === 'dark' ? '#0c0c1b' : 'white',
+                                width: '100%',
+                                border: '1px solid #e4e9f0'
+                            }}
+                        />} */}
+
+
+
+
+
+
+                        <Typography
+                            variant='h6'
+                            style={{
+                                color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
+                                margin: '0px 0px 10px 0px'
+                            }}
+                        >
+                            Изменить изображение
+                </Typography>
+
+                        <Box
+                            style={{
+                                display: 'flex',
+                                flexDirection: width === 'xs' ? 'column' : 'row',
+                                justifyContent: 'flex-start',
+                                alignItems: 'flex-start',
+                                marginBottom: '25px'
+                            }}
+                        >
+                            <input type='file'
+                                ref={fileInput}
+                                onChange={fileUp}
+                                style={{
+                                    display: 'none',
+                                }}
+                            />
+                            {
+                                !loadingImg ?
+
+                                    !state.img ?
+                                        <button
+                                            onClick={() => { fileInput.current.click() }}
+                                            style={{
+                                                backgroundColor: 'inherit',
+                                                border: '2px dashed  rgb(151, 151, 151)',
+                                                width: '300px',
+                                                height: '300px',
+                                                display: 'flex',
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                                cursor: 'pointer',
+                                                color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black'
+                                            }}>
+                                            Выберите файл
+                        </button>
+                                        :
+
+                                        <img
+                                            src={state.img}
+                                            onClick={() => { fileInput.current.click() }}
+                                            style={{
+                                                width: '300px',
+                                                height: '300px',
+                                                cursor: 'pointer',
+                                            }}
+                                        />
+
+
+                                    :
+
+                                    <Box
                                         style={{
+                                            width: '300px',
+                                            height: '300px',
                                             display: 'flex',
-                                            alignItems: 'flex-start',
-                                            justifyContent: 'flex-end',
-                                            marginBottom: '25px',
-                                            marginRight: width === 'xs' || width === 'sm' ? '0px' : '5px',
-                                        }}>
-                                        <FormGroup aria-label="position" row>
-                                            <FormControlLabel
-                                                value="trightop"
-                                                control={
-                                                    <Switch
-                                                        onChange={handleSwitch}
-                                                        color="primary"
-                                                        name="checkedB"
-                                                        inputProps={{ role: 'switch' }}
-                                                    />
-                                                }
-                                                label="TrafficBack"
-                                                labelPlacement="right"
-                                                style={{
-                                                    color: currentTheme === 'dark' ? '#aeaee0' : 'black',
-                                                }}
-                                            />
-                                        </FormGroup>
-                                    </FormControl>
+                                            justifyContent: 'center',
+                                            alignItems: 'center'
+                                        }}
+                                    >
+                                        <CircleSpinner
+                                            size={18}
+                                            color={currentTheme === 'dark' ? 'white' : 'black'}
+                                            loading={loadingImg}
+                                        />
+                                    </Box>
+
+                            }
+
+
+                        </Box>
 
                         <Box
                             style={{
@@ -833,13 +838,13 @@ const CreateURL = ({ width }) => {
                                 display: 'flex',
                                 justifyContent: 'flex-start',
                                 flexDirection: width === 'xs' ? 'column' : 'row',
-                                paddingBottom: '20px'
+                                paddingBottom:'20px'
                             }}
                         >
                             <Button
                                 className={classes.butt}
-                                onClick={createShortener}
                                 variant="contained"
+                                onClick={updateProduct}
                                 style={{
                                     color: 'white',
                                     backgroundColor: 'rgb(75, 124, 243)',
@@ -851,7 +856,7 @@ const CreateURL = ({ width }) => {
                                     maxWidth: width === 'xs' ? '170px' : width === 'sm' ? '200px' : '250px',
                                     border: '0px',
                                     alignSelf: 'left',
-
+                                    paddingBottom:'10px'
                                 }}
 
                             >
@@ -879,7 +884,6 @@ const CreateURL = ({ width }) => {
                                 Отменить
           </Button> */}
                         </Box>
-
                     </Box>
                 </Box>
             }
@@ -888,4 +892,4 @@ const CreateURL = ({ width }) => {
     );
 };
 
-export default withWidth()(CreateURL);
+export default withWidth()(EditProducts);

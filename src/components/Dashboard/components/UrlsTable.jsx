@@ -28,15 +28,15 @@ const showMess = (message) => {
     });
 }
 
-const UsersTable = ({ width, data, setData, setLoading, nameState, setNameState, levelState, setLevelState, pageState, handleUsers }) => {
+const UrlsTable = ({ width, data, setData, setLoading, shortId, setShortId, subId, setSubId, pageState, handleShorteners }) => {
     const dispatch = useDispatch();
     const { currentTheme } = useContext(ThemeContext);
     const [state, setState] = useState([]);
     const [vis, setVis] = useState(false);
-    const idForRef = useSelector(state => state.idForRef);
-    const pageForRef = useSelector(state => state.pageForRef);
     const [open, setOpen] = useState(false);
-    const [idState, setIdState] = useState(null);
+    const [iState, setIState] = useState(null);
+    const idUrl = useSelector(state => state.idForUrl);
+    const [idUrlSt, setIdUrlSt] = useState(idUrl);
 
     const useStyles = makeStyles((theme) => ({
         input: {
@@ -143,11 +143,12 @@ const UsersTable = ({ width, data, setData, setLoading, nameState, setNameState,
         },
     }));
 
-    const reloadUsers = () => {
+    const reloadShorteners = () => {
         setLoading(true);
         var urlencoded = new URLSearchParams();
-        urlencoded.append('page', pageState ? pageState : 1);
-        fetch('https://secure.platinumpay.cc/v1/client/users/getUsers', {
+        urlencoded.append('productId', idUrlSt);
+        urlencoded.append('page', pageState);
+        fetch('https://secure.platinumpay.cc/v1/client/products/shorteners/getShorteners', {
             method: 'POST', headers: {
                 Authorization: `Bearer ${Cookies.get('token')}`,
             },
@@ -158,16 +159,22 @@ const UsersTable = ({ width, data, setData, setLoading, nameState, setNameState,
             })
             .then(data => {
                 console.log(data);
-                setData({
-                    ...data,
-                    arr: data.response.data,
-                    pages: data.response.pages
-                });
+                if (data.response.count) {
+                    setData({
+                        ...data,
+                        arr: data.response.data,
+                        pages: data.response.pages
+                    });
+                }
+                else {
+                    return;
+                }
                 setLoading(false);
             })
             .catch(err => {
                 console.log(err)
                 setLoading(false);
+                showMess('Ошибка!');
             })
     }
 
@@ -195,12 +202,12 @@ const UsersTable = ({ width, data, setData, setLoading, nameState, setNameState,
     console.log(data)
     let rows = data.arr.length > 0 ? data.arr.map((it, i) => {
         return {
-            name: it.username,
-            telegram: it.telegram,
-            level: it.level,
+            url: it.trafficBackUrl,
+            value: it.trafficBackValue,
+            subId: it.subId,
             status: it.status,
-            balance: it.balance,
-            api: it.api,
+            ind: it.pixelIdentifier,
+            pixelV: it.pixelValue,
             date: it.date,
             time: it.time,
         }
@@ -210,10 +217,12 @@ const UsersTable = ({ width, data, setData, setLoading, nameState, setNameState,
         if (data.arr.length) {
             for (let it of data.arr) {
                 arr.push({
-                    userId: it.userId,
-                    name: it.username,
-                    level: it.level,
-                    balance: it.balance,
+                    trafficBackUrl: it.trafficBackUrl,
+                    trafficBackValue: it.trafficBackValue,
+                    subId: it.subId,
+                    shortId: it.shortId,
+                    pixelIdentifier: it.pixelIdentifier,
+                    pixelValue: it.pixelValue,
                     edit: false
                 })
             }
@@ -240,16 +249,16 @@ const UsersTable = ({ width, data, setData, setLoading, nameState, setNameState,
         setState(arr);
     };
 
-    const minmaxLevel = (e) => {
-        if (+e.target.value > 2) {
-            e.target.value = 2;
+    const minmaxTrafficBack = (e) => {
+        if (+e.target.value > 1) {
+            e.target.value = 1;
         }
         if (+e.target.value < 0) {
             e.target.value = 0;
         }
     }
 
-    const editUser = (e, i, param) => {
+    const editShortener = (e, i, param) => {
         const arr = state.map((it) => ({ ...it }));
         arr[i][param] = e.target.value;
         setState(arr);
@@ -261,14 +270,16 @@ const UsersTable = ({ width, data, setData, setLoading, nameState, setNameState,
         setOpen(false);
     };
 
-    const editUsers = (i) => {
+    const editShorteners = (i) => {
 
         var urlencoded = new URLSearchParams();
-        urlencoded.append('userId', state[i].userId);
-        urlencoded.append('username', state[i].name);
-        urlencoded.append('level', state[i].level);
-        urlencoded.append('balance', state[i].balance);
-        fetch('https://secure.platinumpay.cc/v1/client/users/editUser', {
+        urlencoded.append('productId', idUrlSt);
+        urlencoded.append('shortId', state[i].shortId);
+        urlencoded.append('pixelIdentifier', state[i].pixelIdentifier);
+        urlencoded.append('pixelValue', state[i].pixelValue);
+        urlencoded.append('trafficBackUrl', state[i].trafficBackUrl);
+        urlencoded.append('trafficBackValue', state[i].trafficBackValue);
+        fetch('https://secure.platinumpay.cc/v1/client/products/shorteners/editShortener', {
             method: 'POST', headers: {
                 Authorization: `Bearer ${Cookies.get('token')}`,
             },
@@ -281,14 +292,16 @@ const UsersTable = ({ width, data, setData, setLoading, nameState, setNameState,
                 console.log(data);
             })
             .catch(err => {
-                console.log(err)
+                console.log(err);
+                showMess('Ошибка!');
             })
     }
 
-    const deleteUser = (id) => {
+    const deleteShortener = (i) => {
         var urlencoded = new URLSearchParams();
-        urlencoded.append('userId', id);
-        fetch('https://secure.platinumpay.cc/v1/client/users/deleteUser', {
+        urlencoded.append('productId', idUrlSt);
+        urlencoded.append('shortId', state[i].shortId);
+        fetch('https://secure.platinumpay.cc/v1/client/products/shorteners/deleteShortener', {
             method: 'POST', headers: {
                 Authorization: `Bearer ${Cookies.get('token')}`,
             },
@@ -298,23 +311,24 @@ const UsersTable = ({ width, data, setData, setLoading, nameState, setNameState,
                 return res.json();
             })
             .then(dataRes => {
-                console.log(dataRes,data);
-                const arr = data.arr.map(it=>({...it}));    
-                for(let i = 0; i<arr.length;i++){
-                    if(arr[i].userId === id){
+                console.log(dataRes, data);
+                const arr = data.arr.map(it => ({ ...it }));
+                for (let i = 0; i < arr.length; i++) {
+                    if (arr[i].shortId === dataRes.response.shortId) {
                         console.log('BAX');
-                        arr.splice(i,1);
+                        arr.splice(i, 1);
                     }
                 }
                 console.log(arr);
                 setData({
                     ...data,
-                    arr:arr
+                    arr: arr
                 });
-                showMess('Пользователь удален');
+                showMess('Ссылка удалена');
             })
             .catch(err => {
-                console.log(err)
+                console.log(err);
+                showMess('Ошибка!');
             })
     }
 
@@ -326,15 +340,15 @@ const UsersTable = ({ width, data, setData, setLoading, nameState, setNameState,
                 aria-labelledby="responsive-dialog-title"
                 className={classes.dialog}
             >
-                <DialogTitle id="responsive-dialog-title">{"Вы действительно хотите удалить пользователя?"}</DialogTitle>
+                <DialogTitle id="responsive-dialog-title">{"Вы действительно хотите удалить ссылку?"}</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        Подтвердите, что вы действительно хотите удалить пользователя, еще раз нажав кнопку Подтвердить
+                        Подтвердите, что вы действительно хотите удалить ссылку, еще раз нажав кнопку Подтвердить
           </DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     <Button autoFocus onClick={() => {
-                        deleteUser(idState);
+                        deleteShortener(iState);
                         handleClose();
                     }}
                         style={{
@@ -384,10 +398,10 @@ const UsersTable = ({ width, data, setData, setLoading, nameState, setNameState,
 
                                 // borderBottom:'1px solid rgb(174, 174, 224)'
                             }}>
-                            Пользователи
+                            Мои ссылки
                     </Typography>
                         <IconButton
-                            onClick={reloadUsers}
+                            onClick={reloadShorteners}
                             style={{
                                 marginTop: '6px'
                             }}
@@ -415,26 +429,25 @@ const UsersTable = ({ width, data, setData, setLoading, nameState, setNameState,
                         }}
                     >
                         <TextField
-                            placeholder='Имя пользователя'
+                            placeholder='shortId'
                             className={classes.text}
-                            defaultValue={nameState ? nameState : undefined}
-                            onBlur={(e) => { setNameState(e.target.value) }}
+                            defaultValue={shortId ? shortId : undefined}
+                            onBlur={(e) => { setShortId(e.target.value) }}
                         >
 
                         </TextField>
 
                         <TextField
-                            onChange={minmaxLevel}
-                            placeholder='Уровень'
+                            placeholder='subId'
                             className={classes.text}
-                            defaultValue={levelState ? levelState : undefined}
-                            onBlur={(e) => { setLevelState(e.target.value) }}
+                            defaultValue={subId ? subId : undefined}
+                            onBlur={(e) => { setSubId(e.target.value) }}
                         >
 
                         </TextField>
 
                         <IconButton
-                            onClick={handleUsers}
+                            onClick={handleShorteners}
                             style={{
                                 marginTop: '7px'
                             }}
@@ -485,32 +498,11 @@ const UsersTable = ({ width, data, setData, setLoading, nameState, setNameState,
                     <Table size="small" aria-label="a dense table">
                         <TableHead>
                             <TableRow>
-                                <TableCell align="left">Имя пользователя</TableCell>
-                                <TableCell align="left">Telegram</TableCell>
-                                <TableCell align="left">Уровень</TableCell>
-                                <TableCell align="left">Баланс</TableCell>
-                                <TableCell align="left">Статус</TableCell>
-                                <TableCell align="left">Ключ API
-                                <IconButton
-                                        onClick={() => { setVis(!vis) }}
-                                    >
-                                        {!vis ?
-                                            <Visibility
-                                                style={{
-                                                    color: currentTheme === 'dark' ? 'rgb(117, 117, 163)' : '',
-                                                    fontSize: '20px'
-                                                }}
-                                            ></Visibility>
-                                            :
-                                            <VisibilityOff
-                                                style={{
-                                                    color: currentTheme === 'dark' ? 'rgb(117, 117, 163)' : '',
-                                                    fontSize: '20px'
-                                                }}
-                                            ></VisibilityOff>
-                                        }
-                                    </IconButton>
-                                </TableCell>
+                                <TableCell align="left">URL</TableCell>
+                                <TableCell align="left">TrafficBack</TableCell>
+                                <TableCell align="left">SubId</TableCell>
+                                <TableCell align="left">pixelIdentifier</TableCell>
+                                <TableCell align="left">pixelValue</TableCell>
                                 <TableCell align="left">Дата</TableCell>
                                 <TableCell align="left">Время</TableCell>
                                 <TableCell align="left"></TableCell>
@@ -519,53 +511,31 @@ const UsersTable = ({ width, data, setData, setLoading, nameState, setNameState,
                         <TableBody>
                             {data.arr.map((row, i) => (
                                 <TableRow key={row.id}>
-                                    {/* id: it.userId,
-            name: it.username,
-            telegram: it.telegram,
-            level: it.level,
+                                    {/* 
+            url: it.trafficBackUrl,
+            value: it.trafficBackValue,
+            subId: it.subId,
             status: it.status,
-            balance: it.balance,
-            api: it.api,
-            trafficBack: it.trafficBack,
-            trafficBackUrl: it.trafficBackUrl,
+            ind: it.pixelIdentifier,
+            pixelV: it.pixelValue,
             date: it.date,
-            time: it.time, */}
+            time: it.time, 
+            */}
                                     <TableCell align="left">
                                         {
                                             state[i] ?
                                                 state[i].edit ?
                                                     <TextField
                                                         className={classes.text}
-                                                        defaultValue={state[i].name}
-                                                        onBlur={(e) => { editUser(e, i, 'name') }}
+                                                        defaultValue={state[i].trafficBackUrl}
+                                                        onBlur={(e) => { editShortener(e, i, 'trafficBackUrl') }}
                                                     >
 
                                                     </TextField>
                                                     :
-                                                    state[i].name
+                                                    state[i].trafficBackUrl
                                                 :
-                                                row.username
-                                        }
-                                    </TableCell>
-                                    <TableCell align="left">
-                                        {row.telegram}
-                                    </TableCell>
-                                    <TableCell align="left">
-                                        {
-                                            state[i] ?
-                                                state[i].edit ?
-                                                    <TextField
-                                                        className={classes.text}
-                                                        defaultValue={state[i].level}
-                                                        onChange={minmaxLevel}
-                                                        onBlur={(e) => { editUser(e, i, 'level') }}
-                                                    >
-
-                                                    </TextField>
-                                                    :
-                                                    state[i].level
-                                                :
-                                                row.level
+                                                row.trafficBackUrl
                                         }
                                     </TableCell>
                                     <TableCell align="left">
@@ -574,30 +544,62 @@ const UsersTable = ({ width, data, setData, setLoading, nameState, setNameState,
                                                 state[i].edit ?
                                                     <TextField
                                                         className={classes.text}
-                                                        defaultValue={state[i].balance}
-                                                        onBlur={(e) => { editUser(e, i, 'balance') }}
+                                                        defaultValue={state[i].trafficBackValue}
+                                                        onChange={minmaxTrafficBack}
+                                                        onBlur={(e) => { editShortener(e, i, 'trafficBackValue') }}
                                                     >
 
                                                     </TextField>
                                                     :
-                                                    state[i].balance + ' ₽'
+                                                    state[i].trafficBackValue
                                                 :
-                                                row.balance + ' ₽'
+                                                row.trafficBackValue
                                         }
                                     </TableCell>
-                                    <TableCell align="left">{row.status}</TableCell>
-                                    <TableCell align="left"
-                                        style={{
-                                            wordBreak: vis ? 'break-all' : 'normal',
-                                            overflow: vis ? 'visible' : 'hidden'
-                                        }}>{vis ? row.api : '**********************'}</TableCell>
+                                    <TableCell align="left">
+                                        {row.subId}
+                                    </TableCell>
+                                    <TableCell align="left">
+                                        {
+                                            state[i] ?
+                                                state[i].edit ?
+                                                    <TextField
+                                                        className={classes.text}
+                                                        defaultValue={state[i].pixelIdentifier}
+                                                        onBlur={(e) => { editShortener(e, i, 'pixelIdentifier') }}
+                                                    >
+
+                                                    </TextField>
+                                                    :
+                                                    state[i].pixelIdentifier
+                                                :
+                                                row.pixelIdentifier
+                                        }
+                                    </TableCell>
+                                    <TableCell align="left">
+                                        {
+                                            state[i] ?
+                                                state[i].edit ?
+                                                    <TextField
+                                                        className={classes.text}
+                                                        defaultValue={state[i].pixelValue}
+                                                        onBlur={(e) => { editShortener(e, i, 'pixelValue') }}
+                                                    >
+
+                                                    </TextField>
+                                                    :
+                                                    state[i].pixelValue
+                                                :
+                                                row.pixelValue
+                                        }
+                                    </TableCell>
                                     <TableCell align="left">{row.date}</TableCell>
                                     <TableCell align="left">{row.time}</TableCell>
                                     <TableCell align="left">
                                         <IconButton
                                             onClick={state[i] ? state[i].edit ? () => {
                                                 completeEdit(i);
-                                                editUsers(i);
+                                                editShorteners(i);
                                             } : () => { startEdit(i) } : null}
                                         >
                                             {
@@ -620,7 +622,7 @@ const UsersTable = ({ width, data, setData, setLoading, nameState, setNameState,
                                         </IconButton>
                                         <IconButton
                                             onClick={() => {
-                                                setIdState(state[i].userId);
+                                                setIState(i);
                                                 setOpen(true);
                                             }}
                                         >
@@ -644,4 +646,4 @@ const UsersTable = ({ width, data, setData, setLoading, nameState, setNameState,
     );
 };
 
-export default withWidth()(UsersTable);
+export default withWidth()(UrlsTable);

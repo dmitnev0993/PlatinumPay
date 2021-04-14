@@ -108,6 +108,10 @@ const Login = ({ width }) => {
   const [vis, setVis] = useState(false);
   const { currentTheme } = useContext(ThemeContext);
 
+  const route = ()=>{
+    myHistory.push('/dashboard');
+  }
+
   const auth = async (e) => {
     e.preventDefault();
     const name = document.querySelector('#name').value;
@@ -137,6 +141,7 @@ const Login = ({ width }) => {
           }))
           dispatch(setLogin())
           showMess('Авторизация прошла успешно!');
+          route();
         }
         else {
           showMess('Что-то пошло не так, попробуйте еще раз.')

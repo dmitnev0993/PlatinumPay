@@ -211,6 +211,10 @@ const Profile = ({ width }) => {
       .then(data => {
         console.log(data)
       })
+      .catch(err=>{
+        console.log(err);
+        showMess('Ошибка!');
+    })
 
   }
 
@@ -234,6 +238,10 @@ const Profile = ({ width }) => {
           trafficBackUrl: data.response.trafficBackUrl,
         }))
       })
+      .catch(err=>{
+        console.log(err);
+        showMess('Ошибка!');
+    })
   }
 
   const handleProfile = () => {
@@ -259,6 +267,10 @@ const Profile = ({ width }) => {
           telegram: data.response.telegram
         }))
       })
+      .catch(err=>{
+        console.log(err);
+        showMess('Ошибка!');
+    })
   }
   useEffect(() => {
     if (userData.trafficBack) {
@@ -299,6 +311,10 @@ const Profile = ({ width }) => {
           showMess('Ошибка!')
         }
       })
+      .catch(err=>{
+        console.log(err);
+        showMess('Ошибка!');
+    })
 
   }
 
@@ -318,6 +334,10 @@ const Profile = ({ width }) => {
           }))
         }
       })
+      .catch(err=>{
+        console.log(err);
+        showMess('Ошибка!');
+    })
   }
 
   const copyApi = () => {
@@ -355,7 +375,6 @@ const Profile = ({ width }) => {
           >
             <Tab label="Редактировать профиль" />
             <Tab label="Сменить пароль" />
-            <Tab label="TrafficBack" />
             <Tab label="API" style={{
               minWidth: '40px'
             }} />
@@ -602,7 +621,7 @@ const Profile = ({ width }) => {
         </TabPanel>
 
 
-        <TabPanel value={value} index={2} width={width}>
+        {/* <TabPanel value={value} index={2} width={width}>
           <Box style={{
             width: '100%',
             maxWidth: '1000px',
@@ -700,11 +719,11 @@ const Profile = ({ width }) => {
               Подтвердить
             </Button>
           </Box>
-        </TabPanel>
+        </TabPanel> */}
 
 
 
-        <TabPanel value={value} index={3} width={width}>
+        <TabPanel value={value} index={2} width={width}>
           <Box
             style={{
               width: '100%',

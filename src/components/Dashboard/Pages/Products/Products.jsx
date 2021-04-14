@@ -13,9 +13,11 @@ import { Alert, AlertTitle } from '@material-ui/lab';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
-import { isBackToPr, isCreated, setData, setDataProducts, setScrollPr, setBackLabel } from "../../../../actions/actions";
+import { isBackToPr, isCreated, setData, setDataProducts, setScrollPr, setBackLabel, setProduct, setIndex, setIdForUrl } from "../../../../actions/actions";
 import { CircleSpinner } from "react-spinners-kit";
 import lightLogo from '../../../../assets/logo/logo-light.png';
+import ListAltIcon from '@material-ui/icons/ListAlt';
+import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Snackbar from 'node-snackbar';
@@ -25,6 +27,7 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import Tooltip from '@material-ui/core/Tooltip';
 import EditIcon from '@material-ui/icons/Edit';
 import Collapse from '@material-ui/core/Collapse';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -52,6 +55,30 @@ const showMess = (message) => {
     });
 }
 
+const LightTooltip = withStyles((theme) => ({
+    tooltip: {
+        backgroundColor: 'black',
+        color: 'white',
+        boxShadow: 'none',
+        fontSize: 14.5,
+    },
+    arrow: {
+        color: 'black',
+    }
+}))(Tooltip);
+
+const DarkTooltip = withStyles((theme) => ({
+    tooltip: {
+        backgroundColor: '#232135',
+        color: 'rgb(117, 117, 163)',
+        boxShadow: 'none',
+        fontSize: 14.5,
+    },
+    arrow: {
+        color: '#232135',
+    }
+}))(Tooltip);
+
 const Products = ({ width }) => {
     console.log(width)
     const dispatch = useDispatch();
@@ -68,9 +95,11 @@ const Products = ({ width }) => {
     const [open2, setOpen2] = React.useState(false);
     const [idState, setIdState] = useState(null);
     const [lvl, setLvl] = useState(level);
-    const [state,setState] = useState({});
-    const [label,setLabel] = useState('Все');
+    const [state, setState] = useState({});
+    const [label, setLabel] = useState('Все');
     const [stateBackLabel, setStateBackLabel] = useState('');
+    const product = useSelector(state => state.product);
+    const index = useSelector(state => state.index);
 
     const handleClickOpen = () => {
         setOpen2(true);
@@ -81,7 +110,7 @@ const Products = ({ width }) => {
     };
 
     const handleOpen = (i) => {
-        const arr = open.map((it)=>(it));
+        const arr = open.map((it) => (it));
         arr[i] = !arr[i];
         setOpen(arr);
     };
@@ -184,9 +213,9 @@ const Products = ({ width }) => {
                 color: currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.7)' : '',
             }
         },
-        fcont:{
-            "& .MuiFormControlLabel-label.Mui-disabled":{
-             //   color: currentTheme === 'dark' ? 'slategrey' : '',
+        butM:{
+            "&:hover":{
+                backgroundColor: currentTheme === 'dark' ? '#232135' : '#e4e9f0'
             }
         }
     }));
@@ -202,40 +231,54 @@ const Products = ({ width }) => {
     //     console.log('dsds',scrollPr);
     //     window.scroll(0,scrollPr);
     // }
-    
+
     useEffect(() => {
-        
+
 
         if (level !== 0) {
             console.log(backToProducts)
-            if(!backToProducts){
+            if (!backToProducts) {
                 var urlencoded = new URLSearchParams();
-            if (created) setIc(true);
-            urlencoded.append('isSubscription', false);
-            urlencoded.append('isManage', created);
-            urlencoded.append('isWait', false);
-            urlencoded.append('page', 1);
-            fetch('https://secure.platinumpay.cc/v1/client/products/getProducts', {
-                method: 'POST', headers: {
-                    Authorization: `Bearer ${Cookies.get('token')}`,
-                },
-                body: urlencoded
-            })
-                .then(res => {
-                    return res.json()
+                if (created) setIc(true);
+                urlencoded.append('isSubscription', false);
+                urlencoded.append('isManage', created);
+                urlencoded.append('isWait', false);
+                urlencoded.append('page', 1);
+                fetch('https://secure.platinumpay.cc/v1/client/products/getProducts', {
+                    method: 'POST', headers: {
+                        Authorization: `Bearer ${Cookies.get('token')}`,
+                    },
+                    body: urlencoded
                 })
-                .then(data => {
-                    console.log(data)
-                    dispatch(setDataProducts(data.response));
-                    setLoading(false);
-                    if (created) dispatch(isCreated());
-                })
+                    .then(res => {
+                        return res.json()
+                    })
+                    .then(data => {
+                        console.log(data)
+                        dispatch(setDataProducts(data.response));
+                        setLoading(false);
+                        if (created) dispatch(isCreated());
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        showMess('Ошибка!');
+                    })
             }
-            else{
+            else {
                 setLoading(false);
                 dispatch(isBackToPr());
                 setStateBackLabel(backLabel);
                 dispatch(setBackLabel(''));
+                if (index !== null && product.title) {
+                    console.log(index, 'AAAAAAAAAAAAAAAAAAAAAA')
+                    const arr = dataProducts.data.map(it => ({ ...it }));
+                    arr[index] = product;
+                    console.log(arr);
+                    dispatch(setDataProducts({
+                        ...dataProducts,
+                        data: arr
+                    }))
+                }
             }
         }
 
@@ -249,7 +292,7 @@ const Products = ({ width }) => {
 
 
 
-    const reloadProducts = ()=>{
+    const reloadProducts = () => {
         setLoading(true);
 
         const params = ['isManage', 'isSubscription', 'isWait'];
@@ -277,12 +320,16 @@ const Products = ({ width }) => {
                 setLoading(false);
                 console.log(data.response)
             })
+            .catch(err => {
+                console.log(err);
+                showMess('Ошибка!');
+            })
     }
 
-   
+
 
     const productsHandle = async (e, page) => {
-        if(page === pageState)return;
+        if (page === pageState) return;
         setLoading(true);
         const params = ['isManage', 'isSubscription', 'isWait']
         var urlencoded = new URLSearchParams();
@@ -321,6 +368,10 @@ const Products = ({ width }) => {
                 setLoading(false);
                 console.log(data.response)
             })
+            .catch(err => {
+                console.log(err);
+                showMess('Ошибка!');
+            })
     }
 
     useEffect(() => { console.log(dataProducts) }, [dataProducts])
@@ -354,7 +405,8 @@ const Products = ({ width }) => {
                 dispatch(setDataProducts(ob));
             })
             .catch(err => {
-                console.log(err)
+                console.log(err);
+                showMess('Ошибка!');
             })
     }
 
@@ -382,11 +434,12 @@ const Products = ({ width }) => {
                 dispatch(setDataProducts(ob));
             })
             .catch(err => {
-                console.log(err)
+                console.log(err);
+                showMess('Ошибка!');
             })
     }
 
-    const handleWait = (e, id,i) => {
+    const handleWait = (e, id, i) => {
         console.log(e.target.checked, id)
 
         var urlencoded = new URLSearchParams();
@@ -403,40 +456,41 @@ const Products = ({ width }) => {
             })
             .then(data => {
                 console.log(data);
-                const arr = dataProducts.data.map((it)=>({...it}));
+                const arr = dataProducts.data.map((it) => ({ ...it }));
                 arr[i].wait = arr[i].wait === 0 ? 1 : 0;
-                for(let it of arr){
-                    if(!it.wait && !it.type){
+                for (let it of arr) {
+                    if (!it.wait && !it.type) {
                         it.status = 'Открытый';
                     }
-                    else if(!it.wait && it.type){
+                    else if (!it.wait && it.type) {
                         it.status = 'Закрытый';
                     }
-                    else if(it.wait){
+                    else if (it.wait) {
                         it.status = 'На проверке';
                     }
                 };
                 dispatch(setDataProducts({
                     ...dataProducts,
-                    data:arr
+                    data: arr
                 }));
             })
             .catch(err => {
-                console.log(err)
+                console.log(err);
+                showMess('Ошибка!');
             })
 
     }
 
-    useEffect(()=>{
-        if(scrollPr && !loading){
-            console.log('dsds',scrollPr);
+    useEffect(() => {
+        if (scrollPr && !loading) {
+            console.log('dsds', scrollPr);
             window.scrollTo(0, scrollPr);
             dispatch(setScrollPr(0));
         }
         console.log(loading)
-    },[loading])
+    }, [loading])
 
-    const handleType = (e, id,i) => {
+    const handleType = (e, id, i) => {
         console.log(e.target.checked, id)
 
         var urlencoded = new URLSearchParams();
@@ -453,31 +507,32 @@ const Products = ({ width }) => {
             })
             .then(data => {
                 console.log(data);
-                const arr = dataProducts.data.map((it)=>({...it}));
+                const arr = dataProducts.data.map((it) => ({ ...it }));
                 arr[i].type = arr[i].type === 0 ? 1 : 0;
-                for(let it of arr){
-                    if(!it.wait && !it.type){
+                for (let it of arr) {
+                    if (!it.wait && !it.type) {
                         it.status = 'Открытый';
                     }
-                    else if(!it.wait && it.type){
+                    else if (!it.wait && it.type) {
                         it.status = 'Закрытый';
                     }
-                    else if(it.wait){
+                    else if (it.wait) {
                         it.status = 'На проверке';
                     }
                 };
                 dispatch(setDataProducts({
                     ...dataProducts,
-                    data:arr
+                    data: arr
                 }));
             })
             .catch(err => {
-                console.log(err)
+                console.log(err);
+                showMess('Ошибка!');
             })
 
     }
 
-    const handlePremium = (e, id,i) => {
+    const handlePremium = (e, id, i) => {
         console.log(e.target.checked, id)
 
         var urlencoded = new URLSearchParams();
@@ -494,26 +549,27 @@ const Products = ({ width }) => {
             })
             .then(data => {
                 console.log(data);
-                const arr = dataProducts.data.map((it)=>({...it}));
+                const arr = dataProducts.data.map((it) => ({ ...it }));
                 arr[i].premium = arr[i].premium === 0 ? 1 : 0;
-                for(let it of arr){
-                    if(!it.wait && !it.type){
+                for (let it of arr) {
+                    if (!it.wait && !it.type) {
                         it.status = 'Открытый';
                     }
-                    else if(!it.wait && it.type){
+                    else if (!it.wait && it.type) {
                         it.status = 'Закрытый';
                     }
-                    else if(it.wait){
+                    else if (it.wait) {
                         it.status = 'На проверке';
                     }
                 };
                 dispatch(setDataProducts({
                     ...dataProducts,
-                    data:arr
+                    data: arr
                 }));
             })
             .catch(err => {
-                console.log(err)
+                console.log(err);
+                showMess('Ошибка!');
             })
 
     }
@@ -544,23 +600,24 @@ const Products = ({ width }) => {
                 showMess('Продукт удален');
             })
             .catch(err => {
-                console.log(err)
+                console.log(err);
+                showMess('Ошибка!');
             })
     }
 
     useEffect(() => {
-        if(dataProducts.count){
-            setState({...dataProducts});
+        if (dataProducts.count) {
+            setState({ ...dataProducts });
         }
-        
+
     }, [dataProducts])
 
-    useEffect(()=>{
-        console.log(dataProducts,state,myArr());
-        if(state.count && !dataProducts.count){
+    useEffect(() => {
+        console.log(dataProducts, state, myArr());
+        if (state.count && !dataProducts.count) {
             dispatch(setDataProducts(state));
         }
-    },[dataProducts,state]);
+    }, [dataProducts, state]);
 
     // useEffect(()=>{
     //     if(state.count && !dataProducts.count){
@@ -569,7 +626,7 @@ const Products = ({ width }) => {
     // },[state])
 
     const myArr = () => {
-        if(dataProducts.count) return dataProducts;
+        if (dataProducts.count) return dataProducts;
         else return state;
     }
 
@@ -651,13 +708,40 @@ const Products = ({ width }) => {
                     >
                         Цена: {pr.amount} ₽
                     </Typography>
-                    <Typography
-                        style={{
-                            margin: '0px 0px 7.5px 0px'
-                        }}
-                    >
-                        Отчисления: {pr.reward} ₽ ({pr.deductions} %)
-                    </Typography>
+
+                    {currentTheme === 'dark' ?
+                        <DarkTooltip
+                            arrow
+                            title={`${pr.deductions} %`}
+                            placement='right'
+                        >
+                            <Typography
+                                style={{
+                                    margin: '0px 0px 7.5px 0px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Отчисления: {pr.reward} ₽
+                    {/* //({pr.deductions} %) */}
+                            </Typography>
+                        </DarkTooltip>
+                        :
+                        <LightTooltip
+                            arrow
+                            title={`${pr.deductions} %`}
+                            placement='right'
+                        >
+                            <Typography
+                                style={{
+                                    margin: '0px 0px 7.5px 0px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Отчисления: {pr.reward} ₽
+                        {/* //({pr.deductions} %) */}
+                            </Typography>
+                        </LightTooltip>
+                    }
 
                     <List
                         component="nav"
@@ -674,7 +758,7 @@ const Products = ({ width }) => {
                                 <ListItem
                                     className={classes.ListItem}
                                     button
-                                    onClick={()=>{handleOpen(i)}}>
+                                    onClick={() => { handleOpen(i) }}>
                                     <ListItemIcon
                                         className={classes.listIcon}
                                     >
@@ -685,16 +769,43 @@ const Products = ({ width }) => {
                                 </ListItem>
 
                                 <Collapse in={open[i]} timeout="auto" unmountOnExit>
-                                    <List component="div" disablePadding>
+                                    <List component="div" disablePadding
+                                        style={{
+                                            borderBottom: currentTheme === 'dark' ? '1px solid rgb(20, 28, 34)' : '1px solid rgb(228, 233, 240)'
+                                        }}
+                                    >
                                         <ListItem
                                             className={classes.ListItem}
-                                            button onClick={() => { myHistory.push('/dashboard/products/url') }}>
+                                            button onClick={pr.wait ? () => { showMess('Продукт не разрешён к публикации') } : () => {
+                                                dispatch(setScrollPr(window.scrollY));
+                                                dispatch(isBackToPr());
+                                                dispatch(setBackLabel(label));
+                                                dispatch(setIdForUrl(pr.productId));
+                                                myHistory.push('/dashboard/products/shorteners/create')
+                                            }}>
                                             <ListItemIcon
                                                 className={classes.listIcon}
                                             >
                                                 <LinkIcon />
                                             </ListItemIcon>
                                             <ListItemText primary="Создать ссылку" />
+                                        </ListItem>
+                                        <ListItem
+                                            className={classes.ListItem}
+                                            button onClick={pr.wait ? () => { showMess('Продукт не разрешён к публикации') } : () => {
+                                                dispatch(setScrollPr(window.scrollY));
+                                                dispatch(isBackToPr());
+                                                dispatch(setBackLabel(label));
+                                                dispatch(setIdForUrl(pr.productId));
+                                                myHistory.push('/dashboard/products/shorteners/manage')
+
+                                            }}>
+                                            <ListItemIcon
+                                                className={classes.listIcon}
+                                            >
+                                                <ListAltIcon />
+                                            </ListItemIcon>
+                                            <ListItemText primary="Мои ссылки" />
                                         </ListItem>
                                         <ListItem
                                             className={classes.ListItem}
@@ -732,6 +843,29 @@ const Products = ({ width }) => {
                                         button
                                         onClick={
                                             pr.wait && level !== 2 ? () => { showMess('Продукт не разрешён к публикации') } :
+                                                () => {
+                                                    return;
+                                                    // dispatch(setScrollPr(window.scrollY));
+                                                    // dispatch(isBackToPr());
+                                                    // dispatch(setBackLabel(label));
+                                                    // console.log(dataProducts.data[i])
+                                                    // dispatch(setProduct(dataProducts.data[i]));
+                                                    // dispatch(setIndex(i));
+                                                    // myHistory.push('/dashboard/products/edit');
+                                                }}
+                                        className={classes.ListItem}
+                                    >
+                                        <ListItemIcon
+                                            className={classes.listIcon}
+                                        >
+                                            <AttachMoneyIcon />
+                                        </ListItemIcon>
+                                        <ListItemText primary="Мои цены" />
+                                    </ListItem>
+                                    <ListItem
+                                        button
+                                        onClick={
+                                            pr.wait && level !== 2 ? () => { showMess('Продукт не разрешён к публикации') } :
                                                 pr.subscriptions === 0 ?
                                                     () => {
                                                         showMess('Партнеры не найдены')
@@ -751,16 +885,22 @@ const Products = ({ width }) => {
                                         >
                                             <PeopleIcon />
                                         </ListItemIcon>
-                                        <ListItemText primary="Посмотреть партнеров" />
+                                        <ListItemText primary="Мои партнеры" />
                                     </ListItem>
 
                                     <ListItem
                                         button
                                         onClick={
                                             pr.wait && level !== 2 ? () => { showMess('Продукт не разрешён к публикации') } :
-                                                    () => {
-                                                        return;
-                                                    }}
+                                                () => {
+                                                    dispatch(setScrollPr(window.scrollY));
+                                                    dispatch(isBackToPr());
+                                                    dispatch(setBackLabel(label));
+                                                    console.log(dataProducts.data[i])
+                                                    dispatch(setProduct(dataProducts.data[i]));
+                                                    dispatch(setIndex(i));
+                                                    myHistory.push('/dashboard/products/edit');
+                                                }}
                                         className={classes.ListItem}
                                     >
                                         <ListItemIcon
@@ -859,43 +999,29 @@ const Products = ({ width }) => {
                                     }}
                                 >
                                     <a
-                                    href={pr.url}
-                                    target='_blank'
-                                    style={{
-                                        width: width === 'xs' || width === 'sm' ? '100%' : '',
-                                        color: currentTheme === 'dark' ? 'rgb(117, 117, 152)' : 'rgb(128, 128, 128)'
-                                    }}
-                                    >
-                                    <Typography
-                                        className={classes.p}
+                                        href={pr.url}
+                                        target='_blank'
                                         style={{
-                                            height: '40px',
-                                            cursor: 'pointer',
-                                            padding: width === 'xs' || width === 'sm' ? '10px 0px' : '10px 20px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
                                             width: width === 'xs' || width === 'sm' ? '100%' : '',
                                             color: currentTheme === 'dark' ? 'rgb(117, 117, 152)' : 'rgb(128, 128, 128)'
                                         }}
                                     >
-                                        URL
+                                        <Typography
+                                            className={classes.p}
+                                            style={{
+                                                height: '40px',
+                                                cursor: 'pointer',
+                                                padding: width === 'xs' || width === 'sm' ? '10px 0px' : '10px 20px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                width: width === 'xs' || width === 'sm' ? '100%' : '',
+                                                color: currentTheme === 'dark' ? 'rgb(117, 117, 152)' : 'rgb(128, 128, 128)'
+                                            }}
+                                        >
+                                            URL
                         </Typography>
                                     </a>
-                                    <Typography
-                                        className={classes.p}
-                                        style={{
-                                            height: '40px',
-                                            cursor: 'pointer',
-                                            padding: width === 'xs' || width === 'sm' ? '10px 0px' : '10px 20px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            width: width === 'xs' || width === 'sm' ? '100%' : ''
-                                        }}
-                                    >
-                                        ЦЕНЫ
-                        </Typography>
                                     <Typography
                                         className={classes.p}
                                         style={{
@@ -951,7 +1077,7 @@ const Products = ({ width }) => {
                                 style={{
                                     display: 'flex',
                                     flexWrap: 'nowrap',
-                                    justifyContent: 'flex-start',
+                                    justifyContent: 'space-between',
                                     alignItems: 'center',
                                     flexDirection: width === 'xs' || width === 'sm' ? 'column' : 'row',
                                     width: '100%',
@@ -959,73 +1085,70 @@ const Products = ({ width }) => {
                                     color: currentTheme === 'dark' ? 'rgb(117, 117, 152)' : 'rgb(128, 128, 128)'
                                 }}
                             >
-                                <a
-                                href={pr.url}
-                                target='_blank'
+                                <Box
                                 style={{
-                                    color: currentTheme === 'dark' ? 'rgb(117, 117, 152)' : 'rgb(128, 128, 128)'
+                                    height: width === 'sm' ? 'fit-content' : '60px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'flex-start',
+                                    width: width === 'sm' ? '100%' : '',
+                                    flexDirection: width === 'sm' ? 'column' : 'row'
                                 }}
                                 >
-                                <Typography
-                                    className={classes.p}
-                                    style={{
-                                        height: '40px',
-                                        cursor: 'pointer',
-                                        padding: width === 'xs' || width === 'sm' ? '10px 0px' : '10px 20px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        width: width === 'xs' || width === 'sm' ? '100%' : '',
-                                        color: currentTheme === 'dark' ? 'rgb(117, 117, 152)' : 'rgb(128, 128, 128)'
-                                    }}
-                                >
-                                    URL
+                                    <a
+                                        href={pr.url}
+                                        target='_blank'
+                                        style={{
+                                            color: currentTheme === 'dark' ? 'rgb(117, 117, 152)' : 'rgb(128, 128, 128)',
+                                            width: width === 'sm' ? '100%' : 'default'
+                                        }}
+                                    >
+                                        <Typography
+                                            className={classes.p}
+                                            style={{
+                                                height: '40px',
+                                                cursor: 'pointer',
+                                                padding: width === 'xs' || width === 'sm' ? '10px 0px' : '10px 20px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                width: width === 'xs' || width === 'sm' ? '100%' : '',
+                                                color: currentTheme === 'dark' ? 'rgb(117, 117, 152)' : 'rgb(128, 128, 128)'
+                                            }}
+                                        >
+                                            URL
                         </Typography>
-                                </a>
-                                <Typography
-                                    className={classes.p}
-                                    style={{
-                                        height: '40px',
-                                        cursor: 'pointer',
-                                        padding: width === 'xs' || width === 'sm' ? '10px 0px' : '10px 20px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        width: width === 'xs' || width === 'sm' ? '100%' : ''
-                                    }}
-                                >
-                                    ЦЕНЫ
+                                    </a>
+                                    <Typography
+                                        className={classes.p}
+                                        style={{
+                                            height: '40px',
+                                            cursor: 'pointer',
+                                            padding: width === 'xs' || width === 'sm' ? '10px 0px' : '10px 20px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            width: width === 'xs' || width === 'sm' ? '100%' : ''
+                                        }}
+                                    >
+                                        ЗАКАЗЫ
                         </Typography>
-                                <Typography
-                                    className={classes.p}
-                                    style={{
-                                        height: '40px',
-                                        cursor: 'pointer',
-                                        padding: width === 'xs' || width === 'sm' ? '10px 0px' : '10px 20px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        width: width === 'xs' || width === 'sm' ? '100%' : ''
-                                    }}
-                                >
-                                    ЗАКАЗЫ
+                                    <Typography
+                                        className={classes.p}
+                                        style={{
+                                            height: '40px',
+                                            cursor: 'pointer',
+                                            padding: width === 'xs' || width === 'sm' ? '10px 0px' : '10px 20px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            width: width === 'xs' || width === 'sm' ? '100%' : '',
+                                            // borderRight: pr.author ? currentTheme === 'dark' ? '1px rgb(20, 28, 34) solid' : '1px #e4e9f0 solid' : 'none',
+                                        }}
+                                    >
+                                        СТАТИСТИКА
                         </Typography>
-                                <Typography
-                                    className={classes.p}
-                                    style={{
-                                        height: '40px',
-                                        cursor: 'pointer',
-                                        padding: width === 'xs' || width === 'sm' ? '10px 0px' : '10px 20px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        width: width === 'xs' || width === 'sm' ? '100%' : '',
-                                        borderRight: pr.author ? currentTheme === 'dark' ? '1px rgb(20, 28, 34) solid' : '1px #e4e9f0 solid' : 'none',
-                                    }}
-                                >
-                                    СТАТИСТИКА
-                        </Typography>
-                                {pr.author
+                                    {/* {pr.author
                                     ?
                                     <Typography
                                         className={classes.p}
@@ -1041,6 +1164,56 @@ const Products = ({ width }) => {
                                     >
                                         ПРИГЛАСИТЬ
                     </Typography>
+                                    : null} */}
+                                </Box>
+
+                                {pr.author
+                                    ?
+
+                                    <Box
+                                        style={{
+                                            height: '60px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'flex-end',
+                                            width: width === 'sm' ? '100%' : ''
+                                        }}
+                                    >
+                                        <Typography
+                                            className={classes.p}
+                                            style={{
+                                                height: '40px',
+                                                cursor: 'pointer',
+                                                padding: width === 'xs' || width === 'sm' ? '10px 0px' : '10px 20px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                width: width === 'xs' || width === 'sm' ? '100%' : ''
+                                            }}
+                                        >
+                                            ПРИГЛАСИТЬ
+                    </Typography>
+                    <IconButton
+                    className={classes.butM}
+                            style={{
+                                margin: '0px',
+                                borderRadius:'0px',
+                                padding:'21px'
+                            }}
+                        >
+                            <ReplayIcon
+                                style={{
+                                    color: currentTheme === 'dark' ? 'rgb(117, 117, 163)' : '',
+                                    fontSize: '18px',
+                                    
+                                }}
+                            >
+
+                            </ReplayIcon>
+                        </IconButton>
+
+                                    </Box>
+
                                     : null}
 
                             </Box>
@@ -1179,7 +1352,7 @@ const Products = ({ width }) => {
                                 }}
                             >
 
-                                    {pr.author === 1 ?
+                                {pr.author === 1 ?
                                     <FormControl component="fieldset"
                                         className={classes.fcont}
                                         style={{
@@ -1197,7 +1370,7 @@ const Products = ({ width }) => {
                                                         defaultChecked={!pr.type}
                                                         disabled={pr.wait}
                                                         onClick={pr.wait ? () => { showMess('Продукт не разрешён к публикации') } : null}
-                                                        onChange={(e) => handleType(e, pr.productId,i)}
+                                                        onChange={(e) => handleType(e, pr.productId, i)}
                                                         color="primary"
                                                         name="checkedB"
                                                         inputProps={{ role: 'switch' }}
@@ -1230,7 +1403,7 @@ const Products = ({ width }) => {
                                             control={
                                                 <Switch
                                                     defaultChecked={!pr.wait}
-                                                    onChange={(e) => handleWait(e, pr.productId,i)}
+                                                    onChange={(e) => handleWait(e, pr.productId, i)}
                                                     color="primary"
                                                     name="checkedB"
                                                     inputProps={{ role: 'switch' }}
@@ -1259,7 +1432,7 @@ const Products = ({ width }) => {
                                             control={
                                                 <Switch
                                                     defaultChecked={pr.premium}
-                                                    onChange={(e) => handlePremium(e, pr.productId,i)}
+                                                    onChange={(e) => handlePremium(e, pr.productId, i)}
                                                     color="primary"
                                                     name="checkedB"
                                                     inputProps={{ role: 'switch' }}
@@ -1274,7 +1447,7 @@ const Products = ({ width }) => {
                                     </FormGroup>
                                 </FormControl>
 
-                                
+
 
 
                             </Box>
@@ -1330,7 +1503,7 @@ const Products = ({ width }) => {
                                                         defaultChecked={!pr.type}
                                                         disabled={pr.wait}
                                                         onClick={pr.wait ? () => { showMess('Продукт не разрешён к публикации') } : null}
-                                                        onChange={(e) => handleType(e, pr.productId,i)}
+                                                        onChange={(e) => handleType(e, pr.productId, i)}
                                                         color="primary"
                                                         name="checkedB"
                                                         inputProps={{ role: 'switch' }}
@@ -1416,7 +1589,7 @@ const Products = ({ width }) => {
                         alignItems: 'center',
                         flexDirection: width === 'xs' ? 'column' : 'row',
                         position: 'relative',
-                        
+
                     }}
                 >
 
@@ -1424,66 +1597,66 @@ const Products = ({ width }) => {
 
 
                     <Box
-                    style={{
-                        display:'flex',
-                        justifyContent:'flex-start',
-                        position:'relative',
-                        width: width === 'xs' ? '100%' : '45%',
-                        maxWidth: '250px',
-                    }}
-                    >
-                    <FormControl
-                        className={classes.input}
                         style={{
                             display: 'flex',
-                            justifyContent: 'center',
-                           // width: width === 'xs' ? '100%' : '45%',
+                            justifyContent: 'flex-start',
+                            position: 'relative',
+                            width: width === 'xs' ? '100%' : '45%',
                             maxWidth: '250px',
-                            width:'100%',
-                            height: '45px'
                         }}
                     >
-                        <Selectrix
-                            onChange={productsHandle}
-                            materialize={true}
-                            searchable={false}
-                            className={classes.select}
-                            placeholder={ic ? 'В управлении' : stateBackLabel ? stateBackLabel : 'Все'}
-                            options={
-                                lvl === 2 ?
-                                    [
-                                        { key: 'isSubscription', label: 'В партнерстве' },
-                                        { key: 'isManage', label: 'В управлении' },
-                                        { key: 'isWait', label: 'В ожидании' }
-                                    ]
-                                    :
-                                    [
-                                        { key: 'isSubscription', label: 'В партнерстве' },
-                                        { key: 'isManage', label: 'В управлении' },
-
-                                    ]
-                            }
+                        <FormControl
+                            className={classes.input}
+                            style={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                // width: width === 'xs' ? '100%' : '45%',
+                                maxWidth: '250px',
+                                width: '100%',
+                                height: '45px'
+                            }}
                         >
+                            <Selectrix
+                                onChange={productsHandle}
+                                materialize={true}
+                                searchable={false}
+                                className={classes.select}
+                                placeholder={ic ? 'В управлении' : stateBackLabel ? stateBackLabel : 'Все'}
+                                options={
+                                    lvl === 2 ?
+                                        [
+                                            { key: 'isSubscription', label: 'В партнерстве' },
+                                            { key: 'isManage', label: 'В управлении' },
+                                            { key: 'isWait', label: 'В ожидании' }
+                                        ]
+                                        :
+                                        [
+                                            { key: 'isSubscription', label: 'В партнерстве' },
+                                            { key: 'isManage', label: 'В управлении' },
 
-                        </Selectrix>
-                    </FormControl>
-                    <IconButton
-                    onClick={reloadProducts}
-                    style={{
-                        marginTop:'13px',
-                        position:'absolute',
-                        right:'-44px'
-                    }}
-                    >
-                        <ReplayIcon
-                        style={{
-                            color: currentTheme === 'dark' ? 'rgb(117, 117, 163)' : '',
-                            fontSize:'17px'
-                        }}
+                                        ]
+                                }
+                            >
+
+                            </Selectrix>
+                        </FormControl>
+                        <IconButton
+                            onClick={reloadProducts}
+                            style={{
+                                marginTop: '13px',
+                                position: 'absolute',
+                                right: '-44px'
+                            }}
                         >
+                            <ReplayIcon
+                                style={{
+                                    color: currentTheme === 'dark' ? 'rgb(117, 117, 163)' : '',
+                                    fontSize: '17px'
+                                }}
+                            >
 
-                        </ReplayIcon>
-                    </IconButton>
+                            </ReplayIcon>
+                        </IconButton>
                     </Box>
 
                     <Button

@@ -40,7 +40,7 @@ import useMediaQuery from '@material-ui/core/useMediaQuery';
 import LinkIcon from '@material-ui/icons/Link';
 import PeopleIcon from '@material-ui/icons/People';
 import Referrals from '../../components/Referrals'
-import UsersTable from "../../components/UsersTable";
+import UrlsTable from "../../components/UrlsTable";
 
 
 const showMess = (message) => {
@@ -52,7 +52,7 @@ const showMess = (message) => {
     });
 }
 
-const Users = ({ width }) => {
+const ManageUrls = ({ width }) => {
 
     console.log(width)
     const dispatch = useDispatch();
@@ -167,15 +167,20 @@ const Users = ({ width }) => {
         page: 1
     });
     const [loading, setLoading] = useState(true);
-    const [nameState, setNameState] = useState(false);
-    const [levelState, setLevelState] = useState(false);
+    const [shortId, setShortId] = useState('');
+    const [subId, setSubId] = useState('');
     const [pageState, setPageState] = useState(1);
+    const idUrl = useSelector(state=>state.idForUrl);
 
     useEffect(() => {
-            console.log(idForRef);
+        if (!idUrl) {
+            myHistory.push('/dashboard/products')
+        }
+            console.log(idUrl);
             var urlencoded = new URLSearchParams();
+            urlencoded.append('productId', idUrl);
             urlencoded.append('page', pageState);
-            fetch('https://secure.platinumpay.cc/v1/client/users/getUsers', {
+            fetch('https://secure.platinumpay.cc/v1/client/products/shorteners/getShorteners', {
                 method: 'POST', headers: {
                     Authorization: `Bearer ${Cookies.get('token')}`,
                 },
@@ -196,12 +201,14 @@ const Users = ({ width }) => {
                 .catch(err => {
                     console.log(err);
                     setLoading(false);
+                    showMess('Ошибка!');
                 })
         
     }, [])
 
-    const handleUsers = (e,page) => {
+    const handleShorteners = (e,page) => {
         var urlencoded = new URLSearchParams();
+        urlencoded.append('productId', idUrl);
         if(page === pageState) return;
         setLoading(true);
         if(page){
@@ -211,13 +218,13 @@ const Users = ({ width }) => {
         else{
             urlencoded.append('page', pageState);
         }
-        if(nameState){
-            urlencoded.append('username', nameState);
+        if(shortId){
+            urlencoded.append('shortId', shortId);
         }
-        if(levelState){
-            urlencoded.append('level', levelState);
+        if(subId){
+            urlencoded.append('subId', subId);
         }
-        fetch('https://secure.platinumpay.cc/v1/client/users/getUsers', {
+        fetch('https://secure.platinumpay.cc/v1/client/products/shorteners/getShorteners', {
             method: 'POST', headers: {
                 Authorization: `Bearer ${Cookies.get('token')}`,
             },
@@ -236,13 +243,14 @@ const Users = ({ width }) => {
                     });
                 }
                 else{
-                    showMess('Пользователь не найден')
+                    showMess('Ссылка не найдена')
                 }
                 setLoading(false);
             })
             .catch(err => {
-                console.log(err)
+                console.log(err);
                 setLoading(false);
+                showMess('Ошибка!');
             })
     }
 
@@ -303,7 +311,7 @@ const Users = ({ width }) => {
                 }}
                 >
                 {data.arr.length > 0 ?
-                     <UsersTable data={data} setData={setData} setLoading={setLoading} nameState={nameState} setNameState={setNameState} levelState={levelState} setLevelState={setLevelState} pageState={pageState} handleUsers={handleUsers}/>
+                     <UrlsTable data={data} setData={setData} setLoading={setLoading} shortId={shortId} setShortId={setShortId} subId={subId} setSubId={setSubId} pageState={pageState} handleShorteners={handleShorteners}/>
                     : 
                     null}
                 </Box>
@@ -347,7 +355,7 @@ const Users = ({ width }) => {
                         size={width === 'xs' ? 'medium' : 'large'}
                         count={data.pages}
                         page={pageState}
-                        onChange={handleUsers}
+                        onChange={handleShorteners}
                     ></Pagination>
                 </Box>
                 </>
@@ -357,4 +365,4 @@ const Users = ({ width }) => {
     )
 };
 
-export default withWidth()(Users);
+export default withWidth()(ManageUrls);

@@ -2,11 +2,16 @@ const initialState = {
     isLogin:false,
     created:false,
     idForRef:null,
+    idForUrl:null,
     pageForRef:1,
     scrollPr:0,
+    index:null,
     backToProducts:false,
     backLabel: '',
     dataProducts:{
+
+    },
+    product:{
 
     },
     userData: {
@@ -69,6 +74,13 @@ const initialState = {
         };
       }
 
+      case "SET_ID_FOR_URL": {
+        return {
+          ...state,
+          idForUrl: action.payload
+        };
+      }
+
       case "SET_PAGE_FOR_REF": {
         return {
           ...state,
@@ -101,6 +113,20 @@ const initialState = {
         return {
           ...state,
           backLabel: action.payload
+        };
+      }
+
+      case "SET_PRODUCT": {
+        return {
+          ...state,
+          product: action.payload
+        };
+      }
+
+      case "SET_INDEX": {
+        return {
+          ...state,
+          index: action.payload
         };
       }
   
