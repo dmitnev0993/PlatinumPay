@@ -1,27 +1,22 @@
-import React, { useContext, useState, useMemo, useEffect } from "react";
-import Selectrix from 'react-selectrix';
-import ReactSelect, { Props } from "react-select";
+import React, { useContext, useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import withWidth from "@material-ui/core/withWidth";
-import { NavLink, useHistory } from "react-router-dom";
+import {  useHistory } from "react-router-dom";
 import { ThemeContext } from "../../../../context/themeContext";
 import Cookies from 'js-cookie';
 import Panel from "../../components/Panel";
-import { Accordion, AccordionDetails, AccordionSummary, AppBar, Box, Button, ClickAwayListener, Grow, Icon, IconButton, InputBase, InputLabel, makeStyles, MenuItem, MenuList, NativeSelect, Paper, Popper, Switch, Tab, Tabs, TextField, Typography, withStyles } from "@material-ui/core";
+import { Accordion, AccordionDetails, AccordionSummary, AppBar, Box, Button, Icon, IconButton, makeStyles, Switch, Tab, Tabs, Typography, withStyles } from "@material-ui/core";
 import Pagination from '@material-ui/lab/Pagination';
-import { Alert, AlertTitle } from '@material-ui/lab';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
-import { isBackToPr, isCreated, setData, setDataProducts, setScrollPr, setBackLabel, setProduct, setIndex, setIdForUrl } from "../../../../actions/actions";
+import { isBackToPr, isCreated, setDataProducts, setScrollPr, setBackLabel, setProduct, setIndex, setIdForUrl, setIdForPrices, setInvite, setInviteId } from "../../../../actions/actions";
 import { CircleSpinner } from "react-spinners-kit";
-import lightLogo from '../../../../assets/logo/logo-light.png';
 import ListAltIcon from '@material-ui/icons/ListAlt';
 import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Snackbar from 'node-snackbar';
-import ListSubheader from '@material-ui/core/ListSubheader';
 import ReplayIcon from '@material-ui/icons/Replay';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -31,7 +26,6 @@ import Tooltip from '@material-ui/core/Tooltip';
 import EditIcon from '@material-ui/icons/Edit';
 import Collapse from '@material-ui/core/Collapse';
 import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ClearIcon from '@material-ui/icons/Clear';
 import LibraryAddCheckIcon from '@material-ui/icons/LibraryAddCheck';
 import ExpandLess from '@material-ui/icons/ExpandLess';
@@ -41,7 +35,6 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import useMediaQuery from '@material-ui/core/useMediaQuery';
 import LinkIcon from '@material-ui/icons/Link';
 import PeopleIcon from '@material-ui/icons/People';
 import { setIdForRef } from '../../../../actions/actions'
@@ -87,6 +80,8 @@ const Products = ({ width }) => {
     const scrollPr = useSelector(state => state.scrollPr);
     const created = useSelector(state => state.created);
     const backLabel = useSelector(state => state.backLabel);
+    const isInvite = useSelector(state => state.isInvite);
+    const inviteId = useSelector(state => state.inviteId);
     const backToProducts = useSelector(state => state.backToProducts);
     const { currentTheme } = useContext(ThemeContext);
     const [loading, setLoading] = useState(true);
@@ -95,7 +90,7 @@ const Products = ({ width }) => {
     const [open2, setOpen2] = React.useState(false);
     const [idState, setIdState] = useState(null);
     const [lvl, setLvl] = useState(level);
-    const [state, setState] = useState({});
+    const [state, setState] = useState({ ...dataProducts });
     const [label, setLabel] = useState('Все');
     const [stateBackLabel, setStateBackLabel] = useState('');
     const product = useSelector(state => state.product);
@@ -213,11 +208,40 @@ const Products = ({ width }) => {
                 color: currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.7)' : '',
             }
         },
-        butM:{
-            "&:hover":{
+        butM: {
+            "&:hover": {
                 backgroundColor: currentTheme === 'dark' ? '#232135' : '#e4e9f0'
             }
-        }
+        },
+        bar: {
+            boxShadow: 'none',
+            margin:'15px 0px 0px 0px',
+            backgroundColor: currentTheme === 'dark' ? 'rgb(20, 19, 34)' : 'white',
+            '& .MuiTab-wrapper': {
+              color: currentTheme === 'dark' ? '#aeaee0' : 'black',
+              '&:hover': {
+                color: '#4b7cf3'
+              }
+            },
+            '& .MuiTabs-indicator': {
+              backgroundColor: '#635ee7'
+            },
+            '& .MuiTabs-flexContainerVertical': {
+              alignItems: 'center'
+            },
+            '& .MuiTabs-centered': {
+              width: 'fit-content',
+      
+            },
+            '& .MuiTabs-fixed': {
+              display: 'flex',
+              justifyContent: width === 'xs' ? 'center' : 'flex-start'
+            },
+            '& .MuiTabScrollButton-root':{
+                color: currentTheme === 'dark' ? 'white' : 'black'
+            },
+
+          },
     }));
     const classes = useStyles();
 
@@ -225,7 +249,13 @@ const Products = ({ width }) => {
 
     const [pageState, setPageState] = useState(1);
     const [ic, setIc] = useState(false);
-    const [val, setVal] = useState(undefined);
+
+    const [value, setValue] = React.useState(0);
+
+  const handleChange = (event, newValue) => {
+      console.log(newValue);
+    setValue(newValue);
+  }
 
     // if(scrollPr){
     //     console.log('dsds',scrollPr);
@@ -240,7 +270,12 @@ const Products = ({ width }) => {
             if (!backToProducts) {
                 var urlencoded = new URLSearchParams();
                 if (created) setIc(true);
-                urlencoded.append('isSubscription', false);
+                if (inviteId) {
+                    urlencoded.append('productId', inviteId);
+                    dispatch(setInviteId(null));
+                    setValue(1);
+                }
+                urlencoded.append('isSubscription', isInvite);
                 urlencoded.append('isManage', created);
                 urlencoded.append('isWait', false);
                 urlencoded.append('page', 1);
@@ -255,29 +290,35 @@ const Products = ({ width }) => {
                     })
                     .then(data => {
                         console.log(data)
-                        dispatch(setDataProducts(data.response));
+
+                        setState(data.response);
                         setLoading(false);
                         if (created) dispatch(isCreated());
                     })
                     .catch(err => {
                         console.log(err);
-                        showMess('Ошибка!');
+                        showMess('Ошибка');
                     })
+                if (isInvite) {
+                    dispatch(setInvite());
+                }
             }
             else {
                 setLoading(false);
                 dispatch(isBackToPr());
-                setStateBackLabel(backLabel);
-                dispatch(setBackLabel(''));
+                console.log(backLabel,11111111111111111111111);
+                setValue(backLabel);
+                dispatch(setBackLabel(0));
                 if (index !== null && product.title) {
                     console.log(index, 'AAAAAAAAAAAAAAAAAAAAAA')
                     const arr = dataProducts.data.map(it => ({ ...it }));
                     arr[index] = product;
                     console.log(arr);
-                    dispatch(setDataProducts({
+                    setState({
                         ...dataProducts,
                         data: arr
-                    }))
+                    });
+                    
                 }
             }
         }
@@ -295,12 +336,12 @@ const Products = ({ width }) => {
     const reloadProducts = () => {
         setLoading(true);
 
-        const params = ['isManage', 'isSubscription', 'isWait'];
+        const params = [ {title:'isSubscription',index:1},{title:'isManage',index:2},{title:'isWait',index:3}];
         var urlencoded = new URLSearchParams();
 
         for (let param of params) {
-            if (param === val) urlencoded.append(param, true);
-            else urlencoded.append(param, false);
+            if (param.index === value) urlencoded.append(param.title, true);
+            else urlencoded.append(param.title, false);
         }
 
         urlencoded.append('page', pageState);
@@ -316,40 +357,47 @@ const Products = ({ width }) => {
             })
             .then(data => {
                 console.log(data);
-                dispatch(setDataProducts(data.response));
+                setState(data.response);
                 setLoading(false);
                 console.log(data.response)
             })
             .catch(err => {
                 console.log(err);
-                showMess('Ошибка!');
+                showMess('Ошибка');
             })
     }
 
 
 
-    const productsHandle = async (e, page) => {
+    const productsHandle = (newValue ,page) => {
+        console.log(newValue);
+        if(newValue === value) return;
         if (page === pageState) return;
         setLoading(true);
-        const params = ['isManage', 'isSubscription', 'isWait']
+        const params = [ {title:'isSubscription',index:1},{title:'isManage',index:2},{title:'isWait',index:3}];
         var urlencoded = new URLSearchParams();
         if (page) {
             setPageState(page);
             urlencoded.append('page', page);
             for (let param of params) {
-                if (param === val) urlencoded.append(param, true);
-                else urlencoded.append(param, false);
+                if (param.index === value) urlencoded.append(param.title, true);
+                else urlencoded.append(param.title, false);
             }
         }
         else {
-            console.log(e);
-            setIc(false);
-            setLabel(e.label);
-            setVal(e.key);
+           // console.log(e);
+           setValue(newValue);
+            setLabel(newValue);
+            if (isInvite) {
+                dispatch(setInvite());
+            }
+            if (stateBackLabel) {
+                setStateBackLabel(0);
+            }
             urlencoded.append('page', pageState);
             for (let param of params) {
-                if (param === e.key) urlencoded.append(param, true);
-                else urlencoded.append(param, false);
+                if (param.index === newValue) urlencoded.append(param.title, true);
+                else urlencoded.append(param.title, false);
             }
         }
 
@@ -364,13 +412,14 @@ const Products = ({ width }) => {
             })
             .then(data => {
                 console.log(data);
-                dispatch(setDataProducts(data.response));
+                setState(data.response);
                 setLoading(false);
-                console.log(data.response)
+                console.log(data.response);
+                setState(data.response);
             })
             .catch(err => {
                 console.log(err);
-                showMess('Ошибка!');
+                showMess('Ошибка');
             })
     }
 
@@ -395,18 +444,18 @@ const Products = ({ width }) => {
             })
             .then(data => {
                 console.log(data);
-                let ob = { ...dataProducts };
+                let ob = { ...state };
                 for (let pr of ob.data) {
                     if (pr.productId === data.response.productId) {
                         pr.subscription = 1;
                         pr.subscriptions += 1;
                     }
                 }
-                dispatch(setDataProducts(ob));
+                setState(ob);
             })
             .catch(err => {
                 console.log(err);
-                showMess('Ошибка!');
+                showMess('Ошибка');
             })
     }
 
@@ -424,18 +473,18 @@ const Products = ({ width }) => {
             })
             .then(data => {
                 console.log(data);
-                let ob = { ...dataProducts };
+                let ob = { ...state };
                 for (let pr of ob.data) {
                     if (pr.productId === data.response.productId) {
                         pr.subscription = 0;
                         pr.subscriptions -= 1;
                     }
                 }
-                dispatch(setDataProducts(ob));
+                setState(ob);
             })
             .catch(err => {
                 console.log(err);
-                showMess('Ошибка!');
+
             })
     }
 
@@ -456,7 +505,7 @@ const Products = ({ width }) => {
             })
             .then(data => {
                 console.log(data);
-                const arr = dataProducts.data.map((it) => ({ ...it }));
+                const arr = state.data.map((it) => ({ ...it }));
                 arr[i].wait = arr[i].wait === 0 ? 1 : 0;
                 for (let it of arr) {
                     if (!it.wait && !it.type) {
@@ -469,22 +518,55 @@ const Products = ({ width }) => {
                         it.status = 'На проверке';
                     }
                 };
-                dispatch(setDataProducts({
-                    ...dataProducts,
+                setState({
+                    ...state,
                     data: arr
-                }));
+                });
             })
             .catch(err => {
                 console.log(err);
-                showMess('Ошибка!');
+                showMess('Ошибка');
             })
 
+    }
+
+    const resetInvite = (id) => {
+        var urlencoded = new URLSearchParams();
+        urlencoded.append('productId', id);
+        fetch('https://secure.platinumpay.cc/v1/client/products/resetInvite', {
+            method: 'POST', headers: {
+                Authorization: `Bearer ${Cookies.get('token')}`,
+            },
+            body: urlencoded
+        })
+            .then(res => {
+                return res.json();
+            })
+            .then(data => {
+                console.log(state);
+                const arr = state.data.map((it) => ({ ...it }));
+                for (let it of arr) {
+                    if (it.productId === data.response.productId) {
+                        it.invite = data.response.invite;
+                    }
+                }
+                setState({
+                    ...state,
+                    data: arr
+                })
+                showMess('Ссылка изменена');
+            })
+            .catch(err => {
+                console.log(err);
+                showMess('Ошибка');
+            })
     }
 
     useEffect(() => {
         if (scrollPr && !loading) {
             console.log('dsds', scrollPr);
             window.scrollTo(0, scrollPr);
+            dispatch(setDataProducts(state));
             dispatch(setScrollPr(0));
         }
         console.log(loading)
@@ -507,7 +589,7 @@ const Products = ({ width }) => {
             })
             .then(data => {
                 console.log(data);
-                const arr = dataProducts.data.map((it) => ({ ...it }));
+                const arr = state.data.map((it) => ({ ...it }));
                 arr[i].type = arr[i].type === 0 ? 1 : 0;
                 for (let it of arr) {
                     if (!it.wait && !it.type) {
@@ -520,14 +602,14 @@ const Products = ({ width }) => {
                         it.status = 'На проверке';
                     }
                 };
-                dispatch(setDataProducts({
-                    ...dataProducts,
+                setState({
+                    ...state,
                     data: arr
-                }));
+                });
             })
             .catch(err => {
                 console.log(err);
-                showMess('Ошибка!');
+                showMess('Ошибка');
             })
 
     }
@@ -549,7 +631,7 @@ const Products = ({ width }) => {
             })
             .then(data => {
                 console.log(data);
-                const arr = dataProducts.data.map((it) => ({ ...it }));
+                const arr = state.data.map((it) => ({ ...it }));
                 arr[i].premium = arr[i].premium === 0 ? 1 : 0;
                 for (let it of arr) {
                     if (!it.wait && !it.type) {
@@ -562,14 +644,14 @@ const Products = ({ width }) => {
                         it.status = 'На проверке';
                     }
                 };
-                dispatch(setDataProducts({
-                    ...dataProducts,
+                setState({
+                    ...state,
                     data: arr
-                }));
+                });
             })
             .catch(err => {
                 console.log(err);
-                showMess('Ошибка!');
+                showMess('Ошибка');
             })
 
     }
@@ -588,7 +670,7 @@ const Products = ({ width }) => {
             })
             .then(data => {
                 console.log(data);
-                let ob = { ...dataProducts };
+                let ob = { ...state };
                 for (let i = 0; i < ob.data.length; i++) {
                     if (data.response.productId === ob.data[i].productId) {
                         console.log(ob, 'COMPLETE')
@@ -596,28 +678,28 @@ const Products = ({ width }) => {
                         break;
                     }
                 }
-                dispatch(setDataProducts(ob));
+                setState(ob);
                 showMess('Продукт удален');
             })
             .catch(err => {
                 console.log(err);
-                showMess('Ошибка!');
+                showMess('Ошибка');
             })
     }
 
-    useEffect(() => {
-        if (dataProducts.count) {
-            setState({ ...dataProducts });
-        }
+    // useEffect(() => {
+    //     if (dataProducts.count) {
+    //         setState({ ...dataProducts });
+    //     }
 
-    }, [dataProducts])
+    // }, [dataProducts])
 
-    useEffect(() => {
-        console.log(dataProducts, state, myArr());
-        if (state.count && !dataProducts.count) {
-            dispatch(setDataProducts(state));
-        }
-    }, [dataProducts, state]);
+    // useEffect(() => {
+    //     console.log(dataProducts, state, myArr());
+    //     if (state.count && !dataProducts.count) {
+    //         dispatch(setDataProducts(state));
+    //     }
+    // }, [state]);
 
     // useEffect(()=>{
     //     if(state.count && !dataProducts.count){
@@ -625,12 +707,17 @@ const Products = ({ width }) => {
     //     }
     // },[state])
 
-    const myArr = () => {
-        if (dataProducts.count) return dataProducts;
-        else return state;
+    // const myArr = () => {
+    //     if (dataProducts.count === state.count) return dataProducts;
+    //     else return state;
+    // }
+
+    const copyUrl = (invite) => {
+        navigator.clipboard.writeText(`https://cpadev-46e91.web.app/invite/product:${invite}`);
+        showMess('Ссылка скопирована')
     }
 
-    const products = myArr().count && myArr().data.map((pr, i) => {
+    const products = state.count && state.data.map((pr, i) => {
         return (
             <Box
                 key={i}
@@ -778,8 +865,9 @@ const Products = ({ width }) => {
                                             className={classes.ListItem}
                                             button onClick={pr.wait ? () => { showMess('Продукт не разрешён к публикации') } : () => {
                                                 dispatch(setScrollPr(window.scrollY));
+                                                dispatch(setDataProducts(state));
                                                 dispatch(isBackToPr());
-                                                dispatch(setBackLabel(label));
+                                                dispatch(setBackLabel(value));
                                                 dispatch(setIdForUrl(pr.productId));
                                                 myHistory.push('/dashboard/products/shorteners/create')
                                             }}>
@@ -792,14 +880,17 @@ const Products = ({ width }) => {
                                         </ListItem>
                                         <ListItem
                                             className={classes.ListItem}
-                                            button onClick={pr.wait ? () => { showMess('Продукт не разрешён к публикации') } : () => {
-                                                dispatch(setScrollPr(window.scrollY));
-                                                dispatch(isBackToPr());
-                                                dispatch(setBackLabel(label));
-                                                dispatch(setIdForUrl(pr.productId));
-                                                myHistory.push('/dashboard/products/shorteners/manage')
+                                            button onClick={pr.wait ? () => { showMess('Продукт не разрешён к публикации') } :
+                                                pr.shorteners ?
+                                                    () => {
+                                                        dispatch(setScrollPr(window.scrollY));
+                                                        dispatch(isBackToPr());
+                                                        dispatch(setDataProducts(state));
+                                                        dispatch(setBackLabel(value));
+                                                        dispatch(setIdForUrl(pr.productId));
+                                                        myHistory.push('/dashboard/products/shorteners')
 
-                                            }}>
+                                                    } : () => { showMess('Ссылки не найдены') }}>
                                             <ListItemIcon
                                                 className={classes.listIcon}
                                             >
@@ -844,14 +935,15 @@ const Products = ({ width }) => {
                                         onClick={
                                             pr.wait && level !== 2 ? () => { showMess('Продукт не разрешён к публикации') } :
                                                 () => {
-                                                    return;
-                                                    // dispatch(setScrollPr(window.scrollY));
-                                                    // dispatch(isBackToPr());
-                                                    // dispatch(setBackLabel(label));
-                                                    // console.log(dataProducts.data[i])
-                                                    // dispatch(setProduct(dataProducts.data[i]));
-                                                    // dispatch(setIndex(i));
-                                                    // myHistory.push('/dashboard/products/edit');
+
+                                                    dispatch(setScrollPr(window.scrollY));
+                                                    dispatch(isBackToPr());
+                                                    dispatch(setBackLabel(value));
+                                                    dispatch(setDataProducts(state));
+                                                    dispatch(setIdForPrices(pr.productId));
+                                                    //dispatch(setProduct(dataProducts.data[i]));
+                                                    //dispatch(setIndex(i));
+                                                    myHistory.push('/dashboard/products/prices');
                                                 }}
                                         className={classes.ListItem}
                                     >
@@ -874,8 +966,10 @@ const Products = ({ width }) => {
                                                     () => {
                                                         dispatch(setIdForRef(pr.productId));
                                                         dispatch(setScrollPr(window.scrollY));
+                                                        dispatch(setDataProducts(state));
                                                         dispatch(isBackToPr());
-                                                        dispatch(setBackLabel(label));
+                                                        console.log(value,22222222222222222);
+                                                        dispatch(setBackLabel(value));
                                                         myHistory.push('/dashboard/products/subscriptions')
                                                     }}
                                         className={classes.ListItem}
@@ -895,9 +989,10 @@ const Products = ({ width }) => {
                                                 () => {
                                                     dispatch(setScrollPr(window.scrollY));
                                                     dispatch(isBackToPr());
-                                                    dispatch(setBackLabel(label));
-                                                    console.log(dataProducts.data[i])
-                                                    dispatch(setProduct(dataProducts.data[i]));
+                                                    dispatch(setBackLabel(value));
+                                                    dispatch(setDataProducts(state));
+                                                    //   console.log(dataProducts.data[i])
+                                                    dispatch(setProduct(state.data[i]));
                                                     dispatch(setIndex(i));
                                                     myHistory.push('/dashboard/products/edit');
                                                 }}
@@ -1053,6 +1148,7 @@ const Products = ({ width }) => {
                         </Typography>
                                     {pr.author ?
                                         <Typography
+                                            onClick={() => { copyUrl(pr.invite) }}
                                             className={classes.p}
                                             style={{
                                                 height: '40px',
@@ -1064,8 +1160,25 @@ const Products = ({ width }) => {
                                                 width: width === 'xs' || width === 'sm' ? '100%' : ''
                                             }}
                                         >
-                                            ПРИГЛАСИТЬ
-                    </Typography>
+                                            ССЫЛКА
+                                        </Typography>
+                                        : null}
+                                    {pr.author ?
+                                        <Typography
+                                            onClick={() => { resetInvite(pr.productId) }}
+                                            className={classes.p}
+                                            style={{
+                                                height: '40px',
+                                                cursor: 'pointer',
+                                                padding: width === 'xs' || width === 'sm' ? '10px 0px' : '10px 20px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                width: width === 'xs' || width === 'sm' ? '100%' : ''
+                                            }}
+                                        >
+                                            ОБНОВИТЬ ССЫЛКУ
+                                        </Typography>
                                         : null}
 
                                 </Box>
@@ -1086,14 +1199,14 @@ const Products = ({ width }) => {
                                 }}
                             >
                                 <Box
-                                style={{
-                                    height: width === 'sm' ? 'fit-content' : '60px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'flex-start',
-                                    width: width === 'sm' ? '100%' : '',
-                                    flexDirection: width === 'sm' ? 'column' : 'row'
-                                }}
+                                    style={{
+                                        height: width === 'sm' ? 'fit-content' : '60px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'flex-start',
+                                        width: width === 'sm' ? '100%' : '',
+                                        flexDirection: width === 'sm' ? 'column' : 'row'
+                                    }}
                                 >
                                     <a
                                         href={pr.url}
@@ -1180,6 +1293,7 @@ const Products = ({ width }) => {
                                         }}
                                     >
                                         <Typography
+                                            onClick={() => { copyUrl(pr.invite) }}
                                             className={classes.p}
                                             style={{
                                                 height: '40px',
@@ -1191,26 +1305,27 @@ const Products = ({ width }) => {
                                                 width: width === 'xs' || width === 'sm' ? '100%' : ''
                                             }}
                                         >
-                                            ПРИГЛАСИТЬ
+                                            ССЫЛКА
                     </Typography>
-                    <IconButton
-                    className={classes.butM}
-                            style={{
-                                margin: '0px',
-                                borderRadius:'0px',
-                                padding:'21px'
-                            }}
-                        >
-                            <ReplayIcon
-                                style={{
-                                    color: currentTheme === 'dark' ? 'rgb(117, 117, 163)' : '',
-                                    fontSize: '18px',
-                                    
-                                }}
-                            >
+                                        <IconButton
+                                            onClick={() => { resetInvite(pr.productId) }}
+                                            className={classes.butM}
+                                            style={{
+                                                margin: '0px',
+                                                borderRadius: '0px',
+                                                padding: '21px'
+                                            }}
+                                        >
+                                            <ReplayIcon
+                                                style={{
+                                                    color: currentTheme === 'dark' ? 'rgb(117, 117, 163)' : '',
+                                                    fontSize: '18px',
 
-                            </ReplayIcon>
-                        </IconButton>
+                                                }}
+                                            >
+
+                                            </ReplayIcon>
+                                        </IconButton>
 
                                     </Box>
 
@@ -1313,7 +1428,7 @@ const Products = ({ width }) => {
                                     textAlign: 'start'
                                 }}
                             >
-                                Количество апсейлов: {pr.upsales}
+                                Апсейлы: {pr.upsales}
                             </Typography>
                         </Box>
                     </Box>
@@ -1599,13 +1714,13 @@ const Products = ({ width }) => {
                     <Box
                         style={{
                             display: 'flex',
-                            justifyContent: 'flex-start',
+                            justifyContent: width === 'xs' ? 'center' : 'flex-start',
                             position: 'relative',
                             width: width === 'xs' ? '100%' : '45%',
                             maxWidth: '250px',
                         }}
                     >
-                        <FormControl
+                        {/* <FormControl
                             className={classes.input}
                             style={{
                                 display: 'flex',
@@ -1621,7 +1736,9 @@ const Products = ({ width }) => {
                                 materialize={true}
                                 searchable={false}
                                 className={classes.select}
-                                placeholder={ic ? 'В управлении' : stateBackLabel ? stateBackLabel : 'Все'}
+                                defaultValue={ic ? 'isManage' : stateBackLabel ? stateBackLabel : isInvite ? 'isSubscription' : false}
+                                // placeholder={ic ? 'В управлении' : stateBackLabel ? stateBackLabel : isInvite ? 'В партнерстве' : 'Все'}
+                                placeholder={'Все'}
                                 options={
                                     lvl === 2 ?
                                         [
@@ -1639,19 +1756,26 @@ const Products = ({ width }) => {
                             >
 
                             </Selectrix>
-                        </FormControl>
+                        </FormControl> */}
+                        <Typography variant='h5'
+                            style={{
+                                color: currentTheme === 'dark' ? '#aeaee0' : 'black',
+                            }}>
+                            Продукты
+                    </Typography>
                         <IconButton
                             onClick={reloadProducts}
                             style={{
-                                marginTop: '13px',
-                                position: 'absolute',
-                                right: '-44px'
+                                position:'absolute',
+                                    top: width === 'xs' ? '-2px' : '-1px',
+                                    left: width === 'xs' ? '172px' : '110px'
                             }}
                         >
                             <ReplayIcon
                                 style={{
                                     color: currentTheme === 'dark' ? 'rgb(117, 117, 163)' : '',
-                                    fontSize: '17px'
+                                    fontSize: '17px',
+                                    
                                 }}
                             >
 
@@ -1683,6 +1807,26 @@ const Products = ({ width }) => {
                     </Button>
 
                 </Box>
+                 <Box>
+                    <AppBar position="static" className={classes.bar}>
+                        <Tabs
+                            orientation={width === 'xs' ? "vertical" : "horizontal"}
+                            variant={width === 'sm' ? 'scrollable' : 'standard'}
+                            value={value}
+                            onChange={(e,newValue)=>{productsHandle(newValue,undefined)}}
+                            
+                            aria-label="simple tabs example"
+                        >
+                            <Tab label="Все" 
+                            style={{
+                                minWidth: '40px'
+                            }}/>
+                            <Tab label="В партнерстве" />
+                            <Tab label="В управлении" />
+                            {lvl === 2 ? <Tab label="В ожидании" /> : null}
+                        </Tabs>
+                    </AppBar>
+                </Box>
                 {loading ?
                     <Box
                         style={{
@@ -1693,7 +1837,8 @@ const Products = ({ width }) => {
                             right: '0px',
                             display: 'flex',
                             justifyContent: 'center',
-                            alignItems: 'center'
+                            alignItems: width === 'xs' ? 'flex-end' : 'center',
+                            paddingBottom: width !== 'xs' ? '0px' : '30%'
                         }}
                     >
                         <CircleSpinner
@@ -1709,7 +1854,7 @@ const Products = ({ width }) => {
                         display: 'flex',
                         justifyContent: 'center',
                     }}>
-                        {!dataProducts.count && !state.count ?
+                        {!state.count ?
                             <Box
                                 style={{
                                     color: currentTheme === 'dark' ? '#595c97' : 'black',
@@ -1739,13 +1884,13 @@ const Products = ({ width }) => {
                                         padding: '0px 0px 5px 0px'
                                     }}
                                 >
-                                    {dataProducts.count ?
+                                    {state.count ?
                                         <Pagination
                                             className={classes.paginationRoot}
                                             size={width === 'xs' ? 'medium' : 'large'}
-                                            count={dataProducts.pages}
+                                            count={state.pages}
                                             page={pageState}
-                                            onChange={productsHandle}
+                                            onChange={(e,page)=>{productsHandle(undefined,page)}}
                                         ></Pagination>
                                         : null
                                     }
@@ -1757,28 +1902,6 @@ const Products = ({ width }) => {
                     </Box>
                 }
 
-                {/* {!loading ?
-                    <Box
-                        style={{
-                            width: '100%',
-                            display: 'flex',
-                            justifyContent: 'center'
-                        }}
-                    >
-                        {dataProducts.count ?
-                            <Pagination
-                                className={classes.paginationRoot}
-                                size={width === 'xs' ? 'medium' : 'large'}
-                                count={dataProducts.pages}
-                                onChange={productsHandle}
-                            ></Pagination>
-                            : null
-                        }
-
-
-                    </Box>
-                    : null
-                } */}
             </Box>
         </>
     );

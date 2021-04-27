@@ -1,9 +1,8 @@
 import React, { useContext } from "react";
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import withWidth from "@material-ui/core/withWidth";
 import { useHistory } from "react-router-dom";
 import { ThemeContext } from "../../context/themeContext";
-import Cookies from 'js-cookie';
 import Panel from "./components/Panel";
 import StatisticsToday from "./components/StatisticsToday";
 import StatisticsMonthly from './components/StatisticsMonthly';

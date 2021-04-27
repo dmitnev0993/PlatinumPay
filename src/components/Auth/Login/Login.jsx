@@ -140,11 +140,11 @@ const Login = ({ width }) => {
             level:userData.response.level
           }))
           dispatch(setLogin())
-          showMess('Авторизация прошла успешно!');
+          showMess('Авторизация прошла успешно');
           route();
         }
         else {
-          showMess('Что-то пошло не так, попробуйте еще раз.')
+          showMess('Что-то пошло не так, попробуйте еще раз')
         }
       })
   }

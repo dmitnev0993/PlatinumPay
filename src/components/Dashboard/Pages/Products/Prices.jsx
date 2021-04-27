@@ -5,12 +5,11 @@ import { useHistory } from "react-router-dom";
 import { ThemeContext } from "../../../../context/themeContext";
 import Cookies from 'js-cookie';
 import Panel from "../../components/Panel";
-import { Box, Button, IconButton, makeStyles, Typography } from "@material-ui/core";
+import { Box, makeStyles,  Typography } from "@material-ui/core";
 import Pagination from '@material-ui/lab/Pagination';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { CircleSpinner } from "react-spinners-kit";
 import Snackbar from 'node-snackbar';
-import Referrals from '../../components/Referrals'
+import PriceTable from "../../components/PriceTable";
 
 
 const showMess = (message) => {
@@ -22,14 +21,11 @@ const showMess = (message) => {
     });
 }
 
-const Subscriptions = ({ width }) => {
+const Prices = ({ width }) => {
 
     console.log(width)
     const dispatch = useDispatch();
-    const userData = useSelector(state => state.userData);
-    const level = useSelector(state => state.userData.level);
-    const idForRef = useSelector(state => state.idForRef);
-    const pageForRef = useSelector(state => state.pageForRef);
+    const idForPrices = useSelector(state => state.idForPrices);
 
     const { currentTheme } = useContext(ThemeContext);
 
@@ -138,53 +134,50 @@ const Subscriptions = ({ width }) => {
     });
     const [loading, setLoading] = useState(false);
     const [loadingPage, setLoadingPage] = useState(true);
-    const [id, setId] = useState(true);
-
+    const [amountState, setAmountState] = useState(false);
     const [pageState, setPageState] = useState(1);
-    const [usernameSt, setUsernameSt] = useState('');
+    const [id, setId] = useState(idForPrices);
 
     useEffect(() => {
-        if (!idForRef) {
-            myHistory.push('/dashboard/products')
+        console.log(idForPrices);
+        if (!idForPrices) {
+            myHistory.push('/dashboard/products');
+            return;
         }
-        else {
-            setId(idForRef);
-            setPageState(pageForRef);
-            console.log(idForRef)
-            var urlencoded = new URLSearchParams();
-            urlencoded.append('productId', idForRef);
-            urlencoded.append('page', pageForRef);
-            fetch('https://secure.platinumpay.cc/v1/client/products/subscriptions/getSubscriptions', {
-                method: 'POST', headers: {
-                    Authorization: `Bearer ${Cookies.get('token')}`,
-                },
-                body: urlencoded
+        var urlencoded = new URLSearchParams();
+        urlencoded.append('productId', id);
+        urlencoded.append('page', pageState);
+        fetch('https://secure.platinumpay.cc/v1/client/products/prices/getPrices', {
+            method: 'POST', headers: {
+                Authorization: `Bearer ${Cookies.get('token')}`,
+            },
+            body: urlencoded
+        })
+            .then(res => {
+                return res.json();
             })
-                .then(res => {
-                    return res.json();
-                })
-                .then(data => {
-                    console.log(data);
-                    setData({
-                        ...data,
-                        arr: data.response.data,
-                        pages: data.response.pages
-                    });
-                    setLoadingPage(false);
-                })
-                .catch(err => {
-                    console.log(err);
-                    setLoadingPage(false);
-                    showMess('Ошибка')
-                })
-        }
+            .then(data => {
+                console.log(data);
+                setData({
+                    ...data,
+                    arr: data.response.data,
+                    pages: data.response.pages
+                });
+                setLoadingPage(false);
+            })
+            .catch(err => {
+                console.log(err);
+                setLoadingPage(false);
+            })
+
     }, [])
 
-    const handleSubscriptions = (e, page) => {
-        console.log(e.key, page, 'fasf')
+    const handlePrices = (e, page) => {
+        var urlencoded = new URLSearchParams();
+        urlencoded.append('productId', id);
+
         if (page === pageState) return;
         setLoading(true);
-        var urlencoded = new URLSearchParams();
         if (page) {
             urlencoded.append('page', page);
             setPageState(page);
@@ -192,13 +185,11 @@ const Subscriptions = ({ width }) => {
         else {
             urlencoded.append('page', pageState);
         }
-        console.log(e.key, page, 'asdsads')
 
-        urlencoded.append('productId', idForRef);
-        if (usernameSt) {
-            urlencoded.append('username', usernameSt);
+        if (amountState) {
+            urlencoded.append('amount', amountState);
         }
-        fetch('https://secure.platinumpay.cc/v1/client/products/subscriptions/getSubscriptions', {
+        fetch('https://secure.platinumpay.cc/v1/client/products/prices/getPrices', {
             method: 'POST', headers: {
                 Authorization: `Bearer ${Cookies.get('token')}`,
             },
@@ -217,19 +208,14 @@ const Subscriptions = ({ width }) => {
                     });
                 }
                 else {
-                    showMess('Партнер не найден');
+                    showMess('Цена не найдена');
                 }
                 setLoading(false);
             })
             .catch(err => {
-                console.log(err);
-                showMess('Ошибка');
+                console.log(err)
                 setLoading(false);
             })
-    }
-
-    const redirectPr = () => {
-        myHistory.push('/dashboard/products')
     }
 
 
@@ -238,38 +224,7 @@ const Subscriptions = ({ width }) => {
             <Panel>
 
             </Panel>
-            {width === 'xs' ?
 
-                <IconButton
-                    onClick={redirectPr}
-                    style={{
-                        position: 'fixed',
-                        top: '92px',
-                        right: '15px',
-                        zIndex: '100'
-                    }}
-                >
-                    <ArrowBackIcon
-                        style={{
-                            color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
-                        }}
-                    >
-
-                    </ArrowBackIcon>
-                </IconButton>
-                :
-                <Button
-                    onClick={redirectPr}
-                    style={{
-                        position: 'fixed',
-                        top: '97px',
-                        right: '15px',
-                        color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
-                        zIndex: '100'
-                    }}
-                >
-                    Вернуться назад
-            </Button>}
             <Box
                 className='animate__animated animate__fadeIn'
                 style={{
@@ -290,9 +245,6 @@ const Subscriptions = ({ width }) => {
                     alignItems: 'flex-start'
                 }}
             >
-
-                
-
                     <>
                     {loadingPage ?
                     <Box
@@ -320,11 +272,7 @@ const Subscriptions = ({ width }) => {
                             }}
                         >
                             {data.arr.length > 0 ?
-                                <Referrals data={data} setData={setData} loading={loading} setLoading={setLoading} id={id} page={pageState} handleSubscriptions={handleSubscriptions}
-                                    usernameSt={usernameSt} setUsernameSt={setUsernameSt}
-                                >
-
-                                </Referrals>
+                                <PriceTable data={data} setData={setData} setLoading={setLoading} amountState={amountState} setAmountState={setAmountState} pageState={pageState} handlePrices={handlePrices} id={id} loading={loading}/>
                                 :
                                 <Box
                                     style={{
@@ -332,21 +280,23 @@ const Subscriptions = ({ width }) => {
                                         textAlign: 'center',
                                         marginTop: '100px'
                                     }}>
-                                    <Typography variant={width === 'xs' ? 'h5' : 'h4'} style={{ marginBottom: '8px' }}>Партнеры не найдены</Typography>
-                                    
-                                </Box>}
+                                    <Typography variant={width === 'xs' ? 'h5' : 'h4'} style={{ marginBottom: '8px' }}>Цены не найдены</Typography>
+                                    <Typography variant={width === 'xs' ? 'h7' : 'h6'}>Цены не найдены, либо еще не созданы</Typography>
+                                </Box>
+                            }
                         </Box>
 }
+
                         {data.arr.length > 0 ?
                         loading ?
-                            null
-                            :
-                            <Box
+                        null
+                        :
+                                <Box
                                 style={{
                                     width: '100%',
                                     display: 'flex',
                                     justifyContent: 'center',
-                                    margin: '12px 0px 0px 0px',
+                                    margin: '22px 0px 0px 0px',
                                     paddingBottom: '20px'
                                 }}
                             >
@@ -354,12 +304,14 @@ const Subscriptions = ({ width }) => {
                                     className={classes.paginationRoot}
                                     size={width === 'xs' ? 'medium' : 'large'}
                                     count={data.pages}
-                                    onChange={handleSubscriptions}
+                                    page={pageState}
+                                    onChange={handlePrices}
                                 ></Pagination>
                             </Box>
-                            :
-                            null}
-
+                                :
+                                null
+                            }
+                        
                     </>
                 
             </Box>
@@ -367,4 +319,4 @@ const Subscriptions = ({ width }) => {
     )
 };
 
-export default withWidth()(Subscriptions);
+export default withWidth()(Prices);

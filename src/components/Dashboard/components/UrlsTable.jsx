@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import withWidth from "@material-ui/core/withWidth";
-import { makeStyles, Typography, Accordion, AccordionDetails, AccordionSummary, AppBar, Box, Button, ClickAwayListener, Grow, Icon, InputBase, InputLabel, MenuItem, MenuList, NativeSelect, Paper, Popper, Switch, Tab, Tabs, TextField, withStyles, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, IconButton, FormControl } from "@material-ui/core";
+import { useHistory } from "react-router-dom";
+import { makeStyles, Typography, Box, Button, Paper, Switch, TextField, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, IconButton, FormControl, FormGroup, FormControlLabel } from "@material-ui/core";
 import { ThemeContext } from "../../../context/themeContext";
-import { DataGrid } from '@material-ui/data-grid';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import EditIcon from '@material-ui/icons/Edit';
+import { CircleSpinner } from "react-spinners-kit";
 import DoneIcon from '@material-ui/icons/Done';
-import { Visibility, VisibilityOff, People, Close } from '@material-ui/icons';
 import ReplayIcon from '@material-ui/icons/Replay';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Cookies from 'js-cookie';
@@ -16,7 +16,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import Selectrix from 'react-selectrix';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import Snackbar from 'node-snackbar';
 
 const showMess = (message) => {
@@ -28,15 +28,22 @@ const showMess = (message) => {
     });
 }
 
-const UrlsTable = ({ width, data, setData, setLoading, shortId, setShortId, subId, setSubId, pageState, handleShorteners }) => {
-    const dispatch = useDispatch();
+let myId = null;
+
+const UrlsTable = ({ width, data, setData, loading, setLoading, shortId, setShortId, subId, setSubId, sourceSt, setSourceSt, nameSt, setNameSt, pageState, handleShorteners }) => {
     const { currentTheme } = useContext(ThemeContext);
     const [state, setState] = useState([]);
-    const [vis, setVis] = useState(false);
     const [open, setOpen] = useState(false);
     const [iState, setIState] = useState(null);
     const idUrl = useSelector(state => state.idForUrl);
-    const [idUrlSt, setIdUrlSt] = useState(idUrl);
+    if (idUrl) myId = idUrl;
+    const [idUrlSt, setIdUrlSt] = useState(myId);
+    const arr = [];
+    for (let i of data.response.data) {
+        arr.push(i.trafficBackValue);
+    };
+    const [hide, setHide] = useState(arr);
+    const myHistory = useHistory();
 
     const useStyles = makeStyles((theme) => ({
         input: {
@@ -101,31 +108,38 @@ const UrlsTable = ({ width, data, setData, setLoading, shortId, setShortId, subI
                 backgroundColor: currentTheme === 'dark' ? '#2b2a38' : '#c8c4db',
             },
             "& .MuiTableCell-head": {
-                width: '160px',
-                minWidth: '160px',
-                maxWidth: '160px',
+                width: '210px',
+                display: 'flex',
+                justifyContent: 'flex-start',
                 fontSize: '18px',
                 color: currentTheme === 'dark' ? '#aeaee0' : 'black',
                 borderColor: currentTheme === 'dark' ? 'rgb(20, 28, 34)' : ''
             },
+            "& .MuiTableRow-root": {
+                display: 'flex',
+                justifyContent: 'flex-start',
+            },
             "& .MuiTableCell-body": {
-                width: '160px',
-                minWidth: '160px',
-                maxWidth: '160px',
+                width: '210px',
                 fontSize: '16px',
                 border: 'none',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-end',
+
                 color: currentTheme === 'dark' ? '#aeaee0' : 'black',
-                //wordBreak: 'break-all',
+                // wordBreak: 'keep-all',
                 // overflow: 'hidden',
             },
         },
         text: {
-            margin: '0px 5px',
             "& .MuiInput-underline:hover:not(.Mui-disabled):before": {
                 borderBottom: '1px solid #7575a3',
             },
             "& .MuiInputBase-input": {
                 color: currentTheme === 'dark' ? '#aeaee0' : 'black',
+                paddingTop: '0px',
+                paddingBottom: '3px'
             },
             '& .MuiInput-underline:before': {
 
@@ -141,6 +155,29 @@ const UrlsTable = ({ width, data, setData, setLoading, shortId, setShortId, subI
                 color: currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.7)' : '',
             }
         },
+        box2in: {
+            overflowX: 'hidden',
+            height: '50px',
+            alignItems: 'flex-end!important'
+        },
+        box2in2: {
+            overflowX: 'hidden',
+            height: '50px',
+            alignItems: 'flex-start',
+        },
+        fcont: {
+            "& .MuiFormControlLabel-root": {
+                // display:'flex',
+                // justifyContent:'flex-start',
+                // alignItems:'flex-start'
+                position: 'relative'
+            },
+            "& .MuiSwitch-root": {
+                position: 'absolute',
+                top: '-18px',
+                left: '0px'
+            }
+        }
     }));
 
     const reloadShorteners = () => {
@@ -158,7 +195,7 @@ const UrlsTable = ({ width, data, setData, setLoading, shortId, setShortId, subI
                 return res.json();
             })
             .then(data => {
-                console.log(data);
+                //  console.log(data);
                 if (data.response.count) {
                     setData({
                         ...data,
@@ -174,44 +211,10 @@ const UrlsTable = ({ width, data, setData, setLoading, shortId, setShortId, subI
             .catch(err => {
                 console.log(err)
                 setLoading(false);
-                showMess('Ошибка!');
+                showMess('Ошибка');
             })
     }
 
-    const columns = [
-        { field: 'name', headerName: 'Имя пользователя', width: 210 },
-        { field: 'deductions', headerName: 'Отчисления', width: 150 },
-        { field: 'date', headerName: 'Дата', width: 140 },
-        { field: 'time', headerName: 'Время', width: 140 },
-        // {
-        //     field: 'age',
-        //     headerName: 'Age',
-        //     type: 'number',
-        //     width: 90,
-        // },
-        // {
-        //     field: 'fullName',
-        //     headerName: 'Full name',
-        //     description: 'This column has a value getter and is not sortable.',
-        //     sortable: false,
-        //     width: 230,
-        //     valueGetter: (params) =>
-        //         `${params.getValue('firstName') || ''} ${params.getValue('lastName') || ''}`,
-        // },
-    ];
-    console.log(data)
-    let rows = data.arr.length > 0 ? data.arr.map((it, i) => {
-        return {
-            url: it.trafficBackUrl,
-            value: it.trafficBackValue,
-            subId: it.subId,
-            status: it.status,
-            ind: it.pixelIdentifier,
-            pixelV: it.pixelValue,
-            date: it.date,
-            time: it.time,
-        }
-    }) : { id: 1, name: '', deductions: '', date: 0, time: 0 };
     useEffect(() => {
         const arr = [];
         if (data.arr.length) {
@@ -231,19 +234,19 @@ const UrlsTable = ({ width, data, setData, setLoading, shortId, setShortId, subI
 
         }
     }, [data.arr])
-    useEffect(() => { console.log(state); }, [state])
+    // useEffect(() => { console.log(state); }, [state])
 
     const classes = useStyles();
 
     const startEdit = (i) => {
-        console.log('start', i);
+        // console.log('start', i);
         const arr = state.map((it) => ({ ...it }));
         arr[i].edit = true;
         setState(arr);
     };
 
     const completeEdit = (i) => {
-        console.log('com', i);
+        // console.log('com', i);
         const arr = state.map((it) => ({ ...it }));
         arr[i].edit = false;
         setState(arr);
@@ -264,7 +267,7 @@ const UrlsTable = ({ width, data, setData, setLoading, shortId, setShortId, subI
         setState(arr);
     }
 
-    useEffect(() => { console.log(vis) }, [vis])
+    // useEffect(() => { console.log(vis) }, [vis])
 
     const handleClose = () => {
         setOpen(false);
@@ -278,7 +281,7 @@ const UrlsTable = ({ width, data, setData, setLoading, shortId, setShortId, subI
         urlencoded.append('pixelIdentifier', state[i].pixelIdentifier);
         urlencoded.append('pixelValue', state[i].pixelValue);
         urlencoded.append('trafficBackUrl', state[i].trafficBackUrl);
-        urlencoded.append('trafficBackValue', state[i].trafficBackValue);
+        urlencoded.append('trafficBackValue', hide[i]);
         fetch('https://secure.platinumpay.cc/v1/client/products/shorteners/editShortener', {
             method: 'POST', headers: {
                 Authorization: `Bearer ${Cookies.get('token')}`,
@@ -289,11 +292,11 @@ const UrlsTable = ({ width, data, setData, setLoading, shortId, setShortId, subI
                 return res.json();
             })
             .then(data => {
-                console.log(data);
+                //  console.log(data);
             })
             .catch(err => {
                 console.log(err);
-                showMess('Ошибка!');
+                showMess('Ошибка');
             })
     }
 
@@ -311,15 +314,15 @@ const UrlsTable = ({ width, data, setData, setLoading, shortId, setShortId, subI
                 return res.json();
             })
             .then(dataRes => {
-                console.log(dataRes, data);
+                //(dataRes, data);
                 const arr = data.arr.map(it => ({ ...it }));
                 for (let i = 0; i < arr.length; i++) {
                     if (arr[i].shortId === dataRes.response.shortId) {
-                        console.log('BAX');
+                        // console.log('BAX');
                         arr.splice(i, 1);
                     }
                 }
-                console.log(arr);
+                // console.log(arr);
                 setData({
                     ...data,
                     arr: arr
@@ -328,12 +331,56 @@ const UrlsTable = ({ width, data, setData, setLoading, shortId, setShortId, subI
             })
             .catch(err => {
                 console.log(err);
-                showMess('Ошибка!');
+                showMess('Ошибка');
             })
+    }
+
+    const handleHide = (i, e) => {
+        // console.log(e.target.checked);
+        let arr = hide.map((it) => (it));
+        arr[i] = e.target.checked ? 1 : 0;
+        setHide(arr);
+    }
+
+    const redirectPr = () => {
+        myHistory.push('/dashboard/products')
     }
 
     return (
         <>
+            {width === 'xs' ?
+
+                <IconButton
+                    onClick={redirectPr}
+                    style={{
+                        position: 'fixed',
+                        top: '93px',
+                        right: '15px',
+                        zIndex: '100'
+                    }}
+                >
+                    <ArrowBackIcon
+                        style={{
+                            color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
+                        }}
+                    >
+
+                    </ArrowBackIcon>
+                </IconButton>
+                :
+                <Button
+                    onClick={redirectPr}
+                    style={{
+                        position: 'fixed',
+                        top: '100px',
+                        right: '15px',
+                        color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
+                        zIndex: '100'
+                    }}
+                >
+                    Вернуться назад
+            </Button>
+            }
             <Dialog
                 open={open}
                 onClose={handleClose}
@@ -380,19 +427,20 @@ const UrlsTable = ({ width, data, setData, setLoading, shortId, setShortId, subI
                         width: '100%',
                         display: 'flex',
                         justifyContent: width === 'xs' ? 'flex-start' : 'space-around',
-                        flexDirection: width === 'xs' ? 'column' : 'row'
+                        flexDirection: 'column'
                     }}
                 >
                     <Box
                         style={{
                             display: 'flex',
-                            justifyContent: 'flex-start',
+                            justifyContent: width === 'xs' ? 'center' : 'flex-start',
                             margin: '0px 0px 10px 0px',
                             alignItems: 'center',
-                            width: '44%'
+                            width: '100%'
+
                         }}
                     >
-                        <Typography variant={width === 'xs' ? 'h6' : 'h5'}
+                        <Typography variant='h5'
                             style={{
                                 color: currentTheme === 'dark' ? '#aeaee0' : 'black',
 
@@ -421,18 +469,79 @@ const UrlsTable = ({ width, data, setData, setLoading, shortId, setShortId, subI
 
                     <Box
                         style={{
-                            width: width === 'xs' ? '100%' : '55%',
+                            marginBottom: '15px',
                             display: 'flex',
-                            justifyContent: width === 'xs' ? 'center' : 'flex-end',
+                            justifyContent: width === 'xs' ? 'center' : 'flex-start',
                             height: '47px',
-                            alignItems: 'center'
+                            alignItems: 'center',
+                            width: '100%'
                         }}
                     >
+
+                        <TextField
+                            placeholder='Источник кампании '
+                            className={classes.text}
+                            defaultValue={sourceSt ? sourceSt : undefined}
+                            onBlur={(e) => { setSourceSt(e.target.value) }}
+                            style={{
+                                margin: '0px 5px 0px 0px'
+                            }}
+                        >
+
+                        </TextField>
+
+                        <TextField
+                            placeholder='Название кампании'
+                            className={classes.text}
+                            defaultValue={nameSt ? nameSt : undefined}
+                            onBlur={(e) => { setNameSt(e.target.value) }}
+                            style={{
+                                margin: '0px 5px'
+                            }}
+                        >
+
+                        </TextField>
+
+
+
+
+                        {/* <IconButton
+                            onClick={handleShorteners}
+                            style={{
+                                marginTop: '7px'
+                            }}
+                        >
+                            <SearchIcon
+                                style={{
+                                    color: currentTheme === 'dark' ? 'rgb(117, 117, 163)' : '',
+                                    fontSize: '17px'
+                                }}
+                            >
+
+                            </SearchIcon>
+                        </IconButton> */}
+
+                    </Box>
+
+                    <Box
+                        style={{
+                            marginBottom: '15px',
+                            display: 'flex',
+                            justifyContent: width === 'xs' ? 'center' : 'flex-start',
+                            height: '47px',
+                            alignItems: 'center',
+                            width: '100%'
+                        }}
+                    >
+
                         <TextField
                             placeholder='shortId'
                             className={classes.text}
                             defaultValue={shortId ? shortId : undefined}
                             onBlur={(e) => { setShortId(e.target.value) }}
+                            style={{
+                                margin: '0px 5px 0px 0px'
+                            }}
                         >
 
                         </TextField>
@@ -442,9 +551,13 @@ const UrlsTable = ({ width, data, setData, setLoading, shortId, setShortId, subI
                             className={classes.text}
                             defaultValue={subId ? subId : undefined}
                             onBlur={(e) => { setSubId(e.target.value) }}
+                            style={{
+                                margin: '0px 5px'
+                            }}
                         >
 
                         </TextField>
+
 
                         <IconButton
                             onClick={handleShorteners}
@@ -462,49 +575,59 @@ const UrlsTable = ({ width, data, setData, setLoading, shortId, setShortId, subI
                             </SearchIcon>
                         </IconButton>
 
-                        {/* <FormControl
-                        className={classes.input}
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                           // width: width === 'xs' ? '100%' : '45%',
-                            maxWidth: '150px',
-                            width:'100%',
-                            height: '45px'
-                        }}
-                    >
-                        <Selectrix
-                            materialize={true}
-                            searchable={false}
-                            className={classes.select}
-                            placeholder='Все'
-                            options={
-                                    [
-                                        { key: '0', label: '0' },
-                                        { key: '1', label: '1' },
-                                        { key: '2', label: '2' }
-                                    ]
-                            }
-                        >
-
-                        </Selectrix>
-                    </FormControl> */}
                     </Box>
 
                 </Box>
 
-
+                {loading ?
+                    <Box
+                        style={{
+                            position: 'fixed',
+                            top: '0px',
+                            bottom: '0px',
+                            left: '0px',
+                            right: '0px',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                        }}
+                    >
+                        <CircleSpinner
+                            size={25}
+                            color={currentTheme === 'dark' ? 'white' : 'black'}
+                            loading={loading}
+                        />
+                    </Box>
+                    :
                 <TableContainer className={classes.table} component={Paper}>
                     <Table size="small" aria-label="a dense table">
                         <TableHead>
                             <TableRow>
-                                <TableCell align="left">URL</TableCell>
-                                <TableCell align="left">TrafficBack</TableCell>
-                                <TableCell align="left">SubId</TableCell>
-                                <TableCell align="left">pixelIdentifier</TableCell>
-                                <TableCell align="left">pixelValue</TableCell>
-                                <TableCell align="left">Дата</TableCell>
-                                <TableCell align="left">Время</TableCell>
+                                <TableCell align="left">Источник кампании</TableCell>
+                                <TableCell align="left">Название кампании</TableCell>
+                                <TableCell align="left"
+                                    style={{
+                                        width: '410px'
+                                    }}>
+                                    Настройка пикселя
+                                    </TableCell>
+                                <TableCell align="left">Настройка суб-аккаунта</TableCell>
+                                <TableCell align="left"
+                                    style={{
+                                        width: '480px'
+                                    }}
+                                >Настройка трафик-бэк
+                                </TableCell>
+                                <TableCell align="left"
+                                    style={{
+                                        width: '160px'
+                                    }}
+                                >Дата</TableCell>
+                                <TableCell align="left"
+                                    style={{
+                                        width: '160px'
+                                    }}
+                                >Время</TableCell>
                                 <TableCell align="left"></TableCell>
                             </TableRow>
                         </TableHead>
@@ -522,80 +645,224 @@ const UrlsTable = ({ width, data, setData, setLoading, shortId, setShortId, subI
             time: it.time, 
             */}
                                     <TableCell align="left">
-                                        {
-                                            state[i] ?
-                                                state[i].edit ?
-                                                    <TextField
-                                                        className={classes.text}
-                                                        defaultValue={state[i].trafficBackUrl}
-                                                        onBlur={(e) => { editShortener(e, i, 'trafficBackUrl') }}
-                                                    >
+                                        {row.campaignSource ? row.campaignSource : 'Не найден'}
+                                    </TableCell>
+                                    <TableCell align="left">
+                                        {row.campaignName ? row.campaignName : 'Не найден'}
+                                    </TableCell>
+                                    <TableCell align="left"
+                                        style={{
+                                            width: '410px'
+                                        }}
+                                    >
+                                        <Box
+                                            className={classes.box2in}
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'flex-start',
+                                                width: '59%',
+                                                flexWrap: 'wrap',
+                                                alignItems: 'center'
+                                            }}
+                                        >
+                                            <Typography
+                                                style={{
 
-                                                    </TextField>
-                                                    :
-                                                    state[i].trafficBackUrl
-                                                :
-                                                row.trafficBackUrl
-                                        }
-                                    </TableCell>
-                                    <TableCell align="left">
-                                        {
-                                            state[i] ?
-                                                state[i].edit ?
-                                                    <TextField
-                                                        className={classes.text}
-                                                        defaultValue={state[i].trafficBackValue}
-                                                        onChange={minmaxTrafficBack}
-                                                        onBlur={(e) => { editShortener(e, i, 'trafficBackValue') }}
-                                                    >
+                                                    width: '100%',
+                                                    color: currentTheme === 'dark' ? '#575770' : 'rgb(128, 128, 128)'
+                                                }}
+                                            >
+                                                Идентификатор параметра
+                                        </Typography>
+                                            {
 
-                                                    </TextField>
-                                                    :
-                                                    state[i].trafficBackValue
-                                                :
-                                                row.trafficBackValue
-                                        }
-                                    </TableCell>
-                                    <TableCell align="left">
-                                        {row.subId}
-                                    </TableCell>
-                                    <TableCell align="left">
-                                        {
-                                            state[i] ?
-                                                state[i].edit ?
-                                                    <TextField
-                                                        className={classes.text}
-                                                        defaultValue={state[i].pixelIdentifier}
-                                                        onBlur={(e) => { editShortener(e, i, 'pixelIdentifier') }}
-                                                    >
+                                                state[i] ?
+                                                    state[i].edit ?
+                                                        <TextField
+                                                            className={classes.text}
+                                                            defaultValue={state[i].pixelIdentifier}
+                                                            onBlur={(e) => { editShortener(e, i, 'pixelIdentifier') }}
+                                                        >
 
-                                                    </TextField>
+                                                        </TextField>
+                                                        :
+                                                        state[i].pixelIdentifier ? state[i].pixelIdentifier : 'Не найден'
                                                     :
-                                                    state[i].pixelIdentifier
-                                                :
-                                                row.pixelIdentifier
-                                        }
-                                    </TableCell>
-                                    <TableCell align="left">
-                                        {
-                                            state[i] ?
-                                                state[i].edit ?
-                                                    <TextField
-                                                        className={classes.text}
-                                                        defaultValue={state[i].pixelValue}
-                                                        onBlur={(e) => { editShortener(e, i, 'pixelValue') }}
-                                                    >
+                                                    row.pixelIdentifier ? row.pixelIdentifier : 'Не найден'
 
-                                                    </TextField>
+                                            }
+                                        </Box>
+                                        <Box
+                                            className={classes.box2in}
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'flex-start',
+                                                width: '40%',
+                                                flexWrap: 'wrap',
+                                                alignItems: 'center'
+                                            }}
+                                        >
+                                            <Typography
+                                                style={{
+
+                                                    width: '100%',
+                                                    color: currentTheme === 'dark' ? '#575770' : 'rgb(128, 128, 128)'
+                                                }}
+                                            >
+                                                Значение параметра
+                                        </Typography>
+                                            {
+
+                                                state[i] ?
+                                                    state[i].edit ?
+                                                        <TextField
+                                                            className={classes.text}
+                                                            defaultValue={state[i].pixelValue}
+                                                            onBlur={(e) => { editShortener(e, i, 'pixelValue') }}
+                                                        >
+
+                                                        </TextField>
+                                                        :
+                                                        state[i].pixelValue ? state[i].pixelValue : 'Не найден'
                                                     :
-                                                    state[i].pixelValue
-                                                :
-                                                row.pixelValue
-                                        }
+                                                    row.pixelValue ? row.pixelValue : 'Не найден'
+
+                                            }
+                                        </Box>
                                     </TableCell>
-                                    <TableCell align="left">{row.date}</TableCell>
-                                    <TableCell align="left">{row.time}</TableCell>
-                                    <TableCell align="left">
+                                    <TableCell align="left"
+                                    >
+                                        <Box
+                                            className={classes.box2in}
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'flex-start',
+                                                width: '100%',
+                                                flexWrap: 'wrap',
+                                                alignItems: 'center'
+                                            }}
+                                        >
+                                            <Typography
+                                                style={{
+
+                                                    width: '100%',
+                                                    color: currentTheme === 'dark' ? '#575770' : 'rgb(128, 128, 128)'
+                                                }}
+                                            >
+                                                Значение параметра
+                                        </Typography>
+                                            {row.subId ? row.subId : 'Не найден'}
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell align="left"
+                                        style={{
+                                            width: '480px'
+                                        }}
+                                    >
+                                        <Box
+                                            className={classes.box2in}
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'flex-start',
+                                                flexWrap: 'wrap',
+                                                width: '69%',
+                                                alignItems: 'center'
+                                            }}
+                                        >
+                                            <Typography
+                                                style={{
+
+                                                    width: '100%',
+                                                    color: currentTheme === 'dark' ? '#575770' : 'rgb(128, 128, 128)'
+                                                }}
+                                            >
+                                                URL
+                                        </Typography>
+                                            {
+
+                                                state[i] ?
+                                                    state[i].edit ?
+                                                        <TextField
+                                                            className={classes.text}
+                                                            defaultValue={state[i].trafficBackUrl}
+                                                            onBlur={(e) => { editShortener(e, i, 'trafficBackUrl') }}
+                                                        >
+
+                                                        </TextField>
+                                                        :
+                                                        state[i].trafficBackUrl ? state[i].trafficBackUrl : 'Не найден'
+                                                    :
+                                                    row.trafficBackUrl ? row.trafficBackUrl : 'Не найден'
+
+                                            }
+                                        </Box>
+                                        <Box
+                                            className={classes.box2in2}
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'flex-start',
+                                                width: '29%',
+                                                flexWrap: 'wrap',
+                                                alignItems: 'flex-start',
+                                                overflowX: 'visible',
+                                                position: 'relative'
+                                            }}
+                                        >
+                                            <Typography
+                                                style={{
+                                                    marginTop: '2px',
+                                                    width: '100%',
+                                                    color: currentTheme === 'dark' ? '#575770' : 'rgb(128, 128, 128)'
+                                                }}
+                                            >
+                                                TrafficBack
+                                        </Typography>
+                                            <FormControl component="fieldset"
+                                                className={classes.fcont}
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'flex-start',
+                                                    justifyContent: 'flex-end',
+                                                    marginRight: width === 'xs' || width === 'sm' ? '0px' : '5px',
+                                                }}>
+                                                <FormGroup aria-label="position" row>
+                                                    <FormControlLabel
+                                                        value="trightop"
+                                                        control={
+                                                            <Switch
+                                                                disabled={state[i] ? !state[i].edit : false}
+                                                                checked={hide[i]}
+                                                                onChange={(e) => { handleHide(i, e) }}
+                                                                color="primary"
+                                                                name="checkedB"
+                                                                inputProps={{ role: 'switch' }}
+                                                            />
+                                                        }
+                                                        style={{
+                                                            color: currentTheme === 'dark' ? '#aeaee0' : 'black',
+
+                                                        }}
+                                                    />
+                                                </FormGroup>
+                                            </FormControl>
+                                        </Box>
+                                    </TableCell>
+                                    <TableCell align="left"
+                                        style={{
+                                            width: '160px'
+                                        }}
+                                    >{row.date}</TableCell>
+                                    <TableCell align="left"
+                                        style={{
+                                            width: '160px'
+                                        }}
+                                    >{row.time}</TableCell>
+                                    <TableCell align="left"
+                                        style={{
+                                            width: '160px',
+                                            justifyContent: 'flex-start'
+                                        }}
+                                    >
                                         <IconButton
                                             onClick={state[i] ? state[i].edit ? () => {
                                                 completeEdit(i);
@@ -640,6 +907,7 @@ const UrlsTable = ({ width, data, setData, setLoading, shortId, setShortId, subI
                         </TableBody>
                     </Table>
                 </TableContainer>
+}
             </Box>
 
         </>

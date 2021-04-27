@@ -1,23 +1,22 @@
 import React, { useContext, useEffect, useState } from "react";
 import withWidth from "@material-ui/core/withWidth";
-import { makeStyles, Typography, Box, Button, Icon, Paper, TextField, withStyles, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, IconButton, Tooltip } from "@material-ui/core";
-import FiberManualRecordIcon from '@material-ui/icons/FiberManualRecord';
+import { useHistory } from "react-router-dom";
+import { makeStyles, Typography, Box, Button, Paper, TextField, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, IconButton } from "@material-ui/core";
 import { ThemeContext } from "../../../context/themeContext";
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import EditIcon from '@material-ui/icons/Edit';
 import DoneIcon from '@material-ui/icons/Done';
-import { Visibility, VisibilityOff } from '@material-ui/icons';
 import ReplayIcon from '@material-ui/icons/Replay';
-import DeleteIcon from '@material-ui/icons/Delete';
 import Cookies from 'js-cookie';
 import SearchIcon from '@material-ui/icons/Search';
-import { CircleSpinner } from "react-spinners-kit";
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import Snackbar from 'node-snackbar';
+import { CircleSpinner } from "react-spinners-kit";
 
 const showMess = (message) => {
     Snackbar.show({
@@ -28,36 +27,14 @@ const showMess = (message) => {
     });
 }
 
-const LightTooltip = withStyles((theme) => ({
-    tooltip: {
-        backgroundColor: 'black',
-        color: 'white',
-        boxShadow: 'none',
-        fontSize: 14.5,
-    },
-    arrow: {
-        color: 'black',
-    }
-}))(Tooltip);
-
-const DarkTooltip = withStyles((theme) => ({
-    tooltip: {
-        backgroundColor: '#232135',
-        color: 'rgb(117, 117, 163)',
-        boxShadow: 'none',
-        fontSize: 14.5,
-    },
-    arrow: {
-        color: '#232135',
-    }
-}))(Tooltip);
-
-const UsersTable = ({ width, data, setData, loading, setLoading, nameState, setNameState, levelState, setLevelState, pageState, handleUsers }) => {
+const PriceTable = ({ width, data, setData, setLoading, amountState, setAmountState, pageState, handlePrices, id, loading }) => {
+    const dispatch = useDispatch();
     const { currentTheme } = useContext(ThemeContext);
     const [state, setState] = useState([]);
     const [vis, setVis] = useState(false);
     const [open, setOpen] = useState(false);
     const [idState, setIdState] = useState(null);
+    const myHistory = useHistory();
 
     const useStyles = makeStyles((theme) => ({
         input: {
@@ -164,11 +141,12 @@ const UsersTable = ({ width, data, setData, loading, setLoading, nameState, setN
         },
     }));
 
-    const reloadUsers = () => {
+    const reloadPrices = () => {
         setLoading(true);
         var urlencoded = new URLSearchParams();
+        urlencoded.append('productId', id);
         urlencoded.append('page', pageState ? pageState : 1);
-        fetch('https://secure.platinumpay.cc/v1/client/users/getUsers', {
+        fetch('https://secure.platinumpay.cc/v1/client/products/prices/getPrices', {
             method: 'POST', headers: {
                 Authorization: `Bearer ${Cookies.get('token')}`,
             },
@@ -192,15 +170,49 @@ const UsersTable = ({ width, data, setData, loading, setLoading, nameState, setN
             })
     }
 
+    const columns = [
+        { field: 'name', headerName: 'Имя пользователя', width: 210 },
+        { field: 'deductions', headerName: 'Отчисления', width: 150 },
+        { field: 'date', headerName: 'Дата', width: 140 },
+        { field: 'time', headerName: 'Время', width: 140 },
+        // {
+        //     field: 'age',
+        //     headerName: 'Age',
+        //     type: 'number',
+        //     width: 90,
+        // },
+        // {
+        //     field: 'fullName',
+        //     headerName: 'Full name',
+        //     description: 'This column has a value getter and is not sortable.',
+        //     sortable: false,
+        //     width: 230,
+        //     valueGetter: (params) =>
+        //         `${params.getValue('firstName') || ''} ${params.getValue('lastName') || ''}`,
+        // },
+    ];
+    console.log(data)
+    let rows = data.arr.length > 0 ? data.arr.map((it, i) => {
+        return {
+            name: it.username,
+            telegram: it.telegram,
+            level: it.level,
+            status: it.status,
+            balance: it.balance,
+            api: it.api,
+            date: it.date,
+            time: it.time,
+        }
+    }) : { id: 1, name: '', deductions: '', date: 0, time: 0 };
     useEffect(() => {
         const arr = [];
         if (data.arr.length) {
             for (let it of data.arr) {
                 arr.push({
-                    userId: it.userId,
-                    name: it.username,
-                    level: it.level,
-                    balance: it.balance,
+                    priceId: it.priceId,
+                    url: it.url,
+                    path: it.path,
+                    amount: it.amount,
                     edit: false
                 })
             }
@@ -236,7 +248,7 @@ const UsersTable = ({ width, data, setData, loading, setLoading, nameState, setN
         }
     }
 
-    const editUser = (e, i, param) => {
+    const editPrice = (e, i, param) => {
         const arr = state.map((it) => ({ ...it }));
         arr[i][param] = e.target.value;
         setState(arr);
@@ -248,14 +260,14 @@ const UsersTable = ({ width, data, setData, loading, setLoading, nameState, setN
         setOpen(false);
     };
 
-    const editUsers = (i) => {
+    const editPrices = (i) => {
 
         var urlencoded = new URLSearchParams();
-        urlencoded.append('userId', state[i].userId);
-        urlencoded.append('username', state[i].name);
-        urlencoded.append('level', state[i].level);
-        urlencoded.append('balance', state[i].balance);
-        fetch('https://secure.platinumpay.cc/v1/client/users/editUser', {
+        urlencoded.append('productId', id);
+        urlencoded.append('priceId', state[i].priceId);
+        urlencoded.append('amount', state[i].amount);
+        urlencoded.append('path', state[i].path);
+        fetch('https://secure.platinumpay.cc/v1/client/products/prices/editPrice', {
             method: 'POST', headers: {
                 Authorization: `Bearer ${Cookies.get('token')}`,
             },
@@ -272,10 +284,11 @@ const UsersTable = ({ width, data, setData, loading, setLoading, nameState, setN
             })
     }
 
-    const deleteUser = (id) => {
+    const deletePrice = (idPr) => {
         var urlencoded = new URLSearchParams();
-        urlencoded.append('userId', id);
-        fetch('https://secure.platinumpay.cc/v1/client/users/deleteUser', {
+        urlencoded.append('productId', id);
+        urlencoded.append('priceId', idPr);
+        fetch('https://secure.platinumpay.cc/v1/client/products/prices/deletePrice', {
             method: 'POST', headers: {
                 Authorization: `Bearer ${Cookies.get('token')}`,
             },
@@ -288,7 +301,7 @@ const UsersTable = ({ width, data, setData, loading, setLoading, nameState, setN
                 console.log(dataRes, data);
                 const arr = data.arr.map(it => ({ ...it }));
                 for (let i = 0; i < arr.length; i++) {
-                    if (arr[i].userId === id) {
+                    if (arr[i].priceId === idState) {
                         console.log('BAX');
                         arr.splice(i, 1);
                     }
@@ -305,23 +318,59 @@ const UsersTable = ({ width, data, setData, loading, setLoading, nameState, setN
             })
     }
 
+    const redirectPr = () => {
+        myHistory.push('/dashboard/products')
+    }
+
     return (
         <>
+            {width === 'xs' ?
+
+                <IconButton
+                    onClick={redirectPr}
+                    style={{
+                        position: 'fixed',
+                        top: '93px',
+                        right: '15px',
+                        zIndex: '100'
+                    }}
+                >
+                    <ArrowBackIcon
+                        style={{
+                            color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
+                        }}
+                    >
+
+                    </ArrowBackIcon>
+                </IconButton>
+                :
+                <Button
+                    onClick={redirectPr}
+                    style={{
+                        position: 'fixed',
+                        top: '100px',
+                        right: '15px',
+                        color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
+                        zIndex: '100'
+                    }}
+                >
+                    Вернуться назад
+</Button>}
             <Dialog
                 open={open}
                 onClose={handleClose}
                 aria-labelledby="responsive-dialog-title"
                 className={classes.dialog}
             >
-                <DialogTitle id="responsive-dialog-title">{"Вы действительно хотите удалить пользователя?"}</DialogTitle>
+                <DialogTitle id="responsive-dialog-title">{"Вы действительно хотите удалить цену?"}</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        Подтвердите, что вы действительно хотите удалить пользователя, еще раз нажав кнопку Подтвердить
+                        Подтвердите, что вы действительно хотите удалить цену, еще раз нажав кнопку Подтвердить
           </DialogContentText>
                 </DialogContent>
                 <DialogActions>
                     <Button autoFocus onClick={() => {
-                        deleteUser(idState);
+                        deletePrice(idState);
                         handleClose();
                     }}
                         style={{
@@ -371,10 +420,10 @@ const UsersTable = ({ width, data, setData, loading, setLoading, nameState, setN
 
                                 // borderBottom:'1px solid rgb(174, 174, 224)'
                             }}>
-                            Пользователи
+                            Мои цены
                     </Typography>
                         <IconButton
-                            onClick={reloadUsers}
+                            onClick={reloadPrices}
                             style={{
                                 marginTop: '6px'
                             }}
@@ -394,35 +443,28 @@ const UsersTable = ({ width, data, setData, loading, setLoading, nameState, setN
 
                     <Box
                         style={{
+                            marginBottom: '15px',
                             display: 'flex',
                             justifyContent: width === 'xs' ? 'center' : 'flex-start',
                             height: '47px',
                             alignItems: 'center',
-                            width:'100%',
-                            marginBottom:'15px'
+                            width:'100%'
                         }}
                     >
                         <TextField
-                            placeholder='Имя пользователя'
+                            placeholder='Цена'
                             className={classes.text}
-                            defaultValue={nameState ? nameState : undefined}
-                            onBlur={(e) => { setNameState(e.target.value) }}
-                        >
-
-                        </TextField>
-
-                        <TextField
-                            onChange={minmaxLevel}
-                            placeholder='Уровень'
-                            className={classes.text}
-                            defaultValue={levelState ? levelState : undefined}
-                            onBlur={(e) => { setLevelState(e.target.value) }}
+                            defaultValue={amountState ? amountState : undefined}
+                            onBlur={(e) => { setAmountState(e.target.value) }}
+                            style={{
+                                margin: '0px'
+                            }}
                         >
 
                         </TextField>
 
                         <IconButton
-                            onClick={handleUsers}
+                            onClick={handlePrices}
                             style={{
                                 marginTop: '7px'
                             }}
@@ -436,6 +478,34 @@ const UsersTable = ({ width, data, setData, loading, setLoading, nameState, setN
 
                             </SearchIcon>
                         </IconButton>
+
+                        {/* <FormControl
+                        className={classes.input}
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                           // width: width === 'xs' ? '100%' : '45%',
+                            maxWidth: '150px',
+                            width:'100%',
+                            height: '45px'
+                        }}
+                    >
+                        <Selectrix
+                            materialize={true}
+                            searchable={false}
+                            className={classes.select}
+                            placeholder='Все'
+                            options={
+                                    [
+                                        { key: '0', label: '0' },
+                                        { key: '1', label: '1' },
+                                        { key: '2', label: '2' }
+                                    ]
+                            }
+                        >
+
+                        </Selectrix>
+                    </FormControl> */}
                     </Box>
 
                 </Box>
@@ -464,33 +534,8 @@ const UsersTable = ({ width, data, setData, loading, setLoading, nameState, setN
                     <Table size="small" aria-label="a dense table">
                         <TableHead>
                             <TableRow>
-                                <TableCell align="left">Имя пользователя</TableCell>
-                                <TableCell align="left">Активность</TableCell>
-                                <TableCell align="left">Telegram</TableCell>
-                                <TableCell align="left">Уровень</TableCell>
-                                <TableCell align="left">Баланс</TableCell>
-                                <TableCell align="left">Статус</TableCell>
-                                <TableCell align="left">Ключ API
-                                <IconButton
-                                        onClick={() => { setVis(!vis) }}
-                                    >
-                                        {!vis ?
-                                            <Visibility
-                                                style={{
-                                                    color: currentTheme === 'dark' ? 'rgb(117, 117, 163)' : '',
-                                                    fontSize: '20px'
-                                                }}
-                                            ></Visibility>
-                                            :
-                                            <VisibilityOff
-                                                style={{
-                                                    color: currentTheme === 'dark' ? 'rgb(117, 117, 163)' : '',
-                                                    fontSize: '20px'
-                                                }}
-                                            ></VisibilityOff>
-                                        }
-                                    </IconButton>
-                                </TableCell>
+                                <TableCell align="left">Цена</TableCell>
+                                <TableCell align="left">Путь</TableCell>
                                 <TableCell align="left">Дата</TableCell>
                                 <TableCell align="left">Время</TableCell>
                                 <TableCell align="left"></TableCell>
@@ -499,93 +544,21 @@ const UsersTable = ({ width, data, setData, loading, setLoading, nameState, setN
                         <TableBody>
                             {data.arr.map((row, i) => (
                                 <TableRow key={row.id}>
-                                    {/* id: it.userId,
-            name: it.username,
-            telegram: it.telegram,
-            level: it.level,
-            status: it.status,
-            balance: it.balance,
-            api: it.api,
-            trafficBack: it.trafficBack,
-            trafficBackUrl: it.trafficBackUrl,
-            date: it.date,
-            time: it.time, */}
                                     <TableCell align="left">
                                         {
                                             state[i] ?
                                                 state[i].edit ?
                                                     <TextField
                                                         className={classes.text}
-                                                        defaultValue={state[i].name}
-                                                        onBlur={(e) => { editUser(e, i, 'name') }}
+                                                        defaultValue={state[i].amount}
+                                                        onBlur={(e) => { editPrice(e, i, 'amount') }}
                                                     >
 
                                                     </TextField>
                                                     :
-                                                    state[i].name
+                                                    state[i].amount + ' ₽'
                                                 :
-                                                row.username
-                                        }
-                                    </TableCell>
-                                    <TableCell align="left">
-                                        {currentTheme === 'dark' ?
-                                            <DarkTooltip
-                                                arrow
-                                                title={row.activity}
-                                                placement='top'
-                                            >
-                                                <Icon>
-                                                    <FiberManualRecordIcon
-                                                        style={{
-                                                            fontSize: '18px',
-                                                            color: row.activity_status ? '#32cd32' : '#ed143d',
-                                                            cursor:'pointer'
-                                                        }}
-                                                    >
-
-                                                    </FiberManualRecordIcon>
-                                                </Icon>
-                                            </DarkTooltip>
-                                            :
-                                            <LightTooltip
-                                                arrow
-                                                title={row.activity}
-                                                placement='top'
-                                            >
-                                                <Icon>
-                                                    <FiberManualRecordIcon
-                                                        style={{
-                                                            fontSize: '18px',
-                                                            color: row.activity_status ? '#32cd32' : '#ed143d',
-                                                            cursor:'pointer'
-                                                        }}
-                                                    >
-
-                                                    </FiberManualRecordIcon>
-                                                </Icon>
-                                            </LightTooltip>
-                                        }
-
-                                    </TableCell>
-                                    <TableCell align="left">
-                                        {row.telegram}
-                                    </TableCell>
-                                    <TableCell align="left">
-                                        {
-                                            state[i] ?
-                                                state[i].edit ?
-                                                    <TextField
-                                                        className={classes.text}
-                                                        defaultValue={state[i].level}
-                                                        onChange={minmaxLevel}
-                                                        onBlur={(e) => { editUser(e, i, 'level') }}
-                                                    >
-
-                                                    </TextField>
-                                                    :
-                                                    state[i].level
-                                                :
-                                                row.level
+                                                row.amount + ' ₽'
                                         }
                                     </TableCell>
                                     <TableCell align="left">
@@ -594,30 +567,24 @@ const UsersTable = ({ width, data, setData, loading, setLoading, nameState, setN
                                                 state[i].edit ?
                                                     <TextField
                                                         className={classes.text}
-                                                        defaultValue={state[i].balance}
-                                                        onBlur={(e) => { editUser(e, i, 'balance') }}
+                                                        defaultValue={state[i].path}
+                                                        onBlur={(e) => { editPrice(e, i, 'path') }}
                                                     >
 
                                                     </TextField>
                                                     :
-                                                    state[i].balance + ' ₽'
+                                                    state[i].path
                                                 :
-                                                row.balance + ' ₽'
+                                                row.path
                                         }
                                     </TableCell>
-                                    <TableCell align="left">{row.status}</TableCell>
-                                    <TableCell align="left"
-                                        style={{
-                                            wordBreak: vis ? 'break-all' : 'normal',
-                                            overflow: vis ? 'visible' : 'hidden'
-                                        }}>{vis ? row.api : '**********************'}</TableCell>
                                     <TableCell align="left">{row.date}</TableCell>
                                     <TableCell align="left">{row.time}</TableCell>
                                     <TableCell align="left">
                                         <IconButton
                                             onClick={state[i] ? state[i].edit ? () => {
                                                 completeEdit(i);
-                                                editUsers(i);
+                                                editPrices(i);
                                             } : () => { startEdit(i) } : null}
                                         >
                                             {
@@ -638,31 +605,18 @@ const UsersTable = ({ width, data, setData, loading, setLoading, nameState, setN
                                                     :
                                                     null}
                                         </IconButton>
-                                        <IconButton
-                                            onClick={() => {
-                                                setIdState(state[i].userId);
-                                                setOpen(true);
-                                            }}
-                                        >
-                                            <DeleteIcon
-
-                                                style={{
-                                                    color: currentTheme === 'dark' ? '#aeaee0' : 'black'
-                                                }}
-                                            >
-                                            </DeleteIcon>
-                                        </IconButton>
+                    
                                     </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                     </Table>
                 </TableContainer>
-}
+            }
             </Box>
 
         </>
     );
 };
 
-export default withWidth()(UsersTable);
+export default withWidth()(PriceTable);

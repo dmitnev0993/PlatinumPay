@@ -1,28 +1,25 @@
 import React, { useContext, useEffect, useState } from "react";
 import withWidth from "@material-ui/core/withWidth";
-import { makeStyles, Typography, Accordion, AccordionDetails, AccordionSummary, AppBar, Box, Button, ClickAwayListener, Grow, Icon, InputBase, InputLabel, MenuItem, MenuList, NativeSelect, Paper, Popper, Switch, Tab, Tabs, TextField, withStyles, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, IconButton, FormControl, FormGroup, FormControlLabel } from "@material-ui/core";
+import { makeStyles, Typography, Box, Button, Paper, Switch, TextField, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, IconButton, FormControl, FormGroup, FormControlLabel } from "@material-ui/core";
 import { ThemeContext } from "../../../context/themeContext";
-import { DataGrid } from '@material-ui/data-grid';
-import { useDispatch, useSelector } from 'react-redux';
 import EditIcon from '@material-ui/icons/Edit';
 import DoneIcon from '@material-ui/icons/Done';
 import ReplayIcon from '@material-ui/icons/Replay';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Dialog from '@material-ui/core/Dialog';
 import Snackbar from 'node-snackbar';
+import { CircleSpinner } from "react-spinners-kit";
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import SearchIcon from '@material-ui/icons/Search';
 import Cookies from 'js-cookie';
 
-const Referrals = ({ width, data, setData, setLoading, id, page }) => {
-    const dispatch = useDispatch();
+const Referrals = ({ width, data, setData, loading, setLoading, id, page, handleSubscriptions, 
+    usernameSt, setUsernameSt }) => {
     const { currentTheme } = useContext(ThemeContext);
     const [state, setState] = useState([]);
-    const idForRef = useSelector(state => state.idForRef);
-    const pageForRef = useSelector(state => state.pageForRef);
     const [open, setOpen] = useState(false);
     const arr = [];
     for (let i of data.response.data) {
@@ -93,6 +90,11 @@ const Referrals = ({ width, data, setData, setLoading, id, page }) => {
                 color: currentTheme === 'dark' ? 'rgba(255, 255, 255, 0.7)' : '',
             }
         },
+        fcont:{
+            position:'absolute',
+            top:'10px',
+            left:'0px'
+        }
     }));
 
     const showMess = (message) => {
@@ -193,7 +195,7 @@ const Referrals = ({ width, data, setData, setLoading, id, page }) => {
             })
             .catch(err => {
                 console.log(err);
-                showMess('Ошибка!');
+                showMess('Ошибка');
             })
     }
 
@@ -315,11 +317,20 @@ const Referrals = ({ width, data, setData, setLoading, id, page }) => {
                     style={{
                         display: 'flex',
                         justifyContent: 'flex-start',
-                        margin: '0px 0px 20px 0px',
-                        alignItems: 'center'
+                        margin: '0px',
+                        alignItems: 'flex-start',
+                        flexDirection:'column'
                     }}
                 >
-                    <Typography variant={width === 'xs' ? 'h6' : 'h5'}
+                    <Box
+                    style={{
+                        display:'flex',
+                        justifyContent: width === 'xs' ? 'center' : 'flex-start',
+                        alignItems:'center',
+                        width:'100%'
+                    }}
+                    >
+                    <Typography variant='h5'
                         style={{
                             color: currentTheme === 'dark' ? '#aeaee0' : 'black',
 
@@ -342,12 +353,72 @@ const Referrals = ({ width, data, setData, setLoading, id, page }) => {
 
                         </ReplayIcon>
                     </IconButton>
+                    </Box>
+
+                    <Box
+                        style={{
+                            marginBottom:'15px',
+                            display: 'flex',
+                            justifyContent: width === 'xs' ? 'center' : 'flex-start',
+                            height: '47px',
+                            alignItems: 'center',
+                            width:'100%'
+                        }}
+                    >
+
+                        <TextField
+                            placeholder='Имя пользователя'
+                            className={classes.text}
+                            defaultValue={usernameSt ? usernameSt : undefined}
+                            onBlur={(e) => { setUsernameSt(e.target.value) }}
+                            style={{
+                                margin: '0px 5px',
+                                width: width === 'xs' ? '50%' : ''
+                            }}
+                        >
+
+                        </TextField>
+
+                        <IconButton
+                            onClick={handleSubscriptions}
+                            style={{
+                                marginTop: '7px'
+                            }}
+                        >
+                            <SearchIcon
+                                style={{
+                                    color: currentTheme === 'dark' ? 'rgb(117, 117, 163)' : '',
+                                    fontSize: '17px'
+                                }}
+                            >
+
+                            </SearchIcon>
+                        </IconButton>
+
+                    </Box>
+
                 </Box>
 
-                {/* { field: 'name', headerName: 'Имя пользователя', width: 210 },
-        { field: 'deductions', headerName: 'Отчисления', width: 150 },
-        { field: 'date', headerName: 'Дата', width: 140 },
-        { field: 'time', headerName: 'Время',  */}
+                {loading ?
+                    <Box
+                        style={{
+                            position: 'fixed',
+                            top: '0px',
+                            bottom: '0px',
+                            left: '0px',
+                            right: '0px',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                        }}
+                    >
+                        <CircleSpinner
+                            size={25}
+                            color={currentTheme === 'dark' ? 'white' : 'black'}
+                            loading={loading}
+                        />
+                    </Box>
+                    :
                 <TableContainer className={classes.table} component={Paper}>
                     <Table size="small" aria-label="a dense table">
                         <TableHead>
@@ -382,7 +453,11 @@ const Referrals = ({ width, data, setData, setLoading, id, page }) => {
                                                 row.deductions
                                         }
                                     </TableCell>
-                                    <TableCell align="left">
+                                    <TableCell align="left"
+                                    style={{
+                                        position:'relative'
+                                    }}
+                                    >
 
                                         <FormControl component="fieldset"
                                             className={classes.fcont}
@@ -462,6 +537,7 @@ const Referrals = ({ width, data, setData, setLoading, id, page }) => {
                         </TableBody>
                     </Table>
                 </TableContainer>
+    }
             </Box>
 
         </>

@@ -1,6 +1,4 @@
 import React, { useContext, useState, useMemo, useEffect, useRef } from "react";
-import Selectrix from 'react-selectrix';
-import ReactSelect, { Props } from "react-select";
 import Snackbar from 'node-snackbar';
 import { useDispatch, useSelector } from 'react-redux';
 import withWidth from "@material-ui/core/withWidth";
@@ -8,21 +6,10 @@ import { useHistory } from "react-router-dom";
 import { ThemeContext } from "../../../../context/themeContext";
 import Cookies from 'js-cookie';
 import Panel from "../../components/Panel";
-import { AppBar, Box, Button, Icon, IconButton, InputBase, InputLabel, makeStyles, NativeSelect, Switch, Tab, Tabs, TextField, Typography, withStyles } from "@material-ui/core";
-import Pagination from '@material-ui/lab/Pagination';
-import { Alert, AlertTitle } from '@material-ui/lab';
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormControl from '@material-ui/core/FormControl';
+import { Box, Button, IconButton, makeStyles, TextField, Typography, withStyles } from "@material-ui/core";
 import { isCreated, setProduct } from "../../../../actions/actions";
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import AddCircleIcon from '@material-ui/icons/AddCircle';
-import HighlightOffIcon from '@material-ui/icons/HighlightOff';
-import DeleteIcon from '@material-ui/icons/Delete';
-import Img from '../../../../assets/logo/logo-dark.png';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { CircleSpinner } from "react-spinners-kit";
-import Avatar from 'react-avatar-edit'
 
 
 const CssTextField = withStyles({
@@ -215,16 +202,16 @@ const EditProducts = ({ width }) => {
     const dispatch = useDispatch();
     const [loading, setLoading] = useState(false);
     const [loadingImg, setLoadingImg] = useState(false);
-    
-    
+
+
     const [fields, setFields] = useState([{
         price: '',
         url: ''
     }])
     const { currentTheme } = useContext(ThemeContext);
     const fileInput = useRef(null);
-    const product = useSelector(state=>state.product);
-    const [productState,setProductState] = useState(product);
+    const product = useSelector(state => state.product);
+    const [productState, setProductState] = useState(product);
     const [state, setState] = useState({
         img: product.image ? product.image : null,
         imgId: product.imageId ? product.imageId : null
@@ -298,28 +285,21 @@ const EditProducts = ({ width }) => {
         }]);
     }
 
-    const del = (i) => {
-        const copyArr = [...fields];
-        copyArr.splice(i, 1);
-        console.log(i, copyArr)
-        setFields(copyArr);
-    }
-
     const redirectPr = () => {
         myHistory.push('/dashboard/products')
     }
 
 
-    useEffect(()=>{
-        if(product.title){
+    useEffect(() => {
+        if (product.title) {
             console.log(productState)
-        return;
+            return;
         }
-        else{
-            console.log(productState,'BB')
+        else {
+            console.log(productState, 'BB')
             myHistory.push('/dashboard/products');
         }
-    },[])
+    }, [])
 
 
     const updateProduct = () => {
@@ -351,14 +331,14 @@ const EditProducts = ({ width }) => {
                     dispatch(isCreated());
                     dispatch(setProduct({
                         ...product,
-                        title:name,
-                        description:description,
-                        deductions:deductions,
-                        imageId:state.imgId,
-                        image:state.img,
-                        url:url
+                        title: name,
+                        description: description,
+                        deductions: deductions,
+                        imageId: state.imgId,
+                        image: state.img,
+                        url: url
                     }))
-                    showMess('Продукт успешно изменен!');
+                    showMess('Продукт успешно изменен');
                     myHistory.push('/dashboard/products');
                 }
                 else {
@@ -369,7 +349,7 @@ const EditProducts = ({ width }) => {
             .catch(err => {
                 console.log(err);
                 setLoading(false);
-                showMess('Ошибка!');
+                showMess('Ошибка');
             })
 
     }
@@ -448,7 +428,7 @@ const EditProducts = ({ width }) => {
             .catch(err => {
                 console.log(err);
                 setLoadingImg(false);
-                showMess('Ошибка!');
+                showMess('Ошибка');
             });
 
 
@@ -476,37 +456,37 @@ const EditProducts = ({ width }) => {
     return (
         <>
             <Panel></Panel>
-            {width === 'xs' ? 
-            
-            <IconButton
-            onClick={redirectPr}
-            style={{
-                position:'fixed',
-                top:'85px',
-                right:'15px',
-                zIndex:'100'
-            }}
-            >
-                <ArrowBackIcon
-                style={{
-                    color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
-                }}
-                >
+            {width === 'xs' ?
 
-                </ArrowBackIcon>
-            </IconButton>
-            :
-            <Button
-            onClick={redirectPr}
-            style={{
-                position:'fixed',
-                top:'90px',
-                right:'15px',
-                color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
-                zIndex:'100'
-            }}
-            >
-                Вернуться назад
+                <IconButton
+                    onClick={redirectPr}
+                    style={{
+                        position: 'fixed',
+                        top: '85px',
+                        right: '15px',
+                        zIndex: '100'
+                    }}
+                >
+                    <ArrowBackIcon
+                        style={{
+                            color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
+                        }}
+                    >
+
+                    </ArrowBackIcon>
+                </IconButton>
+                :
+                <Button
+                    onClick={redirectPr}
+                    style={{
+                        position: 'fixed',
+                        top: '90px',
+                        right: '15px',
+                        color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
+                        zIndex: '100'
+                    }}
+                >
+                    Вернуться назад
             </Button>}
             {loading ?
                 <Box
@@ -553,15 +533,23 @@ const EditProducts = ({ width }) => {
                             textAlign: 'start'
                         }}
                     >
-                        <Typography
-                            variant='h5'
+                        <Box
                             style={{
-                                color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
-                                margin: '0px'
+                                width: '100%',
+                                display: 'flex',
+                                justifyContent: width === 'xs' ? 'center' : 'flex-start'
                             }}
                         >
-                            Редактировать продукт
+                            <Typography
+                                variant='h5'
+                                style={{
+                                    color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
+                                    margin: '0px'
+                                }}
+                            >
+                                Редактировать продукт
                 </Typography>
+                        </Box>
                         <Typography
                             style={{
                                 color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
@@ -838,7 +826,7 @@ const EditProducts = ({ width }) => {
                                 display: 'flex',
                                 justifyContent: 'flex-start',
                                 flexDirection: width === 'xs' ? 'column' : 'row',
-                                paddingBottom:'20px'
+                                paddingBottom: '20px'
                             }}
                         >
                             <Button
@@ -856,7 +844,7 @@ const EditProducts = ({ width }) => {
                                     maxWidth: width === 'xs' ? '170px' : width === 'sm' ? '200px' : '250px',
                                     border: '0px',
                                     alignSelf: 'left',
-                                    paddingBottom:'10px'
+                                    paddingBottom: '10px'
                                 }}
 
                             >

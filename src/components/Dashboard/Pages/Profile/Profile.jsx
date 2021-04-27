@@ -1,4 +1,4 @@
-import React, { useContext, useState, useMemo, useEffect } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import withWidth from "@material-ui/core/withWidth";
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -7,10 +7,7 @@ import { useHistory } from "react-router-dom";
 import { ThemeContext } from "../../../../context/themeContext";
 import Cookies from 'js-cookie';
 import Panel from "../../components/Panel";
-import { AppBar, Box, Button, Icon, IconButton, makeStyles, Switch, Tab, Tabs, TextField, Typography, withStyles } from "@material-ui/core";
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormControl from '@material-ui/core/FormControl';
+import { AppBar, Box, Button, IconButton, makeStyles, Tab, Tabs, TextField, Typography, withStyles } from "@material-ui/core";
 import { setData } from "../../../../actions/actions";
 import { CircleSpinner } from "react-spinners-kit";
 
@@ -213,7 +210,7 @@ const Profile = ({ width }) => {
       })
       .catch(err=>{
         console.log(err);
-        showMess('Ошибка!');
+        showMess('Ошибка');
     })
 
   }
@@ -240,7 +237,7 @@ const Profile = ({ width }) => {
       })
       .catch(err=>{
         console.log(err);
-        showMess('Ошибка!');
+        showMess('Ошибка');
     })
   }
 
@@ -269,7 +266,7 @@ const Profile = ({ width }) => {
       })
       .catch(err=>{
         console.log(err);
-        showMess('Ошибка!');
+        showMess('Ошибка');
     })
   }
   useEffect(() => {
@@ -284,7 +281,7 @@ const Profile = ({ width }) => {
     const pass2 = document.querySelector('#pass2').value;
     console.log(pass, pass2)
     if (pass !== pass2) {
-      showMess('Пароли не совпадают!');
+      showMess('Пароли не совпадают');
       return
     }
     var urlencoded = new URLSearchParams();
@@ -308,12 +305,12 @@ const Profile = ({ width }) => {
           }))
         }
         else {
-          showMess('Ошибка!')
+          showMess('Ошибка')
         }
       })
       .catch(err=>{
         console.log(err);
-        showMess('Ошибка!');
+        showMess('Ошибка');
     })
 
   }
@@ -336,7 +333,7 @@ const Profile = ({ width }) => {
       })
       .catch(err=>{
         console.log(err);
-        showMess('Ошибка!');
+        showMess('Ошибка');
     })
   }
 
@@ -545,7 +542,7 @@ const Profile = ({ width }) => {
                 :
                 <CssTextField2
 
-                  id="name"
+                  id="pass"
                   placeholder="Пароль"
                   required
                   style={{

@@ -1,6 +1,4 @@
 import React, { useContext, useState, useMemo, useEffect, useRef } from "react";
-import Selectrix from 'react-selectrix';
-import ReactSelect, { Props } from "react-select";
 import Snackbar from 'node-snackbar';
 import { useDispatch, useSelector } from 'react-redux';
 import withWidth from "@material-ui/core/withWidth";
@@ -8,21 +6,12 @@ import { useHistory } from "react-router-dom";
 import { ThemeContext } from "../../../../context/themeContext";
 import Cookies from 'js-cookie';
 import Panel from "../../components/Panel";
-import { AppBar, Box, Button, Icon, InputBase, InputLabel, makeStyles, NativeSelect, Switch, Tab, Tabs, TextField, Typography, withStyles, IconButton } from "@material-ui/core";
-import Pagination from '@material-ui/lab/Pagination';
-import { Alert, AlertTitle } from '@material-ui/lab';
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormControl from '@material-ui/core/FormControl';
+import { Box, Button, Icon, makeStyles, TextField, Typography, withStyles, IconButton } from "@material-ui/core";
 import { isCreated } from "../../../../actions/actions";
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
-import AddCircleIcon from '@material-ui/icons/AddCircle';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
-import DeleteIcon from '@material-ui/icons/Delete';
-import Img from '../../../../assets/logo/logo-dark.png';
 import { CircleSpinner } from "react-spinners-kit";
-import Avatar from 'react-avatar-edit'
 
 
 const CssTextField = withStyles({
@@ -335,18 +324,18 @@ const CreateProduct = ({ width }) => {
             .then(data => {
                 if (!data.errorMsg) {
                     dispatch(isCreated());
-                    showMess('Продукт успешно создан!');
+                    showMess('Продукт успешно создан');
                     myHistory.push('/dashboard/products');
                 }
                 else {
-                    showMess('Ошибка!');
+                    showMess('Ошибка');
                     myHistory.push('/dashboard/products');
                 }
             })
             .catch(err => {
                 console.log(err);
                 setLoading(false);
-                showMess('Ошибка!');
+                showMess('Ошибка');
             })
 
     }
@@ -425,7 +414,7 @@ const CreateProduct = ({ width }) => {
             .catch(err => {
                 console.log(err);
                 setLoadingImg(false);
-                showMess('Ошибка!');
+                showMess('Ошибка');
             });
 
 
@@ -532,6 +521,13 @@ const CreateProduct = ({ width }) => {
                             textAlign: 'start'
                         }}
                     >
+                        <Box 
+                        
+                        style={{
+                            width:'100%',
+                            display:'flex',
+                            justifyContent: width === 'xs' ? 'center' : 'flex-start'
+                        }}>
                         <Typography
                             variant='h5'
                             style={{
@@ -541,6 +537,7 @@ const CreateProduct = ({ width }) => {
                         >
                             Создать продукт
                         </Typography>
+                        </Box>
                         <Typography
                             style={{
                                 color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',

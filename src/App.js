@@ -23,13 +23,17 @@ const Register = lazy(() => import("./components/Auth/Register/Register.jsx"));
 const Dashboard = lazy(() => import("./components/Dashboard/Dashboard.jsx"));
 const MainPage = lazy(() => import("./components/MainPage/MainPage.jsx"));
 const Profile = lazy(() => import("./components/Dashboard/Pages/Profile/Profile"));
+const Stats = lazy(() => import("./components/Dashboard/Pages/Stats/Stats"));
 const Products = lazy(() => import("./components/Dashboard/Pages/Products/Products"));
 const Subscriptions = lazy(() => import("./components/Dashboard/Pages/Subscriptions/Subscriptions"));
 const Users = lazy(() => import("./components/Dashboard/Pages/Users/Users"));
+const Settings = lazy(() => import("./components/Dashboard/Pages/Settings/Settings"));
 const ManageUrls = lazy(() => import("./components/Dashboard/Pages/Products/ManageUrls"));
 const CreateProduct = lazy(() => import("./components/Dashboard/Pages/Products/CreateProduct"));
 const CreateURL = lazy(() => import("./components/Dashboard/Pages/Products/CreateURL"));
+const Invite = lazy(() => import("./components/Dashboard/Pages/Products/Invite"));
 const EditProducts = lazy(() => import("./components/Dashboard/Pages/Products/EditProducts"));
+const Prices = lazy(() => import("./components/Dashboard/Pages/Products/Prices"));
 
 function App({ sound, flag }) {
   const { currentTheme } = useLocalStorageTheme("theme");
@@ -86,19 +90,29 @@ function App({ sound, flag }) {
 
               <Route path="/dashboard/profile" exact component={Profile} />
 
+              <Route path="/dashboard/stats" exact component={Stats} />
+
               <Route path="/dashboard/products" exact component={Products} />
 
               <Route path="/dashboard/users" exact component={Users} />
+
+              <Route path="/dashboard/settings" exact component={Settings} />
 
               <Route path="/dashboard/products/create" exact component={CreateProduct} />
 
               <Route path="/dashboard/products/edit" exact component={EditProducts} />
 
+              <Route path="/invite/product:codeInvite" exact component={Invite} />
+
+              <Route path="/dashboard/products/prices" exact component={Prices} />
+
               <Route path="/dashboard/products/subscriptions" exact component={Subscriptions} />
+
+              <Route path="/dashboard/products/shorteners" exact component={ManageUrls} />
 
               <Route path="/dashboard/products/shorteners/create" exact component={CreateURL} />
 
-              <Route path="/dashboard/products/shorteners/manage" exact component={ManageUrls} />
+              
 
             </Switch>
           </Suspense>

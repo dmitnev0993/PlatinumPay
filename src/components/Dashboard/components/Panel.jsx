@@ -15,6 +15,7 @@ import PeopleAltOutlinedIcon from '@material-ui/icons/PeopleAltOutlined';
 import EqualizerOutlinedIcon from '@material-ui/icons/EqualizerOutlined';
 import clsx from 'clsx';
 import { ThemeContext } from "../../../context/themeContext";
+import SettingsIcon from '@material-ui/icons/Settings';
 import MenuIcon from "@material-ui/icons/Menu";
 import lightLogo from '../../../assets/logo/logo-light-header.png'
 import darkLogo from '../../../assets/logo/logo-dark-header.png'
@@ -228,6 +229,15 @@ const Panel = ({ width }) => {
     const routeUsers = () => {
         myHistory.push('/dashboard/users');
     }
+
+    const routeSettings = () => {
+        myHistory.push('/dashboard/settings');
+    }
+
+    const routeStats = () => {
+        myHistory.push('/dashboard/stats');
+    }
+
     return (
         <>
 
@@ -378,10 +388,14 @@ const Panel = ({ width }) => {
                         }
                         {open ?
 
-                            <Box className={classes.heading}>Заказы <ShoppingCartIconOutlined /></Box>
+                            <Box className={classes.heading}
+                            
+                            >Заказы <ShoppingCartIconOutlined /></Box>
 
                             :
-                            <Icon >
+                            <Icon 
+                            
+                            >
                                 <ShoppingCartIconOutlined
                                     className={classes.icons}
                                     style={{
@@ -393,10 +407,14 @@ const Panel = ({ width }) => {
                         }
                         {open ?
 
-                            <Box className={classes.heading}>Статистика <EqualizerOutlinedIcon /></Box>
+                            <Box className={classes.heading}
+                            onClick={level === 0 ? notActivated : routeStats}
+                            >Статистика <EqualizerOutlinedIcon /></Box>
 
                             :
-                            <Icon >
+                            <Icon 
+                            onClick={level === 0 ? notActivated : routeStats}
+                            >
                                 <EqualizerOutlinedIcon
                                     className={classes.icons}
                                     style={{
@@ -444,6 +462,30 @@ const Panel = ({ width }) => {
                                             height: '30px',
                                             margin: '5px 0px'
                                         }}></PeopleAltOutlinedIcon >
+                                </Icon>
+                            : null
+                        }
+                        {userData.level === 2 ?
+                            open ?
+
+                                <Box 
+                                className={classes.heading}
+                                onClick={routeSettings}
+                                >
+                                    Настройки 
+                                    <SettingsIcon />
+                                    </Box>
+
+                                :
+                                <Icon 
+                                onClick={routeSettings}
+                                >
+                                    <SettingsIcon
+                                        className={classes.icons}
+                                        style={{
+                                            height: '30px',
+                                            margin: '5px 0px'
+                                        }}></SettingsIcon>
                                 </Icon>
                             : null
                         }

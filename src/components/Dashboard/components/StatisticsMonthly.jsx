@@ -60,7 +60,6 @@ const StatisticsMonthly = ({ width }) => {
                 display: 'flex',
                 justifyContent: 'center',
                 flexDirection: 'column',
-                marginTop: '25px',
                 width: width === 'xs' ? 'calc(100vw - 35px)' : 'calc(100vw - 145px)',
             }}>
                 <Typography variant={width === 'xs' ? 'h6' : 'h5'} style={{

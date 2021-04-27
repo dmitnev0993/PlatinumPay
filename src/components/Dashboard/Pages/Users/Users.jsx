@@ -1,45 +1,15 @@
-import React, { useContext, useState, useMemo, useEffect } from "react";
-import Selectrix from 'react-selectrix';
-import ReactSelect, { Props } from "react-select";
+import React, { useContext, useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import withWidth from "@material-ui/core/withWidth";
-import { NavLink, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { ThemeContext } from "../../../../context/themeContext";
 import Cookies from 'js-cookie';
 import Panel from "../../components/Panel";
-import { Accordion, AccordionDetails, AccordionSummary, AppBar, Box, Button, ClickAwayListener, Grow, Icon, InputBase, InputLabel, makeStyles, MenuItem, MenuList, NativeSelect, Paper, Popper, Switch, Tab, Tabs, TextField, Typography, withStyles } from "@material-ui/core";
+import { Box, Button, IconButton, makeStyles, Typography } from "@material-ui/core";
 import Pagination from '@material-ui/lab/Pagination';
-import { Alert, AlertTitle } from '@material-ui/lab';
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormControl from '@material-ui/core/FormControl';
-import { setData } from "../../../../actions/actions";
 import { CircleSpinner } from "react-spinners-kit";
-import lightLogo from '../../../../assets/logo/logo-light.png';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Snackbar from 'node-snackbar';
-import ListSubheader from '@material-ui/core/ListSubheader';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import Collapse from '@material-ui/core/Collapse';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
-import ClearIcon from '@material-ui/icons/Clear';
-import LibraryAddCheckIcon from '@material-ui/icons/LibraryAddCheck';
-import ExpandLess from '@material-ui/icons/ExpandLess';
-import ExpandMore from '@material-ui/icons/ExpandMore';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import useMediaQuery from '@material-ui/core/useMediaQuery';
-import LinkIcon from '@material-ui/icons/Link';
-import PeopleIcon from '@material-ui/icons/People';
-import Referrals from '../../components/Referrals'
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import UsersTable from "../../components/UsersTable";
 
 
@@ -166,55 +136,59 @@ const Users = ({ width }) => {
         pages: 1,
         page: 1
     });
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
+    const [loadingPage, setLoadingPage] = useState(true);
     const [nameState, setNameState] = useState(false);
     const [levelState, setLevelState] = useState(false);
     const [pageState, setPageState] = useState(1);
 
     useEffect(() => {
-            console.log(idForRef);
-            var urlencoded = new URLSearchParams();
-            urlencoded.append('page', pageState);
-            fetch('https://secure.platinumpay.cc/v1/client/users/getUsers', {
-                method: 'POST', headers: {
-                    Authorization: `Bearer ${Cookies.get('token')}`,
-                },
-                body: urlencoded
+        // if(level !== 2){
+        //     myHistory.push('/dashboard')
+        // }
+        console.log(idForRef);
+        var urlencoded = new URLSearchParams();
+        urlencoded.append('page', pageState);
+        fetch('https://secure.platinumpay.cc/v1/client/users/getUsers', {
+            method: 'POST', headers: {
+                Authorization: `Bearer ${Cookies.get('token')}`,
+            },
+            body: urlencoded
+        })
+            .then(res => {
+                return res.json();
             })
-                .then(res => {
-                    return res.json();
-                })
-                .then(data => {
-                    console.log(data);
-                    setData({
-                        ...data,
-                        arr: data.response.data,
-                        pages: data.response.pages
-                    });
-                    setLoading(false);
-                })
-                .catch(err => {
-                    console.log(err);
-                    setLoading(false);
-                })
-        
+            .then(data => {
+                console.log(data);
+                setData({
+                    ...data,
+                    arr: data.response.data,
+                    pages: data.response.pages
+                });
+                setLoadingPage(false);
+            })
+            .catch(err => {
+                console.log(err);
+                setLoadingPage(false);
+            })
+
     }, [])
 
-    const handleUsers = (e,page) => {
+    const handleUsers = (e, page) => {
         var urlencoded = new URLSearchParams();
-        if(page === pageState) return;
+        if (page === pageState) return;
         setLoading(true);
-        if(page){
+        if (page) {
             urlencoded.append('page', page);
             setPageState(page);
         }
-        else{
+        else {
             urlencoded.append('page', pageState);
         }
-        if(nameState){
+        if (nameState) {
             urlencoded.append('username', nameState);
         }
-        if(levelState){
+        if (levelState) {
             urlencoded.append('level', levelState);
         }
         fetch('https://secure.platinumpay.cc/v1/client/users/getUsers', {
@@ -228,14 +202,14 @@ const Users = ({ width }) => {
             })
             .then(data => {
                 console.log(data);
-                if(data.response.count){
+                if (data.response.count) {
                     setData({
                         ...data,
                         arr: data.response.data,
                         pages: data.response.pages
                     });
                 }
-                else{
+                else {
                     showMess('Пользователь не найден')
                 }
                 setLoading(false);
@@ -244,6 +218,10 @@ const Users = ({ width }) => {
                 console.log(err)
                 setLoading(false);
             })
+    }
+
+    const redirect = () => {
+        myHistory.push('/dashboard');
     }
 
 
@@ -274,84 +252,74 @@ const Users = ({ width }) => {
                 }}
             >
 
-                {loading ?
-                <Box
-                style={{
-                    position: 'fixed',
-                    top: '0px',
-                    bottom: '0px',
-                    left: '0px',
-                    right: '0px',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center'
-                }}
-            >
-                <CircleSpinner
-                    size={25}
-                    color={currentTheme === 'dark' ? 'white' : 'black'}
-                    loading={loading}
-                />
-            </Box>
-                :
+                
 
-                <>
+                    <>
+                    {loadingPage ?
+                    <Box
+                        style={{
+                            position: 'fixed',
+                            top: '0px',
+                            bottom: '0px',
+                            left: '0px',
+                            right: '0px',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                        }}
+                    >
+                        <CircleSpinner
+                            size={25}
+                            color={currentTheme === 'dark' ? 'white' : 'black'}
+                            loading={loadingPage}
+                        />
+                    </Box>
+                    :
+                        <Box
+                            style={{
+                                width: '100%'
+                            }}
+                        >
+                            {data.arr.length > 0 ?
+                                <UsersTable data={data} setData={setData} loading={loading} setLoading={setLoading} nameState={nameState} setNameState={setNameState} levelState={levelState} setLevelState={setLevelState} pageState={pageState} handleUsers={handleUsers} />
+                                :
+                                <Box
+                                    style={{
+                                        color: currentTheme === 'dark' ? '#595c97' : 'black',
+                                        textAlign: 'center',
+                                        marginTop: '100px'
+                                    }}>
+                                    <Typography variant={width === 'xs' ? 'h5' : 'h4'} style={{ marginBottom: '8px' }}>Пользователи не найдены</Typography>
 
-                <Box
-                style={{
-                    width:'100%'
-                }}
-                >
-                {data.arr.length > 0 ?
-                     <UsersTable data={data} setData={setData} setLoading={setLoading} nameState={nameState} setNameState={setNameState} levelState={levelState} setLevelState={setLevelState} pageState={pageState} handleUsers={handleUsers}/>
-                    : 
-                    null}
-                </Box>
+                                </Box>}
+                        </Box>
+}
+                        {data.arr.length > 0 ?
+                        loading ?
+                            null
+                            :
+                            <Box
+                                style={{
+                                    width: '100%',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    margin: '22px 0px 0px 0px',
+                                    paddingBottom: '20px'
+                                }}
+                            >
+                                <Pagination
+                                    className={classes.paginationRoot}
+                                    size={width === 'xs' ? 'medium' : 'large'}
+                                    count={data.pages}
+                                    page={pageState}
+                                    onChange={handleUsers}
+                                ></Pagination>
+                            </Box>
+                            :
+                            null}
 
-                {/* <Button
-                    className={classes.butt}
-                    variant="contained"
-                    onClick={() => {
-                        myHistory.push('/dashboard')
-                    }}
-                    style={{
-                        color: 'white',
-                        backgroundColor: '#525252',
-                        margin: width === 'xs' ? '20px 0px 8px 0px' : '25px 0px 8px 0px',
-                        borderRadius: '2px',
-                        fontSize: '15px',
-                        height: '45px',
-                        width: width === 'xs' ? '100%' : '50%',
-                        maxWidth: width === 'xs' ? '170px' : width === 'sm' ? '200px' : '250px',
-                        border: '0px',
-                        alignSelf: 'left',
-                        boxShadow: 'none',
-                    }}
-
-                >
-                    Назад
-          </Button> */}
-
-
-                <Box
-                    style={{
-                        width: '100%',
-                        display: 'flex',
-                        justifyContent: 'center',
-                        margin: '22px 0px 0px 0px',
-                        paddingBottom:'20px'
-                    }}
-                >
-                    <Pagination
-                        className={classes.paginationRoot}
-                        size={width === 'xs' ? 'medium' : 'large'}
-                        count={data.pages}
-                        page={pageState}
-                        onChange={handleUsers}
-                    ></Pagination>
-                </Box>
-                </>
-                }
+                    </>
+                
             </Box>
         </>
     )

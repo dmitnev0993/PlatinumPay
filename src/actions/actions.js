@@ -38,6 +38,20 @@ export const setIdForUrl = id => ({
     payload:id
 });
 
+export const setIdForPrices = id => ({
+    type:'SET_ID_FOR_PRICES',
+    payload:id
+});
+
+export const setInviteId = id => ({
+    type:'SET_INVITE_ID',
+    payload:id
+});
+
+export const setInvite = () => ({
+    type:'SET_INVITE'
+});
+
 export const setPageForRef = page => ({
     type:'SET_PAGE_FOR_REF',
     payload:page

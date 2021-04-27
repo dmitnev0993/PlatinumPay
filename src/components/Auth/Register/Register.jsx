@@ -226,10 +226,10 @@ const Register = ({ width }) => {
             level:userData.response.level
           }))
           dispatch(setLogin())
-          showMess('Вы успешно зарегистрировались!');
+          showMess('Вы успешно зарегистрировались');
         }
         else {
-          showMess('Что-то пошло не так, попробуйте еще раз.')
+          showMess('Что-то пошло не так, попробуйте еще раз')
         }
       })
   }

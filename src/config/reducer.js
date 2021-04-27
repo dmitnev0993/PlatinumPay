@@ -3,6 +3,9 @@ const initialState = {
     created:false,
     idForRef:null,
     idForUrl:null,
+    idForPrices:null,
+    isInvite:false,
+    inviteId:null,
     pageForRef:1,
     scrollPr:0,
     index:null,
@@ -67,6 +70,13 @@ const initialState = {
         };
       }
 
+      case "SET_INVITE": {
+        return {
+          ...state,
+          isInvite: !state.isInvite
+        };
+      }
+
       case "SET_ID_FOR_REF": {
         return {
           ...state,
@@ -78,6 +88,13 @@ const initialState = {
         return {
           ...state,
           idForUrl: action.payload
+        };
+      }
+
+      case "SET_ID_FOR_PRICES": {
+        return {
+          ...state,
+          idForPrices: action.payload
         };
       }
 
@@ -127,6 +144,13 @@ const initialState = {
         return {
           ...state,
           index: action.payload
+        };
+      }
+
+      case "SET_INVITE_ID": {
+        return {
+          ...state,
+          inviteId: action.payload
         };
       }
   

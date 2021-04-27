@@ -1,6 +1,4 @@
-import React, { useContext, useState, useMemo, useEffect, useRef } from "react";
-import Selectrix from 'react-selectrix';
-import ReactSelect, { Props } from "react-select";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import Snackbar from 'node-snackbar';
 import { useDispatch, useSelector } from 'react-redux';
 import withWidth from "@material-ui/core/withWidth";
@@ -8,21 +6,13 @@ import { useHistory } from "react-router-dom";
 import { ThemeContext } from "../../../../context/themeContext";
 import Cookies from 'js-cookie';
 import Panel from "../../components/Panel";
-import { AppBar, Box, Button, Icon, InputBase, InputLabel, makeStyles, NativeSelect, Switch, Tab, Tabs, TextField, Typography, withStyles, IconButton, FormLabel, RadioGroup, Radio } from "@material-ui/core";
-import Pagination from '@material-ui/lab/Pagination';
-import { Alert, AlertTitle } from '@material-ui/lab';
+import { Box, Button, makeStyles, Switch, TextField, Typography, withStyles, IconButton, RadioGroup, Radio } from "@material-ui/core";
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
-import { isCreated, setIdForUrl } from "../../../../actions/actions";
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import { setIdForUrl } from "../../../../actions/actions";
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import AddCircleIcon from '@material-ui/icons/AddCircle';
-import HighlightOffIcon from '@material-ui/icons/HighlightOff';
-import DeleteIcon from '@material-ui/icons/Delete';
-import Img from '../../../../assets/logo/logo-dark.png';
 import { CircleSpinner } from "react-spinners-kit";
-import Avatar from 'react-avatar-edit'
 
 
 const CssTextField = withStyles({
@@ -104,102 +94,6 @@ const CssTextField2 = withStyles({
     },
 })(TextField);
 
-const CssTextArea = withStyles({
-
-    root: {
-
-        '& .MuiFormHelperText-root': {
-            backgroundColor: 'rgb(12, 12, 27)'
-        },
-        '& .MuiInputBase-input': {
-            color: '#7575a3',
-            height: '100px',
-            backgroundColor: '#232135',
-            padding: '8px',
-            '&::-webkit-scrollbar': {
-                width: '12px',
-
-
-            },
-            '&::-webkit-scrollbar-thumb': {
-                backgroundColor: '#32304b!important',
-            },
-        },
-        // '& .MuiInputBase-input:focus': {
-        //   outline:'2px solid #7575a3'
-        // },
-        '& .MuiInput-underline:hover': {
-            outline: '2px solid #7575a3'
-        },
-        '& .MuiInput-underline:after': {
-            display: 'none',
-            borderBottomColor: '#7575a3',
-        },
-        '& .MuiInput-underline:focus-within': {
-            outline: '2px solid #7575a3'
-        },
-        '& .MuiInput-underline:before': {
-            display: 'none',
-            borderBottomColor: '#7575a3',
-        },
-        '& .MuiOutlinedInput-root': {
-            '& fieldset': {
-                borderColor: '#7575a3',
-            },
-            '&:hover fieldset': {
-                borderColor: '#7575a3',
-            },
-            '&.Mui-focused fieldset': {
-                borderColor: '#7575a3',
-            },
-        },
-    },
-})(TextField);
-
-const CssTextArea2 = withStyles({
-    root: {
-        '& .MuiInputBase-input': {
-            height: '100px',
-            padding: '8px',
-            '&::-webkit-scrollbar': {
-                width: '12px',
-
-
-            },
-            '&::-webkit-scrollbar-thumb': {
-                backgroundColor: '#c8c4db!important',
-            },
-        },
-        // '& .MuiInputBase-input:focus': {
-        //   outline:'2px solid #78a3ff'
-        // },
-        '& .MuiInput-underline:hover': {
-            outline: '1px solid #78a3ff'
-        },
-        '& .MuiInput-underline:after': {
-            display: 'none',
-            borderBottomColor: '#78a3ff',
-        },
-        '& .MuiInput-underline:focus-within': {
-            outline: '1px solid #78a3ff'
-        },
-        '& .MuiInput-underline:before': {
-            display: 'none',
-            borderBottomColor: '#78a3ff',
-        },
-        '& .MuiOutlinedInput-root': {
-            '& fieldset': {
-                borderColor: '#78a3ff',
-            },
-            '&:hover fieldset': {
-                borderColor: '#78a3ff',
-            },
-            '& .Mui-focused fieldset': {
-                borderColor: '#78a3ff',
-            },
-        },
-    },
-})(TextField);
 
 const showMess = (message) => {
     Snackbar.show({
@@ -213,23 +107,13 @@ const showMess = (message) => {
 const CreateURL = ({ width }) => {
     console.log(width)
     const dispatch = useDispatch();
-    const idUrl = useSelector(state=>state.idForUrl);
+    const idUrl = useSelector(state => state.idForUrl);
     const [idUrlSt, setIdUrlSt] = useState(idUrl);
     const [loading, setLoading] = useState(false);
-    const [loadingImg, setLoadingImg] = useState(false);
-    const [state, setState] = useState({
-        img: null,
-        imgId: null
-    })
-    const [value,setValue] = useState('');
-    const [myVal,setMyVal] = useState('');
-    const [fields, setFields] = useState([{
-        price: '',
-        url: ''
-    }]);
-    const [switchSt,setSwitchSt] = useState(false);
+    const [value, setValue] = useState('');
+    const [myVal, setMyVal] = useState('');
+    const [switchSt, setSwitchSt] = useState(false);
     const { currentTheme } = useContext(ThemeContext);
-    const fileInput = useRef(null);
     const useStyles = makeStyles(theme => ({
         paginationRoot: {
             "& .MuiPaginationItem-root": {
@@ -353,14 +237,14 @@ const CreateURL = ({ width }) => {
 
         var urlencoded = new URLSearchParams();
         urlencoded.append('productId', idUrlSt);
-        urlencoded.append('campaignSource', value);
+        urlencoded.append('campaignSource', value ? value : myVal);
         urlencoded.append('campaignName', name);
         urlencoded.append('pixelIdentifier', idn);
         urlencoded.append('pixelValue', keyP);
         urlencoded.append('subId', subId);
         urlencoded.append('trafficBackUrl', url);
         urlencoded.append('trafficBackValue', switchSt ? 1 : 0);
-        
+
         fetch('https://secure.platinumpay.cc/v1/client/products/shorteners/createShortener', {
             method: 'POST',
             headers: {
@@ -374,40 +258,23 @@ const CreateURL = ({ width }) => {
             .then(data => {
                 console.log(data);
                 setLoading(false);
-                showMess('Ссылка создана!');
+                showMess('Ссылка создана');
                 dispatch(setIdForUrl(idUrlSt));
-                myHistory.push('/dashboard/products/shorteners/manage');
+                myHistory.push('/dashboard/products/shorteners');
             })
             .catch(err => {
                 console.log(err);
                 setLoading(false);
-                showMess('Ошибка!');
+                showMess('Ошибка');
             });
 
 
 
 
     }
-    // useEffect(() => {
-    //     if (state.src) {
-    //         const f = async () => {
-    //             const canvass = await document.getElementById('canvas');
-    //             var ctx = await canvass.getContext('2d');
-    //             console.log(imgSt.width);
-    //             const w1 = imgSt.width * 0.15;
-    //             const h1 = imgSt.height * 0;
-    //             const w2 = imgSt.width * 0.7;
-    //             const h2 = imgSt.height;
-    //             console.log(w1, h1, w2, h2)
-    //             await ctx.drawImage(imgSt, w1, h1, w2, h2, 0, 0, 300, 300);
-    //             console.log(imgSt.width);
-    //         };
-    //         f();
-    //     }
-    // }, [imgSt])
 
-    const editVal = (e)=>{
-       // console.log(e.target.value);
+    const editVal = (e) => {
+        // console.log(e.target.value);
         setValue(e.target.value);
         setMyVal('');
     }
@@ -497,61 +364,37 @@ const CreateURL = ({ width }) => {
                             textAlign: 'start'
                         }}
                     >
-                        <Typography
-                            variant='h5'
+                        <Box
                             style={{
-                                color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
-                                margin: '0px'
+                                width: '100%',
+                                display: 'flex',
+                                justifyContent: width === 'xs' ? 'center' : 'flex-start'
                             }}
                         >
-                            Создать ссылку
+                            <Typography
+                                variant='h5'
+                                style={{
+                                    color: currentTheme === 'dark' ? 'rgb(174, 174, 224)' : 'black',
+                                    margin: '0px'
+                                }}
+                            >
+                                Создать ссылку
                 </Typography>
+                        </Box>
                         <FormControl component="fieldset"
                             className={classes.source}
                         >
                             <RadioGroup aria-label="source1" name="source1" row value={value}>
-                                <FormControlLabel value="" onChange={(e)=>editVal(e)} control={<Radio color="primary" />} label="Свои значения" />
-                                <FormControlLabel value="google" onChange={(e)=>editVal(e)} control={<Radio color="primary" />} label="Google Adwords" />
-                                <FormControlLabel value="yandex" onChange={(e)=>editVal(e)} control={<Radio color="primary" />} label="Яндекс.Директ" />
-                                <FormControlLabel value="vk" onChange={(e)=>editVal(e)} control={<Radio color="primary" />} label="Вконтакте" />
-                                <FormControlLabel value="facebook" onChange={(e)=>editVal(e)} control={<Radio color="primary" />} label="Facebook" />
-                                <FormControlLabel value="instagram" onChange={(e)=>editVal(e)} control={<Radio color="primary" />} label="Instagram" />
-                                <FormControlLabel value="youtube" onChange={(e)=>editVal(e)} control={<Radio color="primary" />} label="YouTube" />
-                                <FormControlLabel value="mycom" onChange={(e)=>editVal(e)} control={<Radio color="primary" />} label="Target My.com" />
+                                <FormControlLabel value="" onChange={(e) => editVal(e)} control={<Radio color="primary" />} label="Свои значения" />
+                                <FormControlLabel value="google" onChange={(e) => editVal(e)} control={<Radio color="primary" />} label="Google Adwords" />
+                                <FormControlLabel value="yandex" onChange={(e) => editVal(e)} control={<Radio color="primary" />} label="Яндекс.Директ" />
+                                <FormControlLabel value="vk" onChange={(e) => editVal(e)} control={<Radio color="primary" />} label="Вконтакте" />
+                                <FormControlLabel value="facebook" onChange={(e) => editVal(e)} control={<Radio color="primary" />} label="Facebook" />
+                                <FormControlLabel value="instagram" onChange={(e) => editVal(e)} control={<Radio color="primary" />} label="Instagram" />
+                                <FormControlLabel value="youtube" onChange={(e) => editVal(e)} control={<Radio color="primary" />} label="YouTube" />
+                                <FormControlLabel value="mycom" onChange={(e) => editVal(e)} control={<Radio color="primary" />} label="Target My.com" />
                             </RadioGroup>
                         </FormControl>
-
-                        {/* <FormControl
-                            className={classes.input}
-                            style={{
-                                display: 'flex',
-                                justifyContent: 'center',
-                                // width: width === 'xs' ? '100%' : '45%',
-                                maxWidth: '250px',
-                                width: '100%',
-                                height: '45px'
-                            }}
-                        >
-                            <Selectrix
-                                //  onChange={productsHandle}
-                                materialize={true}
-                                searchable={false}
-                                className={classes.select}
-                                placeholder={'Свои значения'}
-                                options={
-                                    [
-                                        { key: 'Свои значения', label: 'Свои значения' },
-                                        { key: 'Google Adwords', label: 'Google Adwords' },
-                                        { key: 'Яндекс.Директ', label: 'Яндекс.Директ' },
-                                        { key: 'Вконтакте', label: 'Вконтакте' },
-                                        { key: 'Facebook', label: 'Facebook' },
-                                        { key: 'Target My.com', label: 'Target My.com' }
-                                    ]
-                                }
-                            >
-
-                            </Selectrix>
-                        </FormControl> */}
 
                         <Typography
                             variant='h5'
@@ -578,7 +421,7 @@ const CreateURL = ({ width }) => {
                                 id="source"
                                 placeholder="google, yandex, vk, facebook"
                                 required
-                                onChange={value ? null : (e)=>setMyVal(e.target.value)}
+                                onChange={value ? null : (e) => setMyVal(e.target.value)}
                                 value={value ? value : myVal}
                                 style={{
                                     margin: '6px 0px 25px 0px',
@@ -591,7 +434,7 @@ const CreateURL = ({ width }) => {
                                 id="source"
                                 placeholder="google, yandex, vk, facebook"
                                 required
-                                onChange={value ? null : (e)=>setMyVal(e.target.value)}
+                                onChange={value ? null : (e) => setMyVal(e.target.value)}
                                 value={value ? value : myVal}
                                 style={{
                                     margin: '6px 0px 25px 0px',
@@ -798,34 +641,34 @@ const CreateURL = ({ width }) => {
                                     border: '1px solid #e4e9f0'
                                 }}
                             />}
-                            <FormControl component="fieldset"
-                                        className={classes.fcont}
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'flex-start',
-                                            justifyContent: 'flex-end',
-                                            marginBottom: '25px',
-                                            marginRight: width === 'xs' || width === 'sm' ? '0px' : '5px',
-                                        }}>
-                                        <FormGroup aria-label="position" row>
-                                            <FormControlLabel
-                                                value="trightop"
-                                                control={
-                                                    <Switch
-                                                        onChange={handleSwitch}
-                                                        color="primary"
-                                                        name="checkedB"
-                                                        inputProps={{ role: 'switch' }}
-                                                    />
-                                                }
-                                                label="TrafficBack"
-                                                labelPlacement="right"
-                                                style={{
-                                                    color: currentTheme === 'dark' ? '#aeaee0' : 'black',
-                                                }}
-                                            />
-                                        </FormGroup>
-                                    </FormControl>
+                        <FormControl component="fieldset"
+                            className={classes.fcont}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'flex-start',
+                                justifyContent: 'flex-end',
+                                marginBottom: '25px',
+                                marginRight: width === 'xs' || width === 'sm' ? '0px' : '5px',
+                            }}>
+                            <FormGroup aria-label="position" row>
+                                <FormControlLabel
+                                    value="trightop"
+                                    control={
+                                        <Switch
+                                            onChange={handleSwitch}
+                                            color="primary"
+                                            name="checkedB"
+                                            inputProps={{ role: 'switch' }}
+                                        />
+                                    }
+                                    label="TrafficBack"
+                                    labelPlacement="right"
+                                    style={{
+                                        color: currentTheme === 'dark' ? '#aeaee0' : 'black',
+                                    }}
+                                />
+                            </FormGroup>
+                        </FormControl>
 
                         <Box
                             style={{
